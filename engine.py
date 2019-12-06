@@ -11,6 +11,7 @@ class Engine(Actuator):
                  start_angle: 'Union[float, int]' = 0,
                  thrust_error_gen: 'ErrorGenerator' = None,
                  angle_error_gen: 'ErrorGenerator' = None,
+                 position_error_gen: 'ErrorGenerator' = None,
                  valid_intensities: 'utils.IntervalSet' = None,
                  valid_angles: 'utils.IntervalSet' = None):
         super().__init__(part, properties={'intensity': Engine.intensity,
@@ -21,6 +22,7 @@ class Engine(Actuator):
         self.__angle = start_angle
         self.__thrust_error = thrust_error_gen
         self.__angle_error = angle_error_gen
+        self.__pos_error = position_error_gen
         self.__valid_intensities = valid_intensities
         self.__valid_angles = valid_angles
 
@@ -71,7 +73,13 @@ class Engine(Actuator):
         else:
             angle = self.__angle_error(self.__angle_error)
 
-        self.applyForce(thrust, 0, 0, angle)
+        if self.__pos_error is None:
+            x = y = 0
+        else:
+            x = self.__pos_error(0)
+            y = self.__pos_error(0)
+
+        self.applyForce(thrust, x, y, angle)
 
 class LinearEngine(Engine):
 

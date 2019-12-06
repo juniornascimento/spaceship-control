@@ -3,9 +3,36 @@ import toml
 
 from pymunk import Body, Circle
 
+from utils import ErrorGenerator
+
 from structure import Structure, StructuralPart
 from positionsensor import PositionSensor
 from engine import LimitedLinearEngine
+
+def __load_error(info: 'Dict[str, Any]') -> ErrorGenerator:
+
+    return ErrorGenerator(error_max=info.get('error_max'),
+                          offset_max=info.get('offset_max'),
+                          error_max_minfac=info.get('error_max_minfac', 1))
+
+def __load_error_dict(
+    errors: 'Dict[str, Dict[str, Any]]') -> 'Dict[str, ErrorGenerator]':
+
+    return {name: __load_error(info) for name, info in errors.items()}
+
+def __engine_error_kwargs(
+    errors: 'Dict[str, Dict[str, Any]]') -> 'Dict[str, ErrorGenerator]':
+
+    if errors is None:
+        return {}
+
+    err_gens_dict = __load_error_dict(errors)
+
+    return {
+        'thrust_error_gen': err_gens_dict.get('Thrust'),
+        'angle_error_gen': err_gens_dict.get('Angle'),
+        'position_error_gen': err_gens_dict.get('Position')
+    }
 
 def __createCircleShape(info: 'Dict[str, Any]') -> 'Circle':
 
@@ -38,7 +65,8 @@ def __createLimitedLinearEngine(
                                info['max_intensity'], info['min_angle'],
                                info['max_angle'],
                                intensity_multiplier=info.get('intensity_mult',
-                                                             1))
+                                                             1),
+                               **__engine_error_kwargs(info.get('Error')))
 
 def __createPositionSensor(
     info: 'Dict[str, Any]', part: StructuralPart) -> PositionSensor:

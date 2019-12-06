@@ -45,6 +45,11 @@ max_intensity = 4
 min_angle = 0
 max_angle = 0
 
+[Actuator.Error.Position]
+
+error_max = 30
+offset_max = 30
+
 [[Actuator]]
 
 part = 'part2'
