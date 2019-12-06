@@ -22,6 +22,12 @@ class Structure(DeviceGroup):
         self.__body = body
         self.__space = space
 
+    def addDevice(self, device: 'Device', **kwargs: 'Any') -> None:
+        super().addDevice(device, **kwargs)
+
+        if isinstance(device, StructuralPart):
+            device.structure = self
+
     @property
     def body(self) -> 'pymunk.Body':
         return self.__body
@@ -32,8 +38,8 @@ class Structure(DeviceGroup):
 
 class StructuralPart(DeviceGroup):
 
-    def __init__(self, structure: Structure,
-                 shapes: 'Iterable[pymunk.Shape]',
+    def __init__(self,
+                 structure: Structure = None,
                  offset: 'Tuple[Union[int, float], Union[int, float]]' = (0, 0),
                  **kwargs: 'Any') -> None:
 
@@ -42,22 +48,43 @@ class StructuralPart(DeviceGroup):
 
         super().__init__(**kwargs)
 
-        self.__shapes = tuple(shapes)
         self.__offset = offset
         self.__structure = structure
 
+    def applyForce(self, val, x, y, angle) -> None:
+
+        if self.__structure is None:
+            return
+
+        body = self.__structure.body
+        body_angle = body.angle
+
+        body.apply_impulse_at_local_point(
+            (math.cos(angle + body_angle)*val,
+             math.sin(angle + body_angle)*val),
+            Vec2d(self.__offset[0] + x, self.__offset[1] + y).rotated(
+                body_angle))
+
     @property
     def position(self) -> 'Tuple[float, float]':
+        if self.__structure is None:
+            return self.__offset
         pos = self.__structure.body.position
         return pos.x + self.__offset[0], pos.y + self.__offset[1]
+
+    @property
+    def angle(self) -> float:
+        if self.__structure is None:
+            return 0
+        return self.__structure.body.angle
 
     @property
     def structure(self) -> Structure:
         return self.__structure
 
-    @property
-    def shapes(self) -> 'Tuple[pymunk.Shape, ...]':
-        return self.__shapes
+    @structure.setter
+    def structure(self, structure: Structure) -> None:
+        self.__structure = structure
 
     @property
     def offset(self) -> 'Tuple[Union[int, float], Union[int, float]]':
@@ -156,15 +183,7 @@ class Actuator(PropertyDevice):
         self.__part = part
 
     def applyForce(self, val, x, y, angle) -> None:
-
-        body = self.__part.structure.body
-        body_angle = body.angle
-        offset = self.__part.offset
-
-        body.apply_impulse_at_local_point(
-            (math.cos(angle + body_angle)*val,
-             math.sin(angle + body_angle)*val),
-            Vec2d(offset[0] + x, offset[1] + y).rotated(body_angle))
+        self.__part.applyForce(val, x, y, angle)
 
     @property
     def structural_part(self) -> StructuralPart:

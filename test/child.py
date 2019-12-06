@@ -132,7 +132,7 @@ try:
     while True:
         pos = ship.position
         intensity = -(pos[0] - 500) // 100
-        send(f'0:1: set-property intensity {intensity}')
+        send(f'1:0: set-property intensity {intensity}')
         print(pos, intensity)
         time.sleep(1)
 except BrokenPipeError:

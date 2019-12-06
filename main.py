@@ -68,19 +68,19 @@ def main():
 
     ship = Structure(space, body, device_type='ship')
 
-    part = StructuralPart(ship, (shape,), device_type='coreship')
-    device3 = DeviceGroup()
+    part = StructuralPart()
+    part2 = StructuralPart(offset=(0, 25))
 
+    ship.addDevice(part, name='part')
+    ship.addDevice(part2, name='part2')
 
-    ship.addDevice(part)
-    #ship.addDevice(DefaultDevice(), name='a')
-    ship.addDevice(device3, name='other')
     part.addDevice(PositionSensor(part, 1, read_error_max=100,
                                   read_offset_max=40))
-    #part.addDevice(DefaultDevice(), name='c')
+
     part.addDevice(LimitedLinearEngine(part, -4, 4, 0, 0), name='engine')
-    #device3.addDevice(DefaultDevice(), name='d')
-    #device3.addDevice(DefaultDevice(), name='e')
+    part2.addDevice(LimitedLinearEngine(part2, -4, 4, 0, 0,
+                                        intensity_multiplier=4), name='engine2')
+    part2.addDevice(LimitedLinearEngine(part2, -4, 4, 0, 0), name='engine3')
 
     t = Thread(target=start_controller,
             args=(['/usr/bin/python3', 'test/child.py'], ship, lock))
