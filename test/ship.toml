@@ -1,0 +1,76 @@
+
+[[Shape]]
+
+type = 'circle'
+mass = 10
+radius = 50
+elasticity = 0.95
+friction = 0.9
+
+[[Part]]
+
+name = 'part1'
+x = 0
+y = 0
+
+[[Part]]
+
+name = 'part2'
+x = 0
+y = 25
+
+[[Sensor]]
+
+part = 'part1'
+
+name = 'pos-sensor'
+type = 'position'
+
+reading_time = 1
+
+error_max = 100
+offset_max = 40
+
+[[Actuator]]
+
+part = 'part1'
+
+name = 'engine1'
+type = 'engine'
+model = 'intensity_range'
+
+min_intensity = -4
+max_intensity = 4
+
+min_angle = 0
+max_angle = 0
+
+[[Actuator]]
+
+part = 'part2'
+
+name = 'engine2'
+type = 'engine'
+model = 'intensity_range'
+
+min_intensity = 0
+max_intensity = 4
+
+min_angle = 0
+max_angle = 0
+
+intensity_mult = 4
+
+[[Actuator]]
+
+part = 'part2'
+
+name = 'engine3'
+type = 'engine'
+model = 'intensity_range'
+
+min_intensity = 0
+max_intensity = 4
+
+min_angle = 0
+max_angle = 0
