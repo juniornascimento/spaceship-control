@@ -129,6 +129,7 @@ ship = Ship()
 print(ship.device)
 
 try:
+    send(f'1:2: set-text "apenas testando."')
     while True:
         pos = ship.position
         intensity = -(pos[0] - 500) // 100

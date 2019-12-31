@@ -5,9 +5,12 @@ from pymunk import Body, Circle
 
 from utils import ErrorGenerator
 
+from PyQt5.QtWidgets import QLabel
+
 from structure import Structure, StructuralPart
 from positionsensor import PositionSensor
 from engine import LimitedLinearEngine
+from interfacedevice import TextDisplayDevice
 
 def __load_error(info: 'Dict[str, Any]') -> ErrorGenerator:
 
@@ -59,32 +62,57 @@ def __createShape(info: 'Dict[str, Any]') -> 'Shape':
     return create_func(info)
 
 def __createLimitedLinearEngine(
-    info: 'Dict[str, Any]', part: StructuralPart) -> LimitedLinearEngine:
+    info: 'Dict[str, Any]', part: StructuralPart,
+    _action_queue: 'ActionQueue') \
+        -> 'Tuple[LimitedLinearEngine, Sequence[QWidget]]':
 
     return LimitedLinearEngine(part, info['min_intensity'],
                                info['max_intensity'], info['min_angle'],
                                info['max_angle'],
                                intensity_multiplier=info.get('intensity_mult',
                                                              1),
-                               **__engine_error_kwargs(info.get('Error')))
+                               **__engine_error_kwargs(info.get('Error'))), ()
 
 def __createPositionSensor(
-    info: 'Dict[str, Any]', part: StructuralPart) -> PositionSensor:
+    info: 'Dict[str, Any]', part: StructuralPart,
+    _action_queue: 'ActionQueue') \
+        -> 'Tuple[PositionSensor, Sequence[QWidget]]':
 
     return PositionSensor(part, info['reading_time'],
                           read_error_max=info.get('error_max', 0),
-                          read_offset_max=info.get('offset_max', 0))
+                          read_offset_max=info.get('offset_max', 0)), ()
+
+def __createTextDisplay(
+    info: 'Dict[str, Any]', part: StructuralPart, action_queue: 'ActionQueue') \
+        -> 'Tuple[Device, Sequence[QWidget]]':
+
+    label = QLabel('-')
+
+    label.setStyleSheet('''
+
+        background-color: white;
+        border-color: black;
+        border-width: 1px;
+        border-style: solid;
+        font-family: "Courier";
+
+    ''')
+
+    label.setGeometry(info.get('x', 0), info.get('y', 0),
+                      info.get('width', 100), info.get('height', 30))
+
+    return TextDisplayDevice(label, action_queue), (label,)
 
 __DEVICE_CREATE_FUNCTIONS = {
 
     ('Actuator', 'engine', 'intensity_range'): __createLimitedLinearEngine,
-    ('Sensor', 'position', None): __createPositionSensor
+    ('Sensor', 'position', None): __createPositionSensor,
+    ('InterfaceDevice', 'text-display', None): __createTextDisplay
 }
 
 def __addDevice(
-    info: 'Dict[str, Any]',
-    parts: 'Dict[str, StructuralPart]',
-    device_type: str) -> 'Tuple[str, Device]':
+    info: 'Dict[str, Any]', parts: 'Dict[str, StructuralPart]',
+    device_type: str, action_queue: 'ActionQueue') -> 'List[QWidget]':
 
     type_and_model = (device_type, info.get('type'), info.get('model'))
     create_func = __DEVICE_CREATE_FUNCTIONS.get(type_and_model)
@@ -95,10 +123,13 @@ def __addDevice(
         raise ValueError(
             f'Invalid type/model for {device_type} \'{type_and_model_str}\'')
 
-    part.addDevice(create_func(info, parts.get(info['part'])),
-                   name=info.get('name'))
+    device, widgets = create_func(info, part, action_queue)
+    part.addDevice(device, name=info.get('name'))
 
-def loadShip(filename: str, space: 'pymunk.Space') -> Structure:
+    return widgets
+
+def loadShip(filename: str, space: 'pymunk.Space',
+             action_queue: 'ActionQueue') -> Structure:
 
     file_content = toml.load(filename)
 
@@ -126,9 +157,13 @@ def loadShip(filename: str, space: 'pymunk.Space') -> Structure:
         parts[name] = part
 
     for info in file_content.get('Actuator', ()):
-        __addDevice(info, parts, 'Actuator')
+        __addDevice(info, parts, 'Actuator', action_queue)
 
     for info in file_content.get('Sensor', ()):
-        __addDevice(info, parts, 'Sensor')
+        __addDevice(info, parts, 'Sensor', action_queue)
 
-    return ship
+    widgets = []
+    for info in file_content.get('InterfaceDevice', ()):
+        widgets.extend(__addDevice(info, parts, 'InterfaceDevice', action_queue))
+
+    return ship, widgets

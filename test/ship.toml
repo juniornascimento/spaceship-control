@@ -79,3 +79,15 @@ max_intensity = 4
 
 min_angle = 0
 max_angle = 0
+
+[[InterfaceDevice]]
+
+part = 'part2'
+
+name = 'display1'
+type = 'text-display'
+
+x = 30
+y = 30
+height = 15
+width = 160

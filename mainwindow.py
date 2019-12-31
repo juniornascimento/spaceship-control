@@ -11,6 +11,7 @@ import pymunk
 
 from shipgraphicsitem import ShipGraphicsItem
 from shiploader import loadShip
+from actionqueue import ActionQueue
 
 UiMainWindow, _ = uic.loadUiType('mainwindow.ui')
 
@@ -35,8 +36,16 @@ class MainWindow(QMainWindow):
 
         self.__space = pymunk.Space()
         self.__space.gravity = (0, 0)
+        self.__action_queue = ActionQueue()
 
-        ship = loadShip('test/ship.toml', self.__space)
+        ship, widgets = loadShip('test/ship.toml', self.__space,
+                                 self.__action_queue)
+
+        self.__widgets = widgets
+
+        for widget in widgets:
+            widget.setParent(self.__ui.deviceInterfaceComponents)
+            widget.show()
 
         ship.body.position = 300, 400
 
@@ -51,6 +60,8 @@ class MainWindow(QMainWindow):
         t.start()
 
     def __timerTimeout(self):
+
+        self.__action_queue.processItems()
 
         with self.__lock:
             self.__space.step(0.02)
