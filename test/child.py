@@ -80,7 +80,13 @@ class Ship:
     def __init__(self):
         self.__device = Device()
         self.__position_devices = []
+        self.__text_display_devices = []
         self.__find_position_devices(self.__device)
+
+    def displayPrint(self, message):
+
+        if self.__text_display_devices:
+            self.__text_display_devices[0].sendMessage(f'set-text "{message}"')
 
     @property
     def position(self):
@@ -109,6 +115,10 @@ class Ship:
             self.__position_devices.append((device, info))
             return
 
+        if device.type_ == 'text-display':
+            self.__text_display_devices.append(device)
+            return
+
         children = device.children
         if children is None:
             return
@@ -128,13 +138,25 @@ ship = Ship()
 
 print(ship.device)
 
-try:
-    send(f'1:2: set-text "apenas testando."')
-    while True:
+colors = ('black', 'red', 'blue', 'green')
+color_id = 0
+
+while True:
+    try:
+        if send('1:3: clicked') == '1':
+            color_id += 1
+            if color_id >= len(colors):
+                color_id = 0
+
         pos = ship.position
         intensity = -(pos[0] - 500) // 100
         send(f'0:0: set-property intensity {intensity}')
         print(pos, intensity)
-        time.sleep(1)
-except BrokenPipeError:
-    pass
+        ship.displayPrint(f'<font color={colors[color_id]}>{pos[0]:.1f}, '
+                          f'{pos[1]:.1f}</font>')
+
+    except BrokenPipeError:
+        break
+    except Exception as err:
+        print(f'Error: {err}')
+    time.sleep(1)

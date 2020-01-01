@@ -6,11 +6,13 @@ from pymunk import Body, Circle
 from utils import ErrorGenerator
 
 from PyQt5.QtWidgets import QLabel
+from PyQt5.QtCore import Qt
 
+from panelpushbutton import PanelPushButton
 from structure import Structure, StructuralPart
 from positionsensor import PositionSensor
 from engine import LimitedLinearEngine
-from interfacedevice import TextDisplayDevice
+from interfacedevice import TextDisplayDevice, ButtonDevice
 
 def __load_error(info: 'Dict[str, Any]') -> ErrorGenerator:
 
@@ -84,7 +86,7 @@ def __createPositionSensor(
 
 def __createTextDisplay(
     info: 'Dict[str, Any]', part: StructuralPart, action_queue: 'ActionQueue') \
-        -> 'Tuple[Device, Sequence[QWidget]]':
+        -> 'Tuple[TextDisplayDevice, Sequence[QWidget]]':
 
     label = QLabel('-')
 
@@ -103,11 +105,26 @@ def __createTextDisplay(
 
     return TextDisplayDevice(label, action_queue), (label,)
 
+def __createButton(
+    info: 'Dict[str, Any]', part: StructuralPart, action_queue: 'ActionQueue') \
+        -> 'Tuple[ButtonDevice, Sequence[QWidget]]':
+
+    button = PanelPushButton()
+
+    button.setFocusPolicy(Qt.NoFocus)
+
+    button.setStyleSheet('background-color: red;')
+
+    button.setGeometry(info.get('x', 0), info.get('y', 0), 50, 50)
+
+    return ButtonDevice(button), (button,)
+
 __DEVICE_CREATE_FUNCTIONS = {
 
     ('Actuator', 'engine', 'intensity_range'): __createLimitedLinearEngine,
     ('Sensor', 'position', None): __createPositionSensor,
-    ('InterfaceDevice', 'text-display', None): __createTextDisplay
+    ('InterfaceDevice', 'text-display', None): __createTextDisplay,
+    ('InterfaceDevice', 'button', None): __createButton
 }
 
 def __addDevice(
