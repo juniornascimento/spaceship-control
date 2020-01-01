@@ -70,6 +70,7 @@ class MainWindow(QMainWindow):
                 pos = ship.body.position
                 gitem.setX(pos.x/10)
                 gitem.setY(pos.y/10)
+                gitem.prepareGeometryChange()
                 gitem.setRotation(180*ship.body.angle/pi)
 
     def __startController(self, program, device, lock):
