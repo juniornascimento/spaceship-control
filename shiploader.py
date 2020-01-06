@@ -9,6 +9,7 @@ from PyQt5.QtWidgets import QLabel
 from PyQt5.QtCore import Qt
 
 from panelpushbutton import PanelPushButton
+from keyboardbutton import KeyboardButton
 from structure import Structure, StructuralPart
 from positionsensor import PositionSensor
 from engine import LimitedLinearEngine
@@ -105,6 +106,16 @@ def __createTextDisplay(
 
     return TextDisplayDevice(label, action_queue), (label,)
 
+def __createKeyboardReceiver(
+    info: 'Dict[str, Any]', part: StructuralPart, action_queue: 'ActionQueue') \
+        -> 'Tuple[ButtonDevice, Sequence[QWidget]]':
+
+    button = KeyboardButton()
+
+    button.setGeometry(info.get('x', 0), info.get('y', 0), 20, 20)
+
+    return ButtonDevice(button), (button,)
+
 def __createButton(
     info: 'Dict[str, Any]', part: StructuralPart, action_queue: 'ActionQueue') \
         -> 'Tuple[ButtonDevice, Sequence[QWidget]]':
@@ -124,7 +135,8 @@ __DEVICE_CREATE_FUNCTIONS = {
     ('Actuator', 'engine', 'intensity_range'): __createLimitedLinearEngine,
     ('Sensor', 'position', None): __createPositionSensor,
     ('InterfaceDevice', 'text-display', None): __createTextDisplay,
-    ('InterfaceDevice', 'button', None): __createButton
+    ('InterfaceDevice', 'button', None): __createButton,
+    ('InterfaceDevice', 'keyboard', None): __createKeyboardReceiver
 }
 
 def __addDevice(

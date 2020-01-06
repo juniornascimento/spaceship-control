@@ -101,3 +101,13 @@ type = 'button'
 
 x = 30
 y = 70
+
+[[InterfaceDevice]]
+
+part = 'part2'
+
+name = 'kb1'
+type = 'keyboard'
+
+x = 20
+y = 300
