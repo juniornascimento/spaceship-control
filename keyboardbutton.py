@@ -1,5 +1,6 @@
 
 from threading import Lock
+from base64 import b64encode
 from PyQt5.QtWidgets import QPushButton
 
 class KeyboardButton(QPushButton):
@@ -15,6 +16,13 @@ class KeyboardButton(QPushButton):
     def appendToQueue(self, val):
         with self.__lock:
             self.__queue.extend(val.encode('utf-8'))
+
+    def getAll(self):
+        with self.__lock:
+            content = self.__queue.decode('utf-8')
+            self.__queue.clear()
+
+        return content
 
     def keyPressEvent(self, event):
         self.appendToQueue('{:08x}'.format(event.key()))

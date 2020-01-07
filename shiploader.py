@@ -14,6 +14,7 @@ from structure import Structure, StructuralPart
 from positionsensor import PositionSensor
 from engine import LimitedLinearEngine
 from interfacedevice import TextDisplayDevice, ButtonDevice
+from interfacedevice import KeyboardReceiverDevice
 
 def __load_error(info: 'Dict[str, Any]') -> ErrorGenerator:
 
@@ -114,7 +115,7 @@ def __createKeyboardReceiver(
 
     button.setGeometry(info.get('x', 0), info.get('y', 0), 20, 20)
 
-    return ButtonDevice(button), (button,)
+    return KeyboardReceiverDevice(button), (button,)
 
 def __createButton(
     info: 'Dict[str, Any]', part: StructuralPart, action_queue: 'ActionQueue') \

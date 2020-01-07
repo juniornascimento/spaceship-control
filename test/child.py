@@ -148,6 +148,8 @@ while True:
             if color_id >= len(colors):
                 color_id = 0
 
+        print(send('1:4: get'))
+
         pos = ship.position
         intensity = -(pos[0] - 500) // 100
         send(f'0:0: set-property intensity {intensity}')
