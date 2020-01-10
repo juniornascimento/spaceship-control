@@ -25,7 +25,8 @@ class KeyboardButton(QPushButton):
         return content
 
     def keyPressEvent(self, event):
-        self.appendToQueue('{:08x}'.format(event.key()))
+        self.appendToQueue('{:02x}{:08x}'.format(int(event.modifiers()) >> 24,
+                                                 event.key()))
 
     def focusOutEvent(self, _event):
         self.__focus = False
