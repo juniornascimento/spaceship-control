@@ -38,7 +38,7 @@ class MainWindow(QMainWindow):
         self.__space.gravity = (0, 0)
         self.__action_queue = ActionQueue()
 
-        ship, widgets = loadShip('test/ship.toml', self.__space,
+        ship, widgets = loadShip('examples/ships/ship1.toml', self.__space,
                                  self.__action_queue)
 
         self.__widgets = widgets
@@ -54,7 +54,8 @@ class MainWindow(QMainWindow):
         self.__ships = [(ship, ship_gitem)]
 
         t = Thread(target=self.__startController, daemon=True,
-                   args=(['/usr/bin/python3', 'test/child.py'],
+                   args=(['/usr/bin/python3',
+                          'examples/controllers/ship1_control_example.py'],
                          ship, self.__lock))
 
         t.start()
