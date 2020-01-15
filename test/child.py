@@ -79,7 +79,7 @@ class Ship:
 
     def __init__(self):
         self.__device = Device()
-        self.__position_devices = []
+        self.__sensor_devices = {}
         self.__text_display_devices = []
         self.__find_position_devices(self.__device)
 
@@ -90,13 +90,32 @@ class Ship:
 
     @property
     def position(self):
-        if not self.__position_devices:
+        if not self.__sensor_devices:
             return None
 
-        device = self.__position_devices[0][0]
+        position_devices = self.__sensor_devices.get('position-sensor')
+
+        if not position_devices:
+            return None
+
+        device = position_devices[0][0]
 
         return (float(device.sendMessage('x:read')),
                 float(device.sendMessage('y:read')))
+
+    @property
+    def angle(self):
+        if not self.__sensor_devices:
+            return None
+
+        position_devices = self.__sensor_devices.get('angle-sensor')
+
+        if not position_devices:
+            return None
+
+        device = position_devices[0][0]
+
+        return float(device.sendMessage('read'))
 
     @property
     def device(self):
@@ -104,7 +123,7 @@ class Ship:
 
     def __find_position_devices(self, device):
 
-        if device.type_ == 'position-sensor':
+        if device.type_ in ('position-sensor', 'angle-sensor'):
             reading_time = float(device.sendMessage('reading-time'))
             max_offset = float(device.sendMessage('max-offset'))
             max_error = float(device.sendMessage('max-error')) - max_offset
@@ -112,7 +131,14 @@ class Ship:
                               max_error=max_error,
                               max_offset=max_offset,
                               estimated_offset=0)
-            self.__position_devices.append((device, info))
+
+            sensor_info = (device, info)
+
+            devices = self.__sensor_devices.get(device.type_)
+            if devices is None:
+                self.__sensor_devices[device.type_] = [sensor_info]
+            else:
+                devices.append(sensor_info)
             return
 
         if device.type_ == 'text-display':
@@ -151,11 +177,12 @@ while True:
         print(send('1:4: get'))
 
         pos = ship.position
+        angle = ship.angle
         intensity = -(pos[0] - 500) // 100
         send(f'0:0: set-property intensity {intensity}')
         print(pos, intensity)
         ship.displayPrint(f'<font color={colors[color_id]}>{pos[0]:.1f}, '
-                          f'{pos[1]:.1f}</font>')
+                          f'{pos[1]:.1f} ({angle:.1f}º)</font>')
 
     except BrokenPipeError:
         break

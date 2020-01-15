@@ -11,7 +11,7 @@ from PyQt5.QtCore import Qt
 from panelpushbutton import PanelPushButton
 from keyboardbutton import KeyboardButton
 from structure import Structure, StructuralPart
-from positionsensor import PositionSensor
+from sensors import PositionSensor, AngleSensor
 from engine import LimitedLinearEngine
 from interfacedevice import TextDisplayDevice, ButtonDevice
 from interfacedevice import KeyboardReceiverDevice
@@ -86,6 +86,15 @@ def __createPositionSensor(
                           read_error_max=info.get('error_max', 0),
                           read_offset_max=info.get('offset_max', 0)), ()
 
+def __createAngleSensor(
+    info: 'Dict[str, Any]', part: StructuralPart,
+    _action_queue: 'ActionQueue') \
+        -> 'Tuple[AngleSensor, Sequence[QWidget]]':
+
+    return AngleSensor(part, info['reading_time'],
+                       read_error_max=info.get('error_max', 0),
+                       read_offset_max=info.get('offset_max', 0)), ()
+
 def __createTextDisplay(
     info: 'Dict[str, Any]', part: StructuralPart, action_queue: 'ActionQueue') \
         -> 'Tuple[TextDisplayDevice, Sequence[QWidget]]':
@@ -109,7 +118,7 @@ def __createTextDisplay(
 
 def __createKeyboardReceiver(
     info: 'Dict[str, Any]', part: StructuralPart, action_queue: 'ActionQueue') \
-        -> 'Tuple[ButtonDevice, Sequence[QWidget]]':
+        -> 'Tuple[KeyboardButton, Sequence[QWidget]]':
 
     button = KeyboardButton()
 
@@ -135,6 +144,7 @@ __DEVICE_CREATE_FUNCTIONS = {
 
     ('Actuator', 'engine', 'intensity_range'): __createLimitedLinearEngine,
     ('Sensor', 'position', None): __createPositionSensor,
+    ('Sensor', 'angle', None): __createAngleSensor,
     ('InterfaceDevice', 'text-display', None): __createTextDisplay,
     ('InterfaceDevice', 'button', None): __createButton,
     ('InterfaceDevice', 'keyboard', None): __createKeyboardReceiver
