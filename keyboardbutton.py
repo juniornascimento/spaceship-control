@@ -1,7 +1,9 @@
 
 from threading import Lock
-from base64 import b64encode
+
 from PyQt5.QtWidgets import QPushButton
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QPalette
 
 class KeyboardButton(QPushButton):
 
@@ -16,6 +18,11 @@ class KeyboardButton(QPushButton):
         self.__lock = Lock()
         self.__queue = bytearray()
         self.__can_delete_after = can_delete_after*self.__key_size
+
+        self.__setColor(Qt.red)
+        self.setAutoFillBackground(True)
+
+        self.update()
 
     def appendToQueue(self, val):
         with self.__lock:
@@ -42,6 +49,7 @@ class KeyboardButton(QPushButton):
 
     def focusOutEvent(self, _event):
         self.__focus = False
+        self.__setColor(Qt.red)
 
     def __clicked(self):
         if self.__focus:
@@ -49,3 +57,10 @@ class KeyboardButton(QPushButton):
         else:
             self.setFocus()
             self.__focus = True
+            self.__setColor(Qt.blue)
+
+    def __setColor(self, color):
+        pal = self.palette()
+        pal.setColor(QPalette.Button, color)
+        self.setPalette(pal)
+        self.update()
