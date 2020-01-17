@@ -1,7 +1,10 @@
 
+import functools
 from abc import ABC, abstractmethod
 from PyQt5.QtWidgets import QGraphicsItem
 from PyQt5.QtCore import QRectF, QPointF, Qt
+
+import pymunk
 
 class DrawingPart(ABC):
 
@@ -52,6 +55,11 @@ class EllipseDrawingPart(DrawingPart):
 
         painter.drawEllipse(self.__offset, self.__b_radius, self.__a_radius)
 
+class CircleDrawingPart(EllipseDrawingPart):
+
+    def __init__(self, radius, **kwargs) -> None:
+        super().__init__(2*radius, 2*radius, **kwargs)
+
 class LineDrawingPart(DrawingPart):
 
     def __init__(self, start, end, color=None) -> None:
@@ -79,9 +87,18 @@ class ShipGraphicsItem(QGraphicsItem):
     def __init__(self, shapes) -> None:
         super().__init__()
 
-        self.__parts = [EllipseDrawingPart(20, 20, color=Qt.blue),
-                        LineDrawingPart(QPointF(0, 0), QPointF(10, 0),
-                                        color=Qt.red)]
+        self.__parts = []
+        for shape in shapes:
+            if isinstance(shape, pymunk.Circle):
+                offset_pym = shape.offset
+                offset = QPointF(offset_pym.x, offset_pym.y)
+                circle = CircleDrawingPart(shape.radius, color=Qt.blue,
+                                           offset=offset)
+                self.__parts.append(circle)
+
+        self.__bounding_rect = QRectF(0, 0, 0, 0)
+        for part in self.__parts:
+            self.__bounding_rect |= part.boundingRect()
 
     def boundingRect(self) -> QRectF:
         return QRectF(-100, -100, 200, 200)

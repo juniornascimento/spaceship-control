@@ -7,6 +7,33 @@ radius = 50
 elasticity = 0.95
 friction = 0.9
 
+[[Shape]]
+
+type = 'circle'
+mass = 1
+radius = 10
+elasticity = 0.95
+friction = 0.9
+y = 60
+
+[[Shape]]
+
+type = 'circle'
+mass = 1
+radius = 10
+elasticity = 0.95
+friction = 0.9
+y = -60
+
+[[Shape]]
+
+type = 'circle'
+mass = 1
+radius = 10
+elasticity = 0.95
+friction = 0.9
+x = -60
+
 [[Part]]
 
 name = 'part1'
