@@ -180,7 +180,8 @@ def __addDevice(
     return widgets
 
 def loadShip(filename: str, space: 'pymunk.Space',
-             action_queue: 'ActionQueue') -> Structure:
+             action_queue: 'ActionQueue') \
+                 -> 'Tuple[Structure, Sequence[QWidget], Sequence[Shape]]':
 
     file_content = toml.load(filename)
 
@@ -217,4 +218,4 @@ def loadShip(filename: str, space: 'pymunk.Space',
     for info in file_content.get('InterfaceDevice', ()):
         widgets.extend(__addDevice(info, parts, 'InterfaceDevice', action_queue))
 
-    return ship, widgets
+    return ship, widgets, shapes

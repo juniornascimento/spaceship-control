@@ -38,8 +38,9 @@ class MainWindow(QMainWindow):
         self.__space.gravity = (0, 0)
         self.__action_queue = ActionQueue()
 
-        ship, widgets = loadShip('examples/ships/ship1.toml', self.__space,
-                                 self.__action_queue)
+        ship, widgets, shapes = loadShip('examples/ships/ship1.toml',
+                                         self.__space,
+                                         self.__action_queue)
 
         self.__widgets = widgets
 
@@ -49,7 +50,7 @@ class MainWindow(QMainWindow):
 
         ship.body.position = 300, 400
 
-        ship_gitem = ShipGraphicsItem()
+        ship_gitem = ShipGraphicsItem(shapes)
         self.__ui.view.scene().addItem(ship_gitem)
         self.__ships = [(ship, ship_gitem)]
 
