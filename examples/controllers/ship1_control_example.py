@@ -176,6 +176,8 @@ while True:
 
         print(send('1:4: get'))
 
+        print('Speed:', send('0:3: read'))
+
         pos = ship.position
         angle = ship.angle
         intensity = -(pos[0] - 500) // 100

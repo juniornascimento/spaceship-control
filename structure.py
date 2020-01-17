@@ -79,6 +79,12 @@ class StructuralPart(DeviceGroup):
         return self.__structure.body.angle
 
     @property
+    def velocity(self) -> 'Tuple[float, float]':
+        if self.__structure is None:
+            return self.__offset
+        return tuple(self.__structure.body.velocity)
+
+    @property
     def structure(self) -> Structure:
         return self.__structure
 

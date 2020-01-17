@@ -43,6 +43,15 @@ reading_time = 5
 error_max = 10
 offset_max = 2
 
+[[Sensor]]
+
+part = 'part1'
+
+name = 'speed-sensor'
+type = 'speed'
+
+reading_time = 0.5
+
 [[Actuator]]
 
 part = 'part1'
