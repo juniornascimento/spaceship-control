@@ -1,5 +1,7 @@
 
+from PyQt5.QtGui import QFontMetricsF, QTextCursor
 from PyQt5.QtWidgets import QLabel
+from PyQt5.QtCore import Qt
 
 from panelpushbutton import PanelPushButton
 from actionqueue import Action
@@ -67,4 +69,76 @@ class KeyboardReceiverDevice(InterfaceDevice):
     __COMMANDS = {
 
         'get': __get
+    }
+
+class ConsoleDevice(InterfaceDevice):
+
+    def __init__(self, text: 'QTextBrowser', action_queue: 'ActionQueue',
+                 columns: int, rows: int, **kwargs: 'Any') -> None:
+        super().__init__(device_type='text-display', **kwargs)
+
+        self.__text = text
+        self.__queue = action_queue
+        self.__col = 0
+        self.__row = 0
+
+        text.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff);
+        text.setFocusPolicy(Qt.NoFocus)
+
+        text.setPlainText('A'*(rows*columns - 1))
+
+        tdoc = text.document()
+        fmetrics = QFontMetricsF(tdoc.defaultFont())
+        margins = text.contentsMargins()
+
+        height = fmetrics.lineSpacing()*rows + \
+            2*(tdoc.documentMargin() + text.frameWidth()) + \
+                margins.top() + margins.bottom()
+
+
+        width = fmetrics.width('A')*columns + \
+            2*(tdoc.documentMargin() + text.frameWidth()) + \
+                margins.left() + margins.right()
+
+        text.setFixedHeight(height)
+        text.setFixedWidth(width)
+
+        text.setMaximumBlockCount(rows)
+
+    def command(self, command: 'List[str]') -> 'Any':
+        return super().command(command, ConsoleDevice.__COMMANDS)
+
+    def __setPos(self, column, row):
+        self.__col = column
+        self.__row = row
+
+        return '<<ok>>'
+
+    def __getPos(self):
+        return f'{self.__col}-{self.__row}'
+
+    def __newline(self):
+        self.__row += 1
+
+    def __columndec(self):
+        self.__col -= 1
+
+    def __columnstart(self):
+        self.__col = 0
+
+    def __write(self, text):
+        pass
+
+    def __update(self):
+        pass
+
+    __COMMANDS = {
+
+        'write': __write,
+        'set-position': __setPos,
+        'get-position': __getPos,
+        'LF': __newline,
+        'BS': __columndec,
+        'CR': __columnstart,
+        'update': __update
     }

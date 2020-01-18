@@ -157,5 +157,18 @@ part = 'part2'
 name = 'kb1'
 type = 'keyboard'
 
-x = 20
-y = 300
+x = 210
+y = 28
+
+[[InterfaceDevice]]
+
+part = 'part2'
+
+name = 'display2'
+type = 'text-display'
+model = 'console'
+
+x = 10
+y = 200
+columns = 25
+rows = 15

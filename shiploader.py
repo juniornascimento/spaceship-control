@@ -5,16 +5,18 @@ from pymunk import Body, Circle
 
 from utils import ErrorGenerator
 
-from PyQt5.QtWidgets import QLabel
+from PyQt5.QtWidgets import QLabel, QPlainTextEdit
 from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QFont
 
 from panelpushbutton import PanelPushButton
 from keyboardbutton import KeyboardButton
 from structure import Structure, StructuralPart
 from sensors import PositionSensor, AngleSensor, SpeedSensor
 from engine import LimitedLinearEngine
-from interfacedevice import TextDisplayDevice, ButtonDevice
-from interfacedevice import KeyboardReceiverDevice
+from interfacedevice import (
+    TextDisplayDevice, ButtonDevice, KeyboardReceiverDevice, ConsoleDevice
+)
 
 def __load_error(info: 'Dict[str, Any]') -> ErrorGenerator:
 
@@ -126,6 +128,33 @@ def __createTextDisplay(
 
     return TextDisplayDevice(label, action_queue), (label,)
 
+def __createConsole(
+    info: 'Dict[str, Any]', part: StructuralPart, action_queue: 'ActionQueue') \
+        -> 'Tuple[InterfaceDevice, Sequence[QWidget]]':
+
+    text = QPlainTextEdit()
+
+    text.setReadOnly(True)
+
+    text.setStyleSheet('''
+
+        color: white;
+        background-color: black;
+        border-color: black;
+        border-width: 1px;
+        border-style: solid;
+    ''')
+
+    font = QFont('Monospace')
+    font.setStyleHint(QFont.TypeWriter)
+    text.setFont(font)
+
+    text.setGeometry(info.get('x', 0), info.get('y', 0),
+                     info.get('width', 100), 0)
+
+    return ConsoleDevice(text, action_queue, info.get('columns', 20),
+                         info.get('rows', 5)), (text,)
+
 def __createKeyboardReceiver(
     info: 'Dict[str, Any]', part: StructuralPart, action_queue: 'ActionQueue') \
         -> 'Tuple[KeyboardButton, Sequence[QWidget]]':
@@ -157,6 +186,8 @@ __DEVICE_CREATE_FUNCTIONS = {
     ('Sensor', 'angle', None): __createAngleSensor,
     ('Sensor', 'speed', None): __createSpeedSensor,
     ('InterfaceDevice', 'text-display', None): __createTextDisplay,
+    ('InterfaceDevice', 'text-display', 'line'): __createTextDisplay,
+    ('InterfaceDevice', 'text-display', 'console'): __createConsole,
     ('InterfaceDevice', 'button', None): __createButton,
     ('InterfaceDevice', 'keyboard', None): __createKeyboardReceiver
 }
