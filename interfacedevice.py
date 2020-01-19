@@ -1,6 +1,8 @@
 
+import html
+
 from PyQt5.QtGui import QFontMetricsF, QTextCursor
-from PyQt5.QtWidgets import QLabel
+from PyQt5.QtWidgets import QLabel, QTextEdit
 from PyQt5.QtCore import Qt
 
 from panelpushbutton import PanelPushButton
@@ -73,19 +75,20 @@ class KeyboardReceiverDevice(InterfaceDevice):
 
 class ConsoleDevice(InterfaceDevice):
 
-    def __init__(self, text: 'QTextBrowser', action_queue: 'ActionQueue',
+    def __init__(self, text: 'QTextEdit', action_queue: 'ActionQueue',
                  columns: int, rows: int, **kwargs: 'Any') -> None:
         super().__init__(device_type='text-display', **kwargs)
 
-        self.__text = text
+        self.__text_widget = text
         self.__queue = action_queue
         self.__col = 0
         self.__row = 0
+        self.__total_cols = columns
+        self.__total_rows = rows
+        self.__text = ' '*(self.__total_cols*self.__total_rows)
 
         text.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff);
         text.setFocusPolicy(Qt.NoFocus)
-
-        text.setPlainText('A'*(rows*columns - 1))
 
         tdoc = text.document()
         fmetrics = QFontMetricsF(tdoc.defaultFont())
@@ -103,12 +106,20 @@ class ConsoleDevice(InterfaceDevice):
         text.setFixedHeight(height)
         text.setFixedWidth(width)
 
-        text.setMaximumBlockCount(rows)
-
     def command(self, command: 'List[str]') -> 'Any':
         return super().command(command, ConsoleDevice.__COMMANDS)
 
-    def __setPos(self, column, row):
+    def __setPos(self, column_s, row_s):
+
+        column = int(column_s)
+        row = int(row_s)
+
+        if column < 0 or column > self.__total_cols:
+            return '<<err>>'
+
+        if row < 0 or row > self.__total_rows:
+            return '<<err>>'
+
         self.__col = column
         self.__row = row
 
@@ -118,27 +129,60 @@ class ConsoleDevice(InterfaceDevice):
         return f'{self.__col}-{self.__row}'
 
     def __newline(self):
+
+        if self.__row >= self.__total_rows:
+            return '<<err>>'
+
         self.__row += 1
 
+        return '<<ok>>'
+
     def __columndec(self):
+        if self.__col == 0:
+            return '<<err>>'
+
         self.__col -= 1
+
+        return '<<ok>>'
 
     def __columnstart(self):
         self.__col = 0
 
+        return '<<ok>>'
+
     def __write(self, text):
-        pass
+        pos = self.__row*self.__total_cols + self.__col
+        self.__text = self.__text[: pos] + text + self.__text[pos + len(text):]
+
+        total_size = self.__total_cols*self.__total_rows
+        if len(text) > total_size:
+            self.__text = self.__text[: total_size]
+
+        pos += len(text)
+        self.__row = pos//self.__total_cols
+        self.__col = pos%self.__total_cols
 
     def __update(self):
-        pass
+
+        text = html.escape(self.__text).replace(' ', '&nbsp;')
+        self.__queue.add(Action(QTextEdit.setHtml,
+                                self.__text_widget, text))
+
+        return '<<ok>>'
+
+    def __clear(self):
+        self.__text = ' '*(self.__total_cols*self.__total_rows)
+
+        return '<<ok>>'
 
     __COMMANDS = {
 
         'write': __write,
-        'set-position': __setPos,
-        'get-position': __getPos,
+        'set-cursor-pos': __setPos,
+        'get-cursor-pos': __getPos,
         'LF': __newline,
         'BS': __columndec,
         'CR': __columnstart,
-        'update': __update
+        'update': __update,
+        'clear': __clear
     }

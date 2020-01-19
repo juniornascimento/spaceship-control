@@ -5,7 +5,7 @@ from pymunk import Body, Circle
 
 from utils import ErrorGenerator
 
-from PyQt5.QtWidgets import QLabel, QPlainTextEdit
+from PyQt5.QtWidgets import QLabel, QTextEdit
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont
 
@@ -132,7 +132,7 @@ def __createConsole(
     info: 'Dict[str, Any]', part: StructuralPart, action_queue: 'ActionQueue') \
         -> 'Tuple[InterfaceDevice, Sequence[QWidget]]':
 
-    text = QPlainTextEdit()
+    text = QTextEdit()
 
     text.setReadOnly(True)
 

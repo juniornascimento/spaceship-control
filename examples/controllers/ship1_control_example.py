@@ -167,6 +167,12 @@ print(ship.device)
 colors = ('black', 'red', 'blue', 'green')
 color_id = 0
 
+send('1:5: set-cursor-pos 3 1')
+send('1:5: write "Spaceship Control"')
+send('1:5: set-cursor-pos 1 5')
+send('1:5: write "This is just an example controller"')
+send('1:5: update')
+
 while True:
     try:
         if send('1:3: clicked') == '1':
