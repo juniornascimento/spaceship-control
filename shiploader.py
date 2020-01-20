@@ -1,7 +1,7 @@
 
 import toml
 
-from pymunk import Body, Circle
+from pymunk import Body, Circle, Poly
 
 from utils import ErrorGenerator
 
@@ -45,8 +45,20 @@ def __engine_error_kwargs(
 
 def __createCircleShape(info: 'Dict[str, Any]') -> 'Circle':
 
-    shape = Circle(None, info.get('radius', 0),
+    shape = Circle(None, info['radius'],
                    (info.get('x', 0), info.get('y', 0)))
+
+    shape.mass = info['mass']
+    shape.elasticity = info.get('elasticity', 0.5)
+    shape.friction = info.get('friction', 0.5)
+
+    return shape
+
+def __createPolyShape(info: 'Dict[str, Any]') -> 'Poly':
+
+    points = tuple((point.get('x', 0), point.get('y', 0))
+                   for point in info['Point'])
+    shape = Poly(None, points)
 
     shape.mass = info['mass']
     shape.elasticity = info.get('elasticity', 0.5)
@@ -56,7 +68,8 @@ def __createCircleShape(info: 'Dict[str, Any]') -> 'Circle':
 
 __SHAPE_CREATE_FUNCTIONS = {
 
-    'circle': __createCircleShape
+    'circle': __createCircleShape,
+    'polygon': __createPolyShape
 }
 
 def __createShape(info: 'Dict[str, Any]') -> 'Shape':

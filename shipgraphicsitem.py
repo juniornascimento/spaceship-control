@@ -3,6 +3,7 @@ import functools
 from abc import ABC, abstractmethod
 from PyQt5.QtWidgets import QGraphicsItem
 from PyQt5.QtCore import QRectF, QPointF, Qt
+from PyQt5.QtGui import QPolygonF
 
 import pymunk
 
@@ -82,6 +83,47 @@ class LineDrawingPart(DrawingPart):
 
         painter.drawLine(self.__start, self.__end)
 
+class PolyDrawingPart(DrawingPart):
+
+    def __init__(self, points, color=None, border_color=None,
+                 brush_color=None) -> None:
+        super().__init__()
+
+        if border_color is None:
+            self.__b_color = color
+        else:
+            self.__b_color = border_color
+
+        if brush_color is None:
+            self.__color = color
+        else:
+            self.__color = brush_color
+
+        self.__points = tuple(points)
+
+        self.__polygon = QPolygonF()
+        for point in points:
+            self.__polygon.append(point)
+
+    def boundingRect(self) -> QRectF:
+        x_val_key = lambda point: point.x()
+        y_val_key = lambda point: point.y()
+        min_x = min(self.__points, key=x_val_key).x()
+        min_y = min(self.__points, key=y_val_key).y()
+        max_x = max(self.__points, key=x_val_key).x()
+        max_y = max(self.__points, key=y_val_key).y()
+        return QRectF(min_x, min_y, max_x - min_x, max_y - min_y)
+
+    def _paint(self, painter, option, widget) -> None:
+        if self.__b_color is not None:
+            pen = painter.pen()
+            pen.setColor(self.__b_color)
+            painter.setPen(pen)
+        if self.__color is not None:
+            painter.setBrush(self.__color)
+
+        painter.drawPolygon(self.__polygon)
+
 class ShipGraphicsItem(QGraphicsItem):
 
     def __init__(self, shapes) -> None:
@@ -95,6 +137,11 @@ class ShipGraphicsItem(QGraphicsItem):
                 circle = CircleDrawingPart(shape.radius, color=Qt.blue,
                                            offset=offset)
                 self.__parts.append(circle)
+
+            elif isinstance(shape, pymunk.Poly):
+                points = tuple(QPointF(point.x, point.y) for point in
+                               shape.get_vertices())
+                self.__parts.append(PolyDrawingPart(points, color=Qt.blue))
 
         self.__bounding_rect = QRectF(0, 0, 0, 0)
         for part in self.__parts:
