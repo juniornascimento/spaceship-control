@@ -9,6 +9,8 @@ from PyQt5.QtCore import QTimer
 
 import pymunk
 
+from fileinfo import FileInfo
+
 from shipgraphicsitem import ShipGraphicsItem
 from shiploader import loadShip
 from actionqueue import ActionQueue
@@ -38,9 +40,10 @@ class MainWindow(QMainWindow):
         self.__space.gravity = (0, 0)
         self.__action_queue = ActionQueue()
 
-        ship, widgets, shapes = loadShip('examples/ships/ship1.toml',
-                                         self.__space,
-                                         self.__action_queue)
+        fileinfo = FileInfo()
+        ship, widgets, shapes = loadShip(
+            fileinfo.shipModelPath('examples/ship1.toml'), self.__space,
+            self.__action_queue)
 
         self.__widgets = widgets
 

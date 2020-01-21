@@ -227,7 +227,7 @@ def loadShip(filename: str, space: 'pymunk.Space',
              action_queue: 'ActionQueue') \
                  -> 'Tuple[Structure, Sequence[QWidget], Sequence[Shape]]':
 
-    file_content = toml.load(filename)
+    file_content = toml.load(str(filename))
 
     shapes = tuple(__createShape(shape_info)
                    for shape_info in file_content['Shape'])
