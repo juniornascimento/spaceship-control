@@ -57,10 +57,10 @@ class MainWindow(QMainWindow):
         self.__ui.view.scene().addItem(ship_gitem)
         self.__ships = [(ship, ship_gitem)]
 
+        controller_path = \
+            fileinfo.controllerPath('examples/ship1_control_example.py')
         t = Thread(target=self.__startController, daemon=True,
-                   args=(['/usr/bin/python3',
-                          'examples/controllers/ship1_control_example.py'],
-                         ship, self.__lock))
+                   args=([controller_path], ship, self.__lock))
 
         t.start()
 

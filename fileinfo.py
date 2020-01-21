@@ -21,9 +21,10 @@ class FileInfo:
             path.mkdir(exist_ok=True)
 
             example_dir_path = path.joinpath('examples')
-            if not example_dir_path.exists():
-                os.symlink(dist_data_examples_path.joinpath(dirname),
-                           example_dir_path)
+            if example_dir_path.exists():
+                os.remove(example_dir_path)
+            os.symlink(dist_data_examples_path.joinpath(dirname),
+                       example_dir_path)
 
     def __new__(cls):
         if FileInfo.__instance is None:
@@ -31,14 +32,30 @@ class FileInfo:
 
         return FileInfo.__instance
 
-    def shipModelPath(self, name=None):
-        ships_path = self.__path.joinpath('ships')
+    def shipModelPath(self, *args, **kwargs):
+        return self.__getPath(self.__path.joinpath('ships'), *args, **kwargs)
+
+    def controllerPath(self, *args, **kwargs):
+        return self.__getPath(
+            self.__path.joinpath('controllers'), *args, **kwargs)
+
+    @staticmethod
+    def __getPath(basepath, name=None, to_string=True):
+
         if name is None:
-            return ships_path
+            if to_string:
+                return str(basepath)
+            return basepath
 
-        ship = ships_path.joinpath(name)
+        file_path = basepath.joinpath(name)
 
-        if not(ship.exists() and ship.is_file()):
+        print(file_path.exists(), file_path.is_file())
+
+        if not(file_path.exists() and file_path.is_file()):
             return None
 
-        return ship
+        print('HERE')
+
+        if to_string:
+            return str(file_path)
+        return file_path
