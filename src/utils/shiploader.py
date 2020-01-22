@@ -3,18 +3,19 @@ import toml
 
 from pymunk import Body, Circle, Poly
 
-from utils import ErrorGenerator
-
 from PyQt5.QtWidgets import QLabel, QTextEdit
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont
 
-from panelpushbutton import PanelPushButton
-from keyboardbutton import KeyboardButton
-from structure import Structure, StructuralPart
-from sensors import PositionSensor, AngleSensor, SpeedSensor
-from engine import LimitedLinearEngine
-from interfacedevice import (
+from ..utils.errorgenerator import ErrorGenerator
+
+from ..interface.panelpushbutton import PanelPushButton
+from ..interface.keyboardbutton import KeyboardButton
+
+from ..devices.structure import Structure, StructuralPart
+from ..devices.sensors import PositionSensor, AngleSensor, SpeedSensor
+from ..devices.engine import LimitedLinearEngine
+from ..devices.interfacedevice import (
     TextDisplayDevice, ButtonDevice, KeyboardReceiverDevice, ConsoleDevice
 )
 

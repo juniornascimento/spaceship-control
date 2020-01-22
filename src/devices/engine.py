@@ -1,8 +1,8 @@
 
 from abc import abstractmethod
 
-from structure import Actuator
-from utils import Interval, IntervalSet
+from .structure import Actuator
+from ..utils.interval import Interval, IntervalSet
 
 class Engine(Actuator):
 

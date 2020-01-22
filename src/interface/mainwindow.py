@@ -9,11 +9,11 @@ from PyQt5.QtCore import QTimer
 
 import pymunk
 
-from fileinfo import FileInfo
+from .shipgraphicsitem import ShipGraphicsItem
 
-from shipgraphicsitem import ShipGraphicsItem
-from shiploader import loadShip
-from actionqueue import ActionQueue
+from ..utils.fileinfo import FileInfo
+from ..utils.shiploader import loadShip
+from ..utils.actionqueue import ActionQueue
 
 UiMainWindow, _ = uic.loadUiType('mainwindow.ui')
 

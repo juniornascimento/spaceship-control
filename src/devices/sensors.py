@@ -1,6 +1,7 @@
 
 from math import pi, cos, sin
-from structure import Sensor, MultiSensor
+
+from .structure import Sensor, MultiSensor
 
 class XPositionSensor(Sensor):
 

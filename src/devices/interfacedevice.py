@@ -5,9 +5,11 @@ from PyQt5.QtGui import QFontMetricsF, QTextCursor
 from PyQt5.QtWidgets import QLabel, QTextEdit
 from PyQt5.QtCore import Qt
 
-from panelpushbutton import PanelPushButton
-from actionqueue import Action
-from device import DefaultDevice
+from .device import DefaultDevice
+
+from ..utils.actionqueue import Action
+
+from ..interface.panelpushbutton import PanelPushButton
 
 class InterfaceDevice(DefaultDevice):
 

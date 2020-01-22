@@ -6,8 +6,9 @@ import time
 import random
 import math
 
-from utils import ErrorGenerator
-from device import DefaultDevice, DeviceGroup, PropertyDevice
+from ..devices.device import DefaultDevice, DeviceGroup, PropertyDevice
+
+from ..utils.errorgenerator import ErrorGenerator
 
 class Structure(DeviceGroup):
 

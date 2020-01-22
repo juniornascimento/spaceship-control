@@ -15,14 +15,21 @@ class FileInfo:
 
         create_n_link_example_dirs = ['controllers', 'ships']
 
-        dist_data_examples_path = self.__dist_data_path.joinpath('examples')
+        dist_data_examples_path = \
+            self.__dist_data_path.parent.joinpath('data/examples')
+        if not dist_data_examples_path.is_dir():
+            dist_data_examples_path = \
+                self.__dist_data_path.parent.parent.joinpath('examples')
+
         for dirname in create_n_link_example_dirs:
             path = self.__path.joinpath(dirname)
             path.mkdir(exist_ok=True)
 
             example_dir_path = path.joinpath('examples')
-            if example_dir_path.exists():
-                os.remove(example_dir_path)
+            try:
+                os.unlink(example_dir_path)
+            except FileNotFoundError:
+                pass
             os.symlink(dist_data_examples_path.joinpath(dirname),
                        example_dir_path)
 
@@ -49,12 +56,8 @@ class FileInfo:
 
         file_path = basepath.joinpath(name)
 
-        print(file_path.exists(), file_path.is_file())
-
         if not(file_path.exists() and file_path.is_file()):
             return None
-
-        print('HERE')
 
         if to_string:
             return str(file_path)
