@@ -15,7 +15,7 @@ from ..utils.fileinfo import FileInfo
 from ..utils.shiploader import loadShip
 from ..utils.actionqueue import ActionQueue
 
-UiMainWindow, _ = uic.loadUiType('mainwindow.ui')
+UiMainWindow, _ = uic.loadUiType(FileInfo().uiFilePath('mainwindow.ui'))
 
 class MainWindow(QMainWindow):
 

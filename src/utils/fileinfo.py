@@ -9,17 +9,16 @@ class FileInfo:
     def __init__(self):
         self.__path = \
             Path.home().joinpath('.local/share/spaceshipcontrol').resolve()
-        self.__dist_data_path = Path(__file__).parent.resolve()
+        self.__dist_data_path = Path(__file__).parent.parent.resolve()
+
+        if self.__dist_data_path.name == 'src':
+            self.__dist_data_path = self.__dist_data_path.parent
 
         self.__path.mkdir(parents=True, exist_ok=True)
 
         create_n_link_example_dirs = ['controllers', 'ships']
 
-        dist_data_examples_path = \
-            self.__dist_data_path.parent.joinpath('data/examples')
-        if not dist_data_examples_path.is_dir():
-            dist_data_examples_path = \
-                self.__dist_data_path.parent.parent.joinpath('examples')
+        dist_data_examples_path = self.__dist_data_path.joinpath('examples')
 
         for dirname in create_n_link_example_dirs:
             path = self.__path.joinpath(dirname)
@@ -38,6 +37,10 @@ class FileInfo:
             FileInfo.__instance = super().__new__(cls)
 
         return FileInfo.__instance
+
+    def uiFilePath(self, *args, **kwargs):
+        return self.__getPath(self.__dist_data_path.joinpath('forms'), *args,
+                              **kwargs)
 
     def shipModelPath(self, *args, **kwargs):
         return self.__getPath(self.__path.joinpath('ships'), *args, **kwargs)
