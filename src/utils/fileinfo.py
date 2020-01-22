@@ -16,7 +16,7 @@ class FileInfo:
 
         self.__path.mkdir(parents=True, exist_ok=True)
 
-        create_n_link_example_dirs = ['controllers', 'ships']
+        create_n_link_example_dirs = ['controllers', 'ships', 'scenarios']
 
         dist_data_examples_path = self.__dist_data_path.joinpath('examples')
 
@@ -48,6 +48,10 @@ class FileInfo:
     def controllerPath(self, *args, **kwargs):
         return self.__getPath(
             self.__path.joinpath('controllers'), *args, **kwargs)
+
+    def scenarioPath(self, *args, **kwargs):
+        return self.__getPath(
+            self.__path.joinpath('scenarios'), *args, **kwargs)
 
     @staticmethod
     def __getPath(basepath, name=None, to_string=True):

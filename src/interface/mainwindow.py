@@ -13,6 +13,7 @@ from .shipgraphicsitem import ShipGraphicsItem
 
 from ..utils.fileinfo import FileInfo
 from ..utils.shiploader import loadShip
+from ..utils.scenarioloader import loadScenario
 from ..utils.actionqueue import ActionQueue
 
 UiMainWindow, _ = uic.loadUiType(FileInfo().uiFilePath('mainwindow.ui'))
@@ -41,28 +42,36 @@ class MainWindow(QMainWindow):
         self.__action_queue = ActionQueue()
 
         fileinfo = FileInfo()
-        ship, widgets, shapes = loadShip(
-            fileinfo.shipModelPath('examples/ship1.toml'), self.__space,
-            self.__action_queue)
 
-        self.__widgets = widgets
+        scenario_path = fileinfo.scenarioPath('examples/scenario1.toml')
+        scenario_info = loadScenario(scenario_path)
 
-        for widget in widgets:
-            widget.setParent(self.__ui.deviceInterfaceComponents)
+        self.__ships = [None]*len(scenario_info.ships)
+        for i, ship_info in enumerate(scenario_info.ships):
+
+            ship, widgets, shapes = loadShip(
+                fileinfo.shipModelPath('examples/ship1.toml'), self.__space,
+                self.__action_queue)
+
+            self.__widgets = widgets
+            ship.body.position = ship_info.position
+            ship.body.angle = ship_info.angle
+
+            for widget in widgets:
+                widget.setParent(self.__ui.deviceInterfaceComponents)
+
+            controller_path = fileinfo.controllerPath(ship_info.controller)
+            thread = Thread(target=self.__startController, daemon=True,
+                            args=([controller_path], ship, self.__lock))
+
+            ship_gitem = ShipGraphicsItem(shapes)
+            self.__ui.view.scene().addItem(ship_gitem)
+            self.__ships[i] = (ship, ship_gitem, widgets, thread)
+
+            thread.start()
+
+        for widget in self.__ships[0][2]:
             widget.show()
-
-        ship.body.position = 300, 400
-
-        ship_gitem = ShipGraphicsItem(shapes)
-        self.__ui.view.scene().addItem(ship_gitem)
-        self.__ships = [(ship, ship_gitem)]
-
-        controller_path = \
-            fileinfo.controllerPath('examples/ship1_control_example.py')
-        t = Thread(target=self.__startController, daemon=True,
-                   args=([controller_path], ship, self.__lock))
-
-        t.start()
 
     def __timerTimeout(self):
 
@@ -70,7 +79,7 @@ class MainWindow(QMainWindow):
 
         with self.__lock:
             self.__space.step(0.02)
-            for ship, gitem in self.__ships:
+            for ship, gitem, _, _ in self.__ships:
                 ship.act()
                 pos = ship.body.position
                 gitem.setX(pos.x/10)

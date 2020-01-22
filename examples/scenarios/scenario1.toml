@@ -1,0 +1,14 @@
+
+[Scenario]
+
+name = 'example1'
+
+[[Ship]]
+
+name = 'ship1'
+model = 'examples/ship1'
+controller = 'examples/ship1_control_example.py'
+
+x = 300
+y = 400
+angle = 45
