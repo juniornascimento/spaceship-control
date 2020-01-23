@@ -79,8 +79,20 @@
      <height>30</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionload_scenario"/>
+   </widget>
+   <addaction name="menuFile"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionload_scenario">
+   <property name="text">
+    <string>load scenario</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>

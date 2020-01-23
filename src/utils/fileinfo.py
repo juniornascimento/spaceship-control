@@ -2,6 +2,8 @@
 import os
 from pathlib import Path
 
+from anytree import Node
+
 class FileInfo:
 
     __instance = None
@@ -37,6 +39,19 @@ class FileInfo:
             FileInfo.__instance = super().__new__(cls)
 
         return FileInfo.__instance
+
+    def listScenariosTree(self):
+        return self.__listTree(self.__path.joinpath('scenarios'), Node('ships'))
+
+    def __listTree(self, base_path, current_node):
+
+        for path in base_path.iterdir():
+
+            new_node = Node(path.with_suffix('').name, parent=current_node)
+            if path.is_dir():
+                self.__listTree(path, new_node)
+
+        return current_node
 
     def uiFilePath(self, *args, **kwargs):
         return self.__getPath(self.__dist_data_path.joinpath('forms'), *args,

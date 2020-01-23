@@ -1,3 +1,4 @@
 toml>=0.10.0
 PyQt5>=5.13.2
-pymunk>=5.6.0,<6
+pymunk>=5.6.0
+anytree>=2.8.0
