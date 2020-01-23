@@ -90,7 +90,7 @@
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionload_scenario">
    <property name="text">
-    <string>load scenario</string>
+    <string>Load Scenario</string>
    </property>
   </action>
  </widget>

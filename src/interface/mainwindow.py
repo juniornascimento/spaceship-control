@@ -1,4 +1,5 @@
 
+import signal
 from math import pi
 from threading import Thread, Lock
 from subprocess import Popen, PIPE
@@ -48,14 +49,24 @@ class MainWindow(QMainWindow):
             self.__loadScenarioAction)
 
     def clear(self):
-        pass
+
+        with self.__lock:
+            self.__space.remove(self.__space.bodies, self.__space.shapes)
+            for ship, gitem, widgets, _ in self.__ships:
+                self.__ui.view.scene().removeItem(gitem)
+                for widget in widgets:
+                    widget.setParent(None)
+
+            self.__ships = []
 
     def __loadScenarioAction(self):
 
         dialog = ChooseFromTreeDialog(FileInfo().listScenariosTree().children)
         dialog.setWindowTitle('Choose scenario')
 
-        self.loadScenario('/'.join(dialog.getOption()))
+        scenario = dialog.getOption()
+        if scenario is not None:
+            self.loadScenario('/'.join(scenario))
 
     def loadScenario(self, scenario):
 
@@ -120,6 +131,8 @@ class MainWindow(QMainWindow):
                     question = question[:-1]
 
                 with lock:
+                    if device.isDestroyed():
+                        break
                     answer = device.communicate(question)
 
                 process.stdin.write(answer.encode())
@@ -128,3 +141,5 @@ class MainWindow(QMainWindow):
 
         except BrokenPipeError:
             pass
+
+        process.send_signal(signal.SIGHUP)

@@ -6,7 +6,7 @@ import time
 import random
 import math
 
-from ..devices.device import DefaultDevice, DeviceGroup, PropertyDevice
+from .device import DefaultDevice, DeviceGroup, PropertyDevice
 
 from ..utils.errorgenerator import ErrorGenerator
 
@@ -28,6 +28,9 @@ class Structure(DeviceGroup):
 
         if isinstance(device, StructuralPart):
             device.structure = self
+
+    def isDestroyed(self) -> bool:
+        return self.__body.space is None
 
     @property
     def body(self) -> 'pymunk.Body':
