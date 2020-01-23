@@ -1,5 +1,6 @@
 
 import os
+import shutil
 from pathlib import Path
 
 from anytree import Node
@@ -67,6 +68,13 @@ class FileInfo:
     def scenarioPath(self, *args, **kwargs):
         return self.__getPath(
             self.__path.joinpath('scenarios'), *args, **kwargs)
+
+    def addScenarios(self, files):
+        return self.__addFiles(self.__path.joinpath('scenarios'), files)
+
+    def __addFiles(self, path, files):
+        for file in files:
+            shutil.copy(file, str(path))
 
     @staticmethod
     def __getPath(basepath, name=None, to_string=True):

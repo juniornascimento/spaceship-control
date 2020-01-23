@@ -83,14 +83,38 @@
     <property name="title">
      <string>File</string>
     </property>
-    <addaction name="actionload_scenario"/>
+    <widget class="QMenu" name="menuImportData">
+     <property name="title">
+      <string>Import Data</string>
+     </property>
+     <addaction name="actionImportScenario"/>
+     <addaction name="actionImportShip"/>
+     <addaction name="actionImportController"/>
+    </widget>
+    <addaction name="actionLoadScenario"/>
+    <addaction name="menuImportData"/>
    </widget>
    <addaction name="menuFile"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
-  <action name="actionload_scenario">
+  <action name="actionLoadScenario">
    <property name="text">
     <string>Load Scenario</string>
+   </property>
+  </action>
+  <action name="actionImportScenario">
+   <property name="text">
+    <string>Scenario</string>
+   </property>
+  </action>
+  <action name="actionImportShip">
+   <property name="text">
+    <string>Ship</string>
+   </property>
+  </action>
+  <action name="actionImportController">
+   <property name="text">
+    <string>Controller</string>
    </property>
   </action>
  </widget>

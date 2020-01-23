@@ -5,7 +5,7 @@ from threading import Thread, Lock
 from subprocess import Popen, PIPE
 
 from PyQt5 import uic
-from PyQt5.QtWidgets import QMainWindow, QGraphicsScene
+from PyQt5.QtWidgets import QMainWindow, QGraphicsScene, QFileDialog
 from PyQt5.QtCore import QTimer
 
 import pymunk
@@ -45,8 +45,17 @@ class MainWindow(QMainWindow):
 
         self.__ships = []
 
-        self.__ui.actionload_scenario.triggered.connect(
+        self.__ui.actionLoadScenario.triggered.connect(
             self.__loadScenarioAction)
+
+        self.__ui.actionImportScenario.triggered.connect(
+            self.__importScenarioAction)
+
+        self.__ui.actionImportShip.triggered.connect(
+            self.__importShipAction)
+
+        self.__ui.actionImportController.triggered.connect(
+            self.__importControllerAction)
 
     def clear(self):
 
@@ -143,3 +152,19 @@ class MainWindow(QMainWindow):
             pass
 
         process.send_signal(signal.SIGHUP)
+
+    def __importScenarioAction(self):
+
+        fdialog = QFileDialog(None, 'Save File', '', 'TOML files(*.toml)')
+        fdialog.setFileMode(QFileDialog.ExistingFiles)
+
+        if not fdialog.exec_():
+            return
+
+        FileInfo().addScenarios(fdialog.selectedFiles())
+
+    def __importShipAction(self):
+        pass
+
+    def __importControllerAction(self):
+        pass
