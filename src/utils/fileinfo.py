@@ -75,9 +75,15 @@ class FileInfo:
     def addShips(self, files):
         return self.__addFiles(self.__path.joinpath('ships'), files)
 
-    def __addFiles(self, path, files):
+    def addControllers(self, files):
+        return self.__addFiles(self.__path.joinpath('controllers'), files,
+                               mode=0o555)
+
+    def __addFiles(self, path, files, mode=0o644):
+        path_str = str(path)
         for file in files:
-            shutil.copy(file, str(path))
+            new_file = shutil.copy(file, path_str)
+            os.chmod(new_file, mode)
 
     @staticmethod
     def __getPath(basepath, name=None, to_string=True):

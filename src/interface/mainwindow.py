@@ -6,7 +6,7 @@ from subprocess import Popen, PIPE
 
 from PyQt5 import uic
 from PyQt5.QtWidgets import QMainWindow, QGraphicsScene, QFileDialog
-from PyQt5.QtCore import QTimer
+from PyQt5.QtCore import QTimer, QDir
 
 import pymunk
 
@@ -176,4 +176,13 @@ class MainWindow(QMainWindow):
         FileInfo().addShips(fdialog.selectedFiles())
 
     def __importControllerAction(self):
-        pass
+
+        fdialog = QFileDialog(None, 'Controller Import Dialog', '',
+                              'executable files(*)')
+
+        fdialog.setFileMode(QFileDialog.ExistingFiles)
+
+        if not fdialog.exec_():
+            return
+
+        FileInfo().addControllers(fdialog.selectedFiles())
