@@ -155,7 +155,8 @@ class MainWindow(QMainWindow):
 
     def __importScenarioAction(self):
 
-        fdialog = QFileDialog(None, 'Save File', '', 'TOML files(*.toml)')
+        fdialog = QFileDialog(None, 'Scenario Import Dialog', '',
+                              'TOML files(*.toml)')
         fdialog.setFileMode(QFileDialog.ExistingFiles)
 
         if not fdialog.exec_():
@@ -164,7 +165,15 @@ class MainWindow(QMainWindow):
         FileInfo().addScenarios(fdialog.selectedFiles())
 
     def __importShipAction(self):
-        pass
+
+        fdialog = QFileDialog(None, 'Ship Import Dialog', '',
+                              'TOML files(*.toml)')
+        fdialog.setFileMode(QFileDialog.ExistingFiles)
+
+        if not fdialog.exec_():
+            return
+
+        FileInfo().addShips(fdialog.selectedFiles())
 
     def __importControllerAction(self):
         pass

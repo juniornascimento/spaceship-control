@@ -72,6 +72,9 @@ class FileInfo:
     def addScenarios(self, files):
         return self.__addFiles(self.__path.joinpath('scenarios'), files)
 
+    def addShips(self, files):
+        return self.__addFiles(self.__path.joinpath('ships'), files)
+
     def __addFiles(self, path, files):
         for file in files:
             shutil.copy(file, str(path))
