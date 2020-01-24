@@ -130,8 +130,8 @@ class MainWindow(QMainWindow):
             for ship, gitem, _, _ in self.__ships:
                 ship.act()
                 pos = ship.body.position
-                gitem.setX(pos.x/10)
-                gitem.setY(pos.y/10)
+                gitem.setX(pos.x)
+                gitem.setY(pos.y)
                 gitem.prepareGeometryChange()
                 gitem.setRotation(180*ship.body.angle/pi)
 
