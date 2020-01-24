@@ -14,8 +14,6 @@ from .shipgraphicsitem import ShipGraphicsItem
 from .choosefromtreedialog import ChooseFromTreeDialog
 
 from ..utils.fileinfo import FileInfo
-from ..utils.shiploader import loadShip
-from ..utils import scenarioloader
 from ..utils.actionqueue import ActionQueue
 
 UiMainWindow, _ = uic.loadUiType(FileInfo().uiFilePath('mainwindow.ui'))
@@ -89,15 +87,13 @@ class MainWindow(QMainWindow):
 
         fileinfo = FileInfo()
 
-        scenario_path = fileinfo.scenarioPath(scenario + '.toml')
-        scenario_info = scenarioloader.loadScenario(scenario_path)
+        scenario_info = fileinfo.loadScenario(scenario)
 
         self.__ships = [None]*len(scenario_info.ships)
         for i, ship_info in enumerate(scenario_info.ships):
 
-            ship, widgets, shapes = loadShip(
-                fileinfo.shipModelPath(ship_info.model + '.toml'), self.__space,
-                self.__action_queue)
+            ship, widgets = fileinfo.loadShip(ship_info.model, self.__space,
+                                              self.__action_queue)
 
             self.__widgets = widgets
             ship.body.position = ship_info.position
@@ -110,7 +106,7 @@ class MainWindow(QMainWindow):
             thread = Thread(target=self.__startController, daemon=True,
                             args=([controller_path], ship, self.__lock))
 
-            ship_gitem = ShipGraphicsItem(shapes)
+            ship_gitem = ShipGraphicsItem(ship.body.shapes)
             self.__ui.view.scene().addItem(ship_gitem)
             self.__ships[i] = (ship, ship_gitem, widgets, thread)
 

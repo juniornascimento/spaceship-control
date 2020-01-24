@@ -263,4 +263,4 @@ def loadShip(filename: str, space: 'pymunk.Space',
     for info in file_content.get('InterfaceDevice', ()):
         widgets.extend(__addDevice(info, parts, 'InterfaceDevice', action_queue))
 
-    return ship, widgets, shapes
+    return ship, widgets

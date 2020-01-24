@@ -5,6 +5,8 @@ from pathlib import Path
 
 from anytree import Node
 
+from . import shiploader, scenarioloader
+
 class FileInfo:
 
     __instance = None
@@ -78,6 +80,14 @@ class FileInfo:
     def addControllers(self, files):
         return self.__addFiles(self.__path.joinpath('controllers'), files,
                                mode=0o555)
+
+    def loadScenario(self, scenario_name):
+        return scenarioloader.loadScenario(
+            self.scenarioPath(scenario_name + '.toml'))
+
+    def loadShip(self, ship_name, space, action_queue):
+        return shiploader.loadShip(
+            self.shipModelPath(ship_name + '.toml'), space, action_queue)
 
     def __addFiles(self, path, files, mode=0o644):
         path_str = str(path)
