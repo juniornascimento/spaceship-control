@@ -5,7 +5,7 @@ from threading import Thread, Lock
 from subprocess import Popen, PIPE
 
 from PyQt5 import uic
-from PyQt5.QtWidgets import QMainWindow, QGraphicsScene, QFileDialog
+from PyQt5.QtWidgets import QMainWindow, QGraphicsScene, QFileDialog, QLabel
 from PyQt5.QtCore import QTimer, QDir
 
 import pymunk
@@ -57,7 +57,13 @@ class MainWindow(QMainWindow):
         self.__ui.actionImportController.triggered.connect(
             self.__importControllerAction)
 
+        self.__title_basename = 'Spaceship Control'
+
+        self.setWindowTitle(self.__title_basename)
+
     def clear(self):
+
+        self.setWindowTitle(self.__title_basename)
 
         with self.__lock:
             self.__space.remove(self.__space.bodies, self.__space.shapes)
@@ -112,6 +118,8 @@ class MainWindow(QMainWindow):
 
         for widget in self.__ships[0][2]:
             widget.show()
+
+        self.setWindowTitle(f'{self.__title_basename}({scenario})')
 
     def __timerTimeout(self):
 
