@@ -58,6 +58,9 @@ class MainWindow(QMainWindow):
 
         self.setWindowTitle(self.__title_basename)
 
+    def closeEvent(self, event):
+        self.__ui.view.setScene(None)
+
     def clear(self):
 
         self.setWindowTitle(self.__title_basename)
