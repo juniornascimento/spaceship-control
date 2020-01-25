@@ -1,0 +1,27 @@
+
+from math import sqrt
+from  pymunk import Vec2d
+
+from .objective import Objective
+
+class GoToObjective(Objective):
+
+    def __init__(self, position, distance, name=None, description=None):
+        if name is None:
+            name = f'Go to position({position[0]}, {position[1]})'
+
+        if description is None:
+            description = ('Get the center of any ship near the position '
+                           f'{position[0]}, {position[1]}, the maximum distance'
+                           f' accepted is {distance}')
+
+        super().__init__(name, description)
+
+        self.__position = Vec2d(position)
+        self.__distance_sqrtd = sqrt(distance)
+
+    def _verifyShip(self, space: 'pymunk.Space', ship: 'Device') -> bool:
+        return ship.body.get_dist_sqrd(self.__position) < self.__distance_sqrtd
+
+    def _verify(self, space: 'pymunk.Space', ships: 'Sequence[Device]') -> bool:
+        return all(self._verifyShip(space, ship) for ship in ships)

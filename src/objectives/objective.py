@@ -8,6 +8,10 @@ class Objective(ABC):
 
         self.__name = name
         self.__desc = description
+        self.__acp = False
+
+    def accomplished() -> bool:
+        return self.__acp
 
     @property
     def description(self) -> str:
@@ -17,9 +21,13 @@ class Objective(ABC):
     def name(self) -> str:
         return self.__name
 
+    def verify(self, space: 'pymunk.Space', ships: 'Sequence[Device]') -> bool:
+
+        if self.__acp is False:
+            self.__acp = self._verify(space, ships)
+
     @abstractmethod
-    def accomplished(self, space: 'pymunk.Space',
-                     ships: 'Sequence[Device]') -> bool:
+    def _verify(self, space: 'pymunk.Space', ships: 'Sequence[Device]') -> bool:
         pass
 
 class ObjectiveGroup(ABC):
@@ -27,6 +35,10 @@ class ObjectiveGroup(ABC):
     def __init__(self, subobjectives: 'Sequence[Objective]',
                  name: str = 'Objectives list',
                  description: str = None) -> None:
+
+        if description is None:
+            description = f'Complete all {len(subobjectives)} subobjectives'
+
         super().__init__(name, description)
 
         self.__subobjectives = tuple(subobjectives)
@@ -35,13 +47,13 @@ class ObjectiveGroup(ABC):
     def subobjectives(self):
         return self.__subobjectives
 
-    def objectivesStatus(self, space: 'pymunk.Space',
-                         ships: 'Sequence[Device]') \
-                             -> 'Sequence[Objective, bool]':
+    def objectivesStatus() -> 'Sequence[Objective, bool]':
 
-        return ((objective, objective.accomplished(space, ships))
+        return ((objective, objective.accomplished())
                 for objective in  self.__subobjectives)
 
-    def accomplished(self, space: 'pymunk.Space',
-                     ships: 'Sequence[Device]') -> bool:
-        return all(acp for _, acp in accomplishedList(space, ships))
+    def accomplished(self) -> bool:
+        return all(acp for _, acp in accomplishedList())
+
+    def verify(self, space: 'pymunk.Space', ships: 'Sequence[Device]') -> bool:
+        return all(objective.verify() for objective in self.__subobjectives)
