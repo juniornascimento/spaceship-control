@@ -82,8 +82,11 @@ class FileInfo:
                                mode=0o555)
 
     def loadScenario(self, scenario_name):
+
+        prefixes = scenario_name.split('/')[:-1]
+
         return scenarioloader.loadScenario(
-            self.scenarioPath(scenario_name + '.toml'))
+            self.scenarioPath(scenario_name + '.toml'), prefixes=prefixes)
 
     def loadShip(self, ship_name, space, action_queue):
         return shiploader.loadShip(

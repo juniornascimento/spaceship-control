@@ -6,7 +6,7 @@ name = 'example1'
 [[Ship]]
 
 name = 'ship1'
-model = 'examples/ship1'
+model = '.ship1'
 controller = 'examples/ship1_control_example.py'
 
 x = 300
