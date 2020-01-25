@@ -1,8 +1,7 @@
 
 import signal
 from math import pi
-from threading import Thread, Lock
-from subprocess import Popen, PIPE
+from threading import Lock
 
 from PyQt5 import uic
 from PyQt5.QtWidgets import QMainWindow, QGraphicsScene, QFileDialog, QLabel
@@ -102,9 +101,8 @@ class MainWindow(QMainWindow):
             for widget in widgets:
                 widget.setParent(self.__ui.deviceInterfaceComponents)
 
-            controller_path = fileinfo.controllerPath(ship_info.controller)
-            thread = Thread(target=self.__startController, daemon=True,
-                            args=([controller_path], ship, self.__lock))
+            thread = fileinfo.loadController(ship_info.controller, ship,
+                                             self.__lock)
 
             ship_gitem = ShipGraphicsItem(ship.body.shapes)
             self.__ui.view.scene().addItem(ship_gitem)
@@ -130,32 +128,6 @@ class MainWindow(QMainWindow):
                 gitem.setY(pos.y)
                 gitem.prepareGeometryChange()
                 gitem.setRotation(180*ship.body.angle/pi)
-
-    def __startController(self, program, device, lock):
-
-        process = Popen(program, stdin=PIPE,
-                        stdout=PIPE)
-
-        try:
-            while process.poll() is None:
-                question = process.stdout.readline().decode()
-
-                if question and question[-1] == '\n':
-                    question = question[:-1]
-
-                with lock:
-                    if device.isDestroyed():
-                        break
-                    answer = device.communicate(question)
-
-                process.stdin.write(answer.encode())
-                process.stdin.write(b'\n')
-                process.stdin.flush()
-
-        except BrokenPipeError:
-            pass
-
-        process.send_signal(signal.SIGHUP)
 
     def __importScenarioAction(self):
 
