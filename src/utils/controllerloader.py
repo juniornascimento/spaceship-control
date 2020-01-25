@@ -1,4 +1,5 @@
 
+import signal
 from subprocess import Popen, PIPE
 from threading import Thread
 
