@@ -79,7 +79,7 @@ class ConsoleDevice(InterfaceDevice):
 
     def __init__(self, text: 'QTextEdit', action_queue: 'ActionQueue',
                  columns: int, rows: int, **kwargs: 'Any') -> None:
-        super().__init__(device_type='text-display', **kwargs)
+        super().__init__(device_type='console-text-display', **kwargs)
 
         self.__text_widget = text
         self.__queue = action_queue
@@ -136,6 +136,7 @@ class ConsoleDevice(InterfaceDevice):
             return '<<err>>'
 
         self.__row += 1
+        self.__col = 0
 
         return '<<ok>>'
 
@@ -163,6 +164,8 @@ class ConsoleDevice(InterfaceDevice):
         pos += len(text)
         self.__row = pos//self.__total_cols
         self.__col = pos%self.__total_cols
+
+        return '<<ok>>'
 
     def __update(self):
 
