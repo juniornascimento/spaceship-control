@@ -1,9 +1,8 @@
 
-import itertools
 from math import pi
 from collections import namedtuple
-import toml
 
+from .configfileinheritance import resolvePrefix
 from ..objectives.gotoobjective import GoToObjective
 
 ShipInfo = namedtuple('ShipInfo', (
@@ -50,15 +49,12 @@ __OBJECTIVE_CREATE_FUNCTIONS = {
 
 def __readShipInfo(ship_content, prefixes) -> 'ShipInfo':
 
-    model = ship_content['model']
-    model = __subPrefix(model, prefixes, f'Invalid model \'{model}\'')
-
-    controller = ship_content['controller']
-    controller = __subPrefix(controller, prefixes,
-                             f'Invalid controller \'{controller}\'')
+    model, _ = resolvePrefix(ship_content['model'], prefixes)
 
     if model is None:
-        raise ValueError(f'Invalid ship model ')
+        raise ValueError(f'Ship model not found')
+
+    controller, _ = resolvePrefix(ship_content['controller'], prefixes)
 
     ship_info_kwargs = {
 
@@ -71,18 +67,17 @@ def __readShipInfo(ship_content, prefixes) -> 'ShipInfo':
 
     return ShipInfo(**ship_info_kwargs)
 
-def loadScenario(filename: str, prefixes=()) -> 'ScenarioInfo':
+def loadScenario(scenario_info: 'Dict[str, Any]',
+                 prefixes=()) -> 'ScenarioInfo':
 
-    content = toml.load(filename)
-
-    scenario_content = content.get('Scenario', {})
+    scenario_content = scenario_info.get('Scenario', {})
 
     s_name = scenario_content.get('name', '<<nameless>>')
     ships = tuple(__readShipInfo(ship, prefixes)
-                  for ship in content.get('Ship', ()))
+                  for ship in scenario_info.get('Ship', ()))
 
     objectives = tuple(
         __OBJECTIVE_CREATE_FUNCTIONS[objective['type']](objective)
-        for objective in content.get('Objective', ()))
+        for objective in scenario_info.get('Objective', ()))
 
     return ScenarioInfo(name=s_name, ships=ships, objectives=objectives)

@@ -1,11 +1,14 @@
 
+import toml
 import os
 import shutil
 from pathlib import Path
 
 from anytree import Node
 
-from . import shiploader, scenarioloader, controllerloader
+from . import (
+    shiploader, scenarioloader, controllerloader, configfileinheritance
+)
 
 class FileInfo:
 
@@ -81,12 +84,25 @@ class FileInfo:
         return self.__addFiles(self.__path.joinpath('controllers'), files,
                                mode=0o555)
 
+    def __getScenarioContent(self, scenario_name):
+
+        scenario_path = self.scenarioPath(scenario_name + '.toml')
+
+        if scenario_path is None:
+            raise Exception('Inexistent scenario')
+
+        return toml.load(scenario_path)
+
     def loadScenario(self, scenario_name):
 
         prefixes = scenario_name.split('/')[:-1]
 
-        return scenarioloader.loadScenario(
-            self.scenarioPath(scenario_name + '.toml'), prefixes=prefixes)
+        scenario_content = self.__getScenarioContent(scenario_name)
+
+        scenario_content = configfileinheritance.mergeInheritedFiles(
+            scenario_content, self.__getScenarioContent, prefixes=prefixes)
+
+        return scenarioloader.loadScenario(scenario_content, prefixes=prefixes)
 
     def loadShip(self, model, name, space, action_queue):
         return shiploader.loadShip(self.shipModelPath(model + '.toml'),
