@@ -1,4 +1,18 @@
 
 [Inheritance]
 
-parent = '.scenario1'
+parent = '.scenario2'
+
+[[Ship]]
+
+id = 's1'
+x = -100
+y = 0
+
+[[Ship]]
+
+id = 's2'
+
+    [Ship.Inheritance]
+
+    mode = 'delete'

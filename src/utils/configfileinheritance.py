@@ -10,7 +10,7 @@ def resolvePrefix(name, prefixes):
         raise ValueError(f'Could\'nt resolve \'{name}\'')
 
     if dot_count == 0:
-        return name
+        return name, prefixes
 
     parent_returns = dot_count - 1
 
@@ -25,8 +25,86 @@ def resolvePrefix(name, prefixes):
 
     return resolved_name, new_prefix
 
-def mergeProperty(child_property, parent_property):
-    return child_property
+def __mergeContentList(child_content, parent_content):
+
+    named_elements = {}
+    unnamed_elements = []
+
+    for element in child_content:
+        prop_id = element.get('id')
+
+        if prop_id is None:
+            unnamed_elements.append(element)
+        else:
+            named_elements[prop_id] = element
+
+    for element in parent_content:
+        prop_id = element.get('id')
+
+        if prop_id is None:
+            unnamed_elements.append(element)
+        else:
+            child_el = named_elements.get(prop_id)
+            if child_el is None:
+                named_elements[prop_id] = element
+            else:
+                merge_val = mergeContent(child_el, element)
+                if merge_val is None:
+                    del named_elements[prop_id]
+                else:
+                    named_elements[prop_id] = merge_val
+
+    print(named_elements)
+
+    final_value = unnamed_elements
+    final_value.extend(named_elements.values())
+
+    return final_value
+
+def __mergeContentDict(child_content, parent_content):
+
+    parent_inheritance_props = parent_content.get('Inheritance')
+
+    if parent_inheritance_props is not None:
+
+        if parent_inheritance_props.get('final', False) is True:
+            raise Exception('Trying to inherit property marked as final')
+
+    inheritance_properties = child_content.get('Inheritance')
+
+    if inheritance_properties is not None:
+        inheritance_mode = inheritance_properties.get('mode')
+
+        if inheritance_mode is not None:
+            inheritance_mode = inheritance_mode.lower()
+            if inheritance_mode == 'delete':
+                return None
+            if inheritance_mode == 'replace':
+                return child_content
+
+    for key, parent_value in parent_content.items():
+        child_value = child_content.get(key)
+        if child_value is None:
+            final_value = parent_value
+        else:
+            final_value = mergeContent(child_value, parent_value)
+
+        if final_value is None:
+            del child_content[key]
+        else:
+            child_content[key] = final_value
+
+    return child_content
+
+def mergeContent(child_content, parent_content):
+
+    if isinstance(child_content, dict) and isinstance(parent_content, dict):
+        return __mergeContentDict(child_content, parent_content)
+
+    if isinstance(child_content, list) and isinstance(parent_content, list):
+        return __mergeContentList(child_content, parent_content)
+
+    return child_content
 
 def mergeInheritedFiles(file_content, get_parent_func, prefixes=()):
 
@@ -45,13 +123,4 @@ def mergeInheritedFiles(file_content, get_parent_func, prefixes=()):
     parent_content = mergeInheritedFiles(parent_content, get_parent_func,
                                          prefixes=parent_prefixes)
 
-    for key, parent_value in parent_content.items():
-        child_value = file_content.get(key)
-        if child_value is None:
-            final_value = parent_value
-        else:
-            final_value = mergeProperty(child_value, parent_value)
-
-        file_content[key] = final_value
-
-    return file_content
+    return mergeContent(file_content, parent_content)
