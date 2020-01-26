@@ -26,6 +26,8 @@ class Objective(ABC):
         if self.__acp is False:
             self.__acp = self._verify(space, ships)
 
+        return self.__acp
+
     @abstractmethod
     def _verify(self, space: 'pymunk.Space', ships: 'Sequence[Device]') -> bool:
         pass

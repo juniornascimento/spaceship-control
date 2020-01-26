@@ -7,8 +7,17 @@ name = 'example1'
 
 name = 'ship1'
 model = '.ship1'
-controller = 'examples/ship1_control_example.py'
+controller = '.ship1_control_example.py'
 
 x = 300
 y = 400
 angle = 45
+
+[[Objective]]
+
+type = 'goto'
+
+x = 1200
+y = 1200
+
+distance = 50

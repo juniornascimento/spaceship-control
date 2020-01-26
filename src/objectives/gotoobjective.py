@@ -1,5 +1,4 @@
 
-from math import sqrt
 from  pymunk import Vec2d
 
 from .objective import Objective
@@ -18,10 +17,11 @@ class GoToObjective(Objective):
         super().__init__(name, description)
 
         self.__position = Vec2d(position)
-        self.__distance_sqrtd = sqrt(distance)
+        self.__distance_sqrtd = distance**2
 
     def _verifyShip(self, space: 'pymunk.Space', ship: 'Device') -> bool:
-        return ship.body.get_dist_sqrd(self.__position) < self.__distance_sqrtd
+        pos = ship.body.position
+        return pos.get_dist_sqrd(self.__position) < self.__distance_sqrtd
 
     def _verify(self, space: 'pymunk.Space', ships: 'Sequence[Device]') -> bool:
         return all(self._verifyShip(space, ship) for ship in ships)

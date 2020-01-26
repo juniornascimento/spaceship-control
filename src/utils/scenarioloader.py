@@ -4,10 +4,12 @@ from math import pi
 from collections import namedtuple
 import toml
 
+from ..objectives.gotoobjective import GoToObjective
+
 ShipInfo = namedtuple('ShipInfo', (
     'name', 'model', 'controller', 'position', 'angle'))
 
-ScenarioInfo = namedtuple('ScenarioInfo', ('name', 'ships'))
+ScenarioInfo = namedtuple('ScenarioInfo', ('name', 'ships', 'objectives'))
 
 def __subPrefix(name, prefixes, error_msg):
 
@@ -27,6 +29,24 @@ def __subPrefix(name, prefixes, error_msg):
 
     return '/'.join(itertools.chain(prefixes[: len(prefixes) - parent_returns],
                                     (name[dot_count:],)))
+
+def __createGoToObjective(objective_content) -> 'Objective':
+
+    position = (objective_content['x'], objective_content['y'])
+    distance = objective_content['distance']
+
+    kwargs = {}
+
+    for key in ('name', 'description'):
+        if key in objective_content:
+            kwargs[key] = objective_content[key]
+
+    return GoToObjective(position, distance, **kwargs)
+
+__OBJECTIVE_CREATE_FUNCTIONS = {
+
+    'goto': __createGoToObjective
+}
 
 def __readShipInfo(ship_content, prefixes) -> 'ShipInfo':
 
@@ -61,4 +81,8 @@ def loadScenario(filename: str, prefixes=()) -> 'ScenarioInfo':
     ships = tuple(__readShipInfo(ship, prefixes)
                   for ship in content.get('Ship', ()))
 
-    return ScenarioInfo(name=s_name, ships=ships)
+    objectives = tuple(
+        __OBJECTIVE_CREATE_FUNCTIONS[objective['type']](objective)
+        for objective in content.get('Objective', ()))
+
+    return ScenarioInfo(name=s_name, ships=ships, objectives=objectives)

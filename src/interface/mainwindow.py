@@ -41,6 +41,9 @@ class MainWindow(QMainWindow):
         self.__action_queue = ActionQueue()
 
         self.__ships = []
+        self.__scenario_objectives = []
+        self.__objectives_complete = False
+        self.__current_scenario = None
 
         self.__ui.actionLoadScenario.triggered.connect(
             self.__loadScenarioAction)
@@ -56,7 +59,23 @@ class MainWindow(QMainWindow):
 
         self.__title_basename = 'Spaceship Control'
 
-        self.setWindowTitle(self.__title_basename)
+        self.__updateTitle()
+
+    def __updateTitle(self):
+
+        if self.__current_scenario is None:
+            self.setWindowTitle(self.__title_basename)
+        else:
+            if not self.__scenario_objectives:
+                suffix = ''
+            elif self.__objectives_complete:
+                suffix = ' ✓'
+            else:
+                suffix = ' ✗'
+
+            self.setWindowTitle(
+                f'{self.__title_basename}({self.__current_scenario}){suffix}')
+
 
     def closeEvent(self, event):
         self.__ui.view.setScene(None)
@@ -73,6 +92,8 @@ class MainWindow(QMainWindow):
                     widget.setParent(None)
 
             self.__ships = []
+
+        self.__current_scenario = None
 
     def __loadScenarioAction(self):
 
@@ -92,6 +113,8 @@ class MainWindow(QMainWindow):
         scenario_info = fileinfo.loadScenario(scenario)
 
         self.__ships = [None]*len(scenario_info.ships)
+        self.__scenario_objectives = scenario_info.objectives
+        print(self.__scenario_objectives)
         for i, ship_info in enumerate(scenario_info.ships):
 
             ship, widgets = fileinfo.loadShip(ship_info.model, self.__space,
@@ -116,12 +139,13 @@ class MainWindow(QMainWindow):
         for widget in self.__ships[0][2]:
             widget.show()
 
-        self.setWindowTitle(f'{self.__title_basename}({scenario})')
+        self.__current_scenario = scenario
 
     def __timerTimeout(self):
 
         self.__action_queue.processItems()
 
+        ships = tuple(ship for ship, _, _, _ in self.__ships)
         with self.__lock:
             self.__space.step(0.02)
             for ship, gitem, _, _ in self.__ships:
@@ -131,6 +155,11 @@ class MainWindow(QMainWindow):
                 gitem.setY(pos.y)
                 gitem.prepareGeometryChange()
                 gitem.setRotation(180*ship.body.angle/pi)
+            self.__objectives_complete = all(
+                objective.verify(self.__space, ships)
+                for objective in self.__scenario_objectives)
+
+        self.__updateTitle()
 
     def __importScenarioAction(self):
 
