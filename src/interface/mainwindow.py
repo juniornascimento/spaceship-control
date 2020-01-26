@@ -117,8 +117,8 @@ class MainWindow(QMainWindow):
         print(self.__scenario_objectives)
         for i, ship_info in enumerate(scenario_info.ships):
 
-            ship, widgets = fileinfo.loadShip(ship_info.model, self.__space,
-                                              self.__action_queue)
+            ship, widgets = fileinfo.loadShip(ship_info.model, ship_info.name,
+                                              self.__space, self.__action_queue)
 
             self.__widgets = widgets
             ship.body.position = ship_info.position

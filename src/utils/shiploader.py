@@ -224,9 +224,9 @@ def __addDevice(
 
     return widgets
 
-def loadShip(filename: str, space: 'pymunk.Space',
+def loadShip(filename: str, name: str, space: 'pymunk.Space',
              action_queue: 'ActionQueue') \
-                 -> 'Tuple[Structure, Sequence[QWidget], Sequence[Shape]]':
+                 -> 'Tuple[Structure, Sequence[QWidget]]':
 
     file_content = toml.load(str(filename))
 
@@ -243,15 +243,15 @@ def loadShip(filename: str, space: 'pymunk.Space',
 
     space.add(body, shapes)
 
-    ship = Structure(space, body, device_type='ship')
+    ship = Structure(name, space, body, device_type='ship')
 
     parts = {}
     for part_info in file_content.get('Part', ()):
-        name = part_info['name']
+        part_name = part_info['name']
         part = StructuralPart(offset=(part_info['x'], part_info['y']))
 
-        ship.addDevice(part, name=name)
-        parts[name] = part
+        ship.addDevice(part, name=part_name)
+        parts[part_name] = part
 
     for info in file_content.get('Actuator', ()):
         __addDevice(info, parts, 'Actuator', action_queue)

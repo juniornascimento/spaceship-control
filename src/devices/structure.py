@@ -12,7 +12,7 @@ from ..utils.errorgenerator import ErrorGenerator
 
 class Structure(DeviceGroup):
 
-    def __init__(self, space: 'pymunk.Space', body: 'pymunk.Body',
+    def __init__(self, name: str, space: 'pymunk.Space', body: 'pymunk.Body',
                  **kwargs: 'Any') -> None:
 
         if 'device_type' not in kwargs:
@@ -22,6 +22,11 @@ class Structure(DeviceGroup):
 
         self.__body = body
         self.__space = space
+        self.__name = name
+
+    @property
+    def name(self) -> str:
+        return self.__name
 
     def addDevice(self, device: 'Device', **kwargs: 'Any') -> None:
         super().addDevice(device, **kwargs)

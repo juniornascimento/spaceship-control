@@ -88,9 +88,9 @@ class FileInfo:
         return scenarioloader.loadScenario(
             self.scenarioPath(scenario_name + '.toml'), prefixes=prefixes)
 
-    def loadShip(self, ship_name, space, action_queue):
-        return shiploader.loadShip(
-            self.shipModelPath(ship_name + '.toml'), space, action_queue)
+    def loadShip(self, model, name, space, action_queue):
+        return shiploader.loadShip(self.shipModelPath(model + '.toml'),
+                                   name, space, action_queue)
 
     def loadController(self, controller_name, ship, lock):
         return controllerloader.loadController(
