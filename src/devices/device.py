@@ -1,21 +1,91 @@
+"""Base classes meant to represent a ship device.
+
+This module contains classes that represent a ship device, some of these classes
+are inherited by classes inside `structure.py` to represent a ship structure, a
+sensor, an actuator or another device.
+"""
 
 import shlex
 
 from abc import ABC, abstractmethod
 
 class Device(ABC):
+     """Base class for all devices.
+
+    This abstract class is the base for all classes that represent a ship
+    device.
+
+    """
 
     @abstractmethod
     def act(self) -> None:
+        """Method used to perform the device actions.
+
+        This method is called perodically and is meant to be used to perform
+        actions that are done over time.
+
+        """
         pass
 
     @abstractmethod
     def communicate(self, input_: str) -> str:
+        """Method used to communicate with the device controller.
+
+        This method receive an input from the controller, do some action
+        accordingly and gives back an answer.
+
+        This method is used so the controller can modify the state of the
+        device or get some information from it.
+
+        Note:
+            This method will be called inside a separeted thread so the
+            implementation of this method cannot contain any instruction that
+            need to be executed inside the main thread.
+
+        Args:
+            input_: The message sent to the device, it should'nt contain any
+                control character.
+
+        Returns:
+            A string that contain no control characters.
+
+        """
         pass
 
 class CommandCommunicationDevice(Device):
+    """Device that use shell-like command to communicate
+
+    This abstract class implements `Device` communicate method an declare the
+    method `command` to be used instead.
+
+    """
 
     def communicate(self, input_: str) -> str:
+        """Method used to communicate with the device controller.
+
+        This method receive an input from the controller, do some action
+        accordingly and gives back an answer.
+
+        This method is used so the controller can modify the state of the
+        device or get some information from it.
+
+        This method is implemented in a way that it will call the method
+        `command`, tranform the return into a string and return it.
+
+        Note:
+            The input is considered invalid if it's not a shell-like command.
+
+        Args:
+            input_: The message sent to the device, it should'nt contain any
+                control character and should be a formatted as a shell-like
+                command.
+
+        Returns:
+            The return of the method `command` turned into a string that must
+            contain no control characters or 'Invalid command' if the input
+            is considered invalid.
+
+        """
 
         try:
             return str(self.command(shlex.split(input_)))
