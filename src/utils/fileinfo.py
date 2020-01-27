@@ -47,15 +47,29 @@ class FileInfo:
         return FileInfo.__instance
 
     def listScenariosTree(self):
-        return self.__listTree(self.__path.joinpath('scenarios'), Node('ships'))
+        return self.__listTree(self.__path.joinpath('scenarios'),
+                               Node('scenarios'))
 
-    def __listTree(self, base_path, current_node):
+    def listControllersTree(self):
+        return self.__listTree(self.__path.joinpath('controllers'),
+                               Node('controllers'), blacklist=('__pycache__',),
+                               remove_suffix=False)
+
+    def __listTree(self, base_path, current_node, blacklist=(),
+                   remove_suffix=True):
 
         for path in base_path.iterdir():
 
-            new_node = Node(path.with_suffix('').name, parent=current_node)
+            if path.name in blacklist:
+                continue
+
+            if remove_suffix is True:
+                path = path.with_suffix('')
+
+            new_node = Node(path.name, parent=current_node)
             if path.is_dir():
-                self.__listTree(path, new_node)
+                self.__listTree(path, new_node, blacklist=blacklist,
+                                remove_suffix=remove_suffix)
 
         return current_node
 

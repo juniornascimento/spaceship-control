@@ -1,4 +1,5 @@
 
+import os
 import signal
 from math import pi
 from threading import Lock
@@ -112,9 +113,8 @@ class MainWindow(QMainWindow):
 
         scenario_info = fileinfo.loadScenario(scenario)
 
-        self.__ships = [None]*len(scenario_info.ships)
+        ships = [None]*len(scenario_info.ships)
         self.__scenario_objectives = scenario_info.objectives
-        print(self.__scenario_objectives)
         for i, ship_info in enumerate(scenario_info.ships):
 
             ship, widgets = fileinfo.loadShip(ship_info.model, ship_info.name,
@@ -127,14 +127,30 @@ class MainWindow(QMainWindow):
             for widget in widgets:
                 widget.setParent(self.__ui.deviceInterfaceComponents)
 
-            thread = fileinfo.loadController(ship_info.controller, ship,
-                                             self.__lock)
+            ship_controller = ship_info.controller
+
+            if ship_controller is None:
+
+                dialog = ChooseFromTreeDialog(
+                    fileinfo.listControllersTree().children)
+                dialog.setWindowTitle('Choose controller')
+
+                ship_controller = dialog.getOption()
+                if ship_controller is None:
+                    self.clear()
+                    return
+
+                ship_controller = '/'.join(ship_controller)
+
+            thread = fileinfo.loadController(ship_controller, ship, self.__lock)
 
             ship_gitem = ShipGraphicsItem(ship.body.shapes)
             self.__ui.view.scene().addItem(ship_gitem)
-            self.__ships[i] = (ship, ship_gitem, widgets, thread)
+            ships[i] = (ship, ship_gitem, widgets, thread)
 
             thread.start()
+
+        self.__ships = ships
 
         for widget in self.__ships[0][2]:
             widget.show()

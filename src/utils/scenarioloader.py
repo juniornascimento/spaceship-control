@@ -54,7 +54,10 @@ def __readShipInfo(ship_content, prefixes) -> 'ShipInfo':
     if model is None:
         raise ValueError(f'Ship model not found')
 
-    controller, _ = resolvePrefix(ship_content['controller'], prefixes)
+    controller = ship_content.get('controller')
+
+    if controller is not None:
+        controller, _ = resolvePrefix(controller, prefixes)
 
     ship_info_kwargs = {
 
