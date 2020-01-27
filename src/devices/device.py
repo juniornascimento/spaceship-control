@@ -10,7 +10,7 @@ import shlex
 from abc import ABC, abstractmethod
 
 class Device(ABC):
-     """Base class for all devices.
+    """Base class for all devices.
 
     This abstract class is the base for all classes that represent a ship
     device.
@@ -52,13 +52,40 @@ class Device(ABC):
         """
         pass
 
-class CommandCommunicationDevice(Device):
-    """Device that use shell-like command to communicate
+class DefaultDevice(Device):
+    """Device that use shell-like command to communicate.
 
-    This abstract class implements `Device` communicate method an declare the
-    method `command` to be used instead.
+    This class represent a more concrete device than the 'Device' class, classes
+    that inherits from this have a default way to return information that will
+    help the controller to discover what the actions that it can perform.
 
+    Note:
+        This class implements `Device` communicate method and declare the method
+        `command` to be used instead, but it should't be overriden without
+        calling the this class `command` method.
+
+    Args:
+        device_type: String that represent what the device is meant to be,
+            using this value consistently it will help the controller to now
+            what the commands it can send to this device.
+        device_desc: Description of what this device does in a human readable
+            way.
+        device_info: Dictionary that contains pair key, value that represents
+            constants that may used to help the controller to know more
+            information about this device.
     """
+
+    def __init__(self, device_type: str = 'none',
+                 device_desc: str = 'not specified',
+                 device_info: 'Dict[str, str]' = None):
+
+        self.__device_type = device_type
+        self.__device_desc = device_desc
+
+        if device_info is None:
+            self.__device_info = {}
+        else:
+            self.__device_info = device_info.copy()
 
     def communicate(self, input_: str) -> str:
         """Method used to communicate with the device controller.
@@ -89,26 +116,8 @@ class CommandCommunicationDevice(Device):
 
         try:
             return str(self.command(shlex.split(input_)))
-        except ValueError:
+        except Exception:
             return 'Invalid command'
-
-    @abstractmethod
-    def command(self, command: 'List[str]') -> 'Any':
-        pass
-
-class DefaultDevice(CommandCommunicationDevice):
-
-    def __init__(self, device_type: str = 'none',
-                 device_desc: str = 'not specified',
-                 device_info: 'Dict[str, str]' = None):
-
-        self.__device_type = device_type
-        self.__device_desc = device_desc
-
-        if device_info is None:
-            self.__device_info = {}
-        else:
-            self.__device_info = device_info.copy()
 
     def setInfo(self, name: str, value: 'Optional[str]') -> None:
         if value is None:
