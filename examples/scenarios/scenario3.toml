@@ -6,6 +6,7 @@ parent = '.scenario2'
 [[Ship]]
 
 id = 's1'
+model = '.ship2'
 x = -100
 y = 0
 

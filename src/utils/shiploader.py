@@ -224,14 +224,12 @@ def __addDevice(
 
     return widgets
 
-def loadShip(filename: str, name: str, space: 'pymunk.Space',
+def loadShip(ship_info: str, name: str, space: 'pymunk.Space',
              action_queue: 'ActionQueue') \
                  -> 'Tuple[Structure, Sequence[QWidget]]':
 
-    file_content = toml.load(str(filename))
-
     shapes = tuple(__createShape(shape_info)
-                   for shape_info in file_content['Shape'])
+                   for shape_info in ship_info['Shape'])
 
     mass = sum(shape.mass for shape in shapes)
     moment = sum(shape.moment for shape in shapes)
@@ -246,21 +244,22 @@ def loadShip(filename: str, name: str, space: 'pymunk.Space',
     ship = Structure(name, space, body, device_type='ship')
 
     parts = {}
-    for part_info in file_content.get('Part', ()):
+    for part_info in ship_info.get('Part', ()):
         part_name = part_info['name']
         part = StructuralPart(offset=(part_info['x'], part_info['y']))
 
         ship.addDevice(part, name=part_name)
         parts[part_name] = part
 
-    for info in file_content.get('Actuator', ()):
+    for info in ship_info.get('Actuator', ()):
         __addDevice(info, parts, 'Actuator', action_queue)
 
-    for info in file_content.get('Sensor', ()):
+    for info in ship_info.get('Sensor', ()):
         __addDevice(info, parts, 'Sensor', action_queue)
 
     widgets = []
-    for info in file_content.get('InterfaceDevice', ()):
-        widgets.extend(__addDevice(info, parts, 'InterfaceDevice', action_queue))
+    for info in ship_info.get('InterfaceDevice', ()):
+        widgets.extend(
+            __addDevice(info, parts, 'InterfaceDevice', action_queue))
 
     return ship, widgets

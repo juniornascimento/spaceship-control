@@ -27,26 +27,31 @@ y = -60
 
 [[Shape]]
 
+id = 'poly-shape'
 type = 'polygon'
 mass = 3
 
     [[Shape.Point]]
 
+    id = 'p1'
     x = -40
     y = -70
 
     [[Shape.Point]]
 
+    id = 'p2'
     x = -40
     y = 70
 
     [[Shape.Point]]
 
+    id = 'p3'
     x = -60
     y = -70
 
     [[Shape.Point]]
 
+    id = 'p4'
     x = -60
     y = 70
 

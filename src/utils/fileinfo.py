@@ -93,6 +93,15 @@ class FileInfo:
 
         return toml.load(scenario_path)
 
+    def __getShipContent(self, ship_model):
+
+        ship_model_path = self.shipModelPath(ship_model + '.toml')
+
+        if ship_model_path is None:
+            raise Exception('Inexistent ship model')
+
+        return toml.load(ship_model_path)
+
     def loadScenario(self, scenario_name):
 
         prefixes = scenario_name.split('/')[:-1]
@@ -105,8 +114,15 @@ class FileInfo:
         return scenarioloader.loadScenario(scenario_content, prefixes=prefixes)
 
     def loadShip(self, model, name, space, action_queue):
-        return shiploader.loadShip(self.shipModelPath(model + '.toml'),
-                                   name, space, action_queue)
+
+        prefixes = model.split('/')[:-1]
+
+        ship_content = self.__getShipContent(model)
+
+        ship_content = configfileinheritance.mergeInheritedFiles(
+            ship_content, self.__getShipContent, prefixes=prefixes)
+
+        return shiploader.loadShip(ship_content, name, space, action_queue)
 
     def loadController(self, controller_name, ship, lock):
         return controllerloader.loadController(
