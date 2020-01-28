@@ -3,6 +3,10 @@
 
 parent = '.scenario2'
 
+[Scenario]
+
+hide_user_interface = true
+
 [[Ship]]
 
 id = 's1'

@@ -8,7 +8,8 @@ from ..objectives.gotoobjective import GoToObjective
 ShipInfo = namedtuple('ShipInfo', (
     'name', 'model', 'controller', 'position', 'angle'))
 
-ScenarioInfo = namedtuple('ScenarioInfo', ('name', 'ships', 'objectives'))
+ScenarioInfo = namedtuple('ScenarioInfo', (
+    'name', 'ships', 'objectives', 'visible_user_interface'))
 
 def __createGoToObjective(objective_content) -> 'Objective':
 
@@ -66,4 +67,7 @@ def loadScenario(scenario_info: 'Dict[str, Any]',
         __OBJECTIVE_CREATE_FUNCTIONS[objective['type']](objective)
         for objective in scenario_info.get('Objective', ()))
 
-    return ScenarioInfo(name=s_name, ships=ships, objectives=objectives)
+    hidden_user_interface = scenario_content.get('hide_user_interface', False)
+
+    return ScenarioInfo(name=s_name, ships=ships, objectives=objectives,
+                        visible_user_interface=not(hidden_user_interface))

@@ -85,6 +85,8 @@ class MainWindow(QMainWindow):
 
         self.setWindowTitle(self.__title_basename)
 
+        self.__ui.deviceInterfaceComponents.show()
+
         with self.__lock:
             self.__space.remove(self.__space.bodies, self.__space.shapes)
             for ship, gitem, widgets, _ in self.__ships:
@@ -118,6 +120,9 @@ class MainWindow(QMainWindow):
         fileinfo = FileInfo()
 
         scenario_info = fileinfo.loadScenario(scenario)
+
+        self.__ui.deviceInterfaceComponents.setVisible(
+            scenario_info.visible_user_interface)
 
         ships = [None]*len(scenario_info.ships)
         self.__scenario_objectives = scenario_info.objectives
