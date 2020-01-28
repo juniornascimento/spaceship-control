@@ -123,15 +123,18 @@ class MainWindow(QMainWindow):
         self.__scenario_objectives = scenario_info.objectives
         for i, ship_info in enumerate(scenario_info.ships):
 
-            ship_options = fileinfo.listShipsModelTree().children
-            ship_model = self.__getOptionDialog('Choose ship model',
-                                                ship_options)
-
+            ship_model = ship_info.model
             if ship_model is None:
-                self.clear()
-                return
+                ship_options = fileinfo.listShipsModelTree().children
+                ship_model = self.__getOptionDialog('Choose ship model',
+                                                    ship_options)
 
-            ship_model = '/'.join(ship_model)
+                if ship_model is None:
+                    self.clear()
+                    return
+
+                ship_model = '/'.join(ship_model)
+
             ship, widgets = fileinfo.loadShip(ship_model, ship_info.name,
                                               self.__space, self.__action_queue)
 
