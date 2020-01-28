@@ -96,12 +96,18 @@ class MainWindow(QMainWindow):
 
         self.__current_scenario = None
 
+    def __getOptionDialog(self, title, options):
+
+        dialog = ChooseFromTreeDialog(options)
+        dialog.setWindowTitle(title)
+
+        return dialog.getOption()
+
     def __loadScenarioAction(self):
 
-        dialog = ChooseFromTreeDialog(FileInfo().listScenariosTree().children)
-        dialog.setWindowTitle('Choose scenario')
+        scenario = self.__getOptionDialog(
+            'Choose scenario', FileInfo().listScenariosTree().children)
 
-        scenario = dialog.getOption()
         if scenario is not None:
             self.loadScenario('/'.join(scenario))
 
@@ -117,7 +123,16 @@ class MainWindow(QMainWindow):
         self.__scenario_objectives = scenario_info.objectives
         for i, ship_info in enumerate(scenario_info.ships):
 
-            ship, widgets = fileinfo.loadShip(ship_info.model, ship_info.name,
+            ship_options = fileinfo.listShipsModelTree().children
+            ship_model = self.__getOptionDialog('Choose ship model',
+                                                ship_options)
+
+            if ship_model is None:
+                self.clear()
+                return
+
+            ship_model = '/'.join(ship_model)
+            ship, widgets = fileinfo.loadShip(ship_model, ship_info.name,
                                               self.__space, self.__action_queue)
 
             self.__widgets = widgets
@@ -131,11 +146,10 @@ class MainWindow(QMainWindow):
 
             if ship_controller is None:
 
-                dialog = ChooseFromTreeDialog(
-                    fileinfo.listControllersTree().children)
-                dialog.setWindowTitle('Choose controller')
+                controller_options = fileinfo.listControllersTree().children
+                ship_controller = self.__getOptionDialog('Choose controller',
+                                                         controller_options)
 
-                ship_controller = dialog.getOption()
                 if ship_controller is None:
                     self.clear()
                     return

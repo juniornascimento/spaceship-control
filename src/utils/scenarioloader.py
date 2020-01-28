@@ -10,25 +10,6 @@ ShipInfo = namedtuple('ShipInfo', (
 
 ScenarioInfo = namedtuple('ScenarioInfo', ('name', 'ships', 'objectives'))
 
-def __subPrefix(name, prefixes, error_msg):
-
-    for dot_count, char in enumerate(name):
-        if char != '.':
-            break
-    else:
-        raise ValueError(error_msg)
-
-    if dot_count == 0:
-        return name
-
-    parent_returns = dot_count - 1
-
-    if parent_returns > len(prefixes):
-        raise ValueError(error_msg)
-
-    return '/'.join(itertools.chain(prefixes[: len(prefixes) - parent_returns],
-                                    (name[dot_count:],)))
-
 def __createGoToObjective(objective_content) -> 'Objective':
 
     position = (objective_content['x'], objective_content['y'])
@@ -49,10 +30,12 @@ __OBJECTIVE_CREATE_FUNCTIONS = {
 
 def __readShipInfo(ship_content, prefixes) -> 'ShipInfo':
 
-    model, _ = resolvePrefix(ship_content['model'], prefixes)
+    model = ship_content.get('model')
+    if model is not None:
+        model, _ = resolvePrefix(model, prefixes)
 
-    if model is None:
-        raise ValueError(f'Ship model not found')
+        if model is None:
+            raise ValueError(f'Ship model not found')
 
     controller = ship_content.get('controller')
 

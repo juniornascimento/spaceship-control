@@ -46,6 +46,9 @@ class FileInfo:
 
         return FileInfo.__instance
 
+    def listShipsModelTree(self):
+        return self.__listTree(self.__path.joinpath('ships'), Node('ships'))
+
     def listScenariosTree(self):
         return self.__listTree(self.__path.joinpath('scenarios'),
                                Node('scenarios'))
