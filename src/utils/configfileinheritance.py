@@ -54,8 +54,6 @@ def __mergeContentList(child_content, parent_content):
                 else:
                     named_elements[prop_id] = merge_val
 
-    print(named_elements)
-
     final_value = unnamed_elements
     final_value.extend(named_elements.values())
 
@@ -72,6 +70,7 @@ def __mergeContentDict(child_content, parent_content):
 
     inheritance_properties = child_content.get('Inheritance')
 
+    delete_elements = ()
     if inheritance_properties is not None:
         inheritance_mode = inheritance_properties.get('mode')
 
@@ -82,7 +81,15 @@ def __mergeContentDict(child_content, parent_content):
             if inheritance_mode == 'replace':
                 return child_content
 
+        del_elements_prop = inheritance_properties.get('DeleteElement')
+        if del_elements_prop is not None:
+            delete_elements = set(del_elements_prop)
+
     for key, parent_value in parent_content.items():
+
+        if key in delete_elements:
+            continue
+
         child_value = child_content.get(key)
         if child_value is None:
             final_value = parent_value
@@ -93,6 +100,10 @@ def __mergeContentDict(child_content, parent_content):
             del child_content[key]
         else:
             child_content[key] = final_value
+
+    for element in delete_elements:
+        if element in child_content:
+            del child_content[element]
 
     return child_content
 

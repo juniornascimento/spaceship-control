@@ -1,0 +1,14 @@
+
+[Inheritance]
+
+parent = '.scenario2'
+
+[[Ship]]
+
+id = 's1'
+Inheritance.DeleteElement = ['controller']
+
+[[Ship]]
+
+id = 's2'
+Inheritance.DeleteElement = ['controller']
