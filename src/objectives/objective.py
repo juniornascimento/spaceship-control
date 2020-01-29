@@ -47,7 +47,7 @@ class Objective(ABC):
     def info(self) -> 'Dict[str, Any]':
         pass
 
-class ObjectiveGroup(ABC):
+class ObjectiveGroup(Objective):
 
     def __init__(self, subobjectives: 'Sequence[Objective]',
                  name: str = 'Objectives list',
@@ -72,8 +72,9 @@ class ObjectiveGroup(ABC):
     def accomplished(self) -> bool:
         return all(acp for _, acp in accomplishedList())
 
-    def verify(self, space: 'pymunk.Space', ships: 'Sequence[Device]') -> bool:
-        return all(objective.verify() for objective in self.__subobjectives)
+    def _verify(self, space: 'pymunk.Space', ships: 'Sequence[Device]') -> bool:
+        return all(objective.verify(space, ships)
+                   for objective in self.__subobjectives)
 
     @property
     def info(self) -> 'Dict[str, Any]':
@@ -89,6 +90,6 @@ def createObjectiveTree(objective: 'Union[Objective, Sequence[Objective]]',
 
     if isinstance(objective, ObjectiveGroup):
 
-        for subobjective in self.__subobjectives:
+        for subobjective in objective.subobjectives:
             createObjectiveTree(subobjective, parent=current_node)
 

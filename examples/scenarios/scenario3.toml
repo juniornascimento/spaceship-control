@@ -24,21 +24,25 @@ id = 's2'
 
 [[Objective]]
 
-type = 'goto'
+type = 'list'
 
-x = 200
-y = 200
+    [[Objective.Objective]]
 
-distance = 50
+    type = 'goto'
 
-[[Objective]]
+    x = 200
+    y = 200
 
-type = 'goto'
+    distance = 50
 
-x = 500
-y = 500
+    [[Objective.Objective]]
 
-distance = 100
+    type = 'goto'
+
+    x = 500
+    y = 500
+
+    distance = 100
 
 [[Objective]]
 

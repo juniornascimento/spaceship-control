@@ -3,6 +3,7 @@ from math import pi
 from collections import namedtuple
 
 from ..configfileinheritance import resolvePrefix
+from ...objectives.objective import ObjectiveGroup
 from ...objectives.gotoobjective import GoToObjective
 
 ShipInfo = namedtuple('ShipInfo', (
@@ -11,22 +12,28 @@ ShipInfo = namedtuple('ShipInfo', (
 ScenarioInfo = namedtuple('ScenarioInfo', (
     'name', 'ships', 'objectives', 'visible_user_interface'))
 
-def __createGoToObjective(objective_content) -> 'Objective':
+def __createGoToObjective(objective_content) -> 'GoToObjective':
 
     position = (objective_content['x'], objective_content['y'])
     distance = objective_content['distance']
 
-    kwargs = {}
-
-    for key in ('name', 'description'):
-        if key in objective_content:
-            kwargs[key] = objective_content[key]
+    kwargs = {key: value for key, value in objective_content.items()
+              if key in ('name', 'description')}
 
     return GoToObjective(position, distance, **kwargs)
 
+def __createObjectiveGroup(objective_content) -> 'ObjectiveGroup':
+
+    kwargs = {key: value for key, value in objective_content.items()
+              if key in ('name', 'description')}
+
+    return ObjectiveGroup(loadObjectives(objective_content['Objective']),
+                          **kwargs)
+
 __OBJECTIVE_CREATE_FUNCTIONS = {
 
-    'goto': __createGoToObjective
+    'goto': __createGoToObjective,
+    'list': __createObjectiveGroup
 }
 
 def __readShipInfo(ship_content, prefixes) -> 'ShipInfo':
@@ -54,6 +61,10 @@ def __readShipInfo(ship_content, prefixes) -> 'ShipInfo':
 
     return ShipInfo(**ship_info_kwargs)
 
+def loadObjectives(objectives):
+    return tuple(__OBJECTIVE_CREATE_FUNCTIONS[objective['type']](objective)
+                 for objective in objectives)
+
 def loadScenario(scenario_info: 'Dict[str, Any]',
                  prefixes=()) -> 'ScenarioInfo':
 
@@ -63,9 +74,7 @@ def loadScenario(scenario_info: 'Dict[str, Any]',
     ships = tuple(__readShipInfo(ship, prefixes)
                   for ship in scenario_info.get('Ship', ()))
 
-    objectives = tuple(
-        __OBJECTIVE_CREATE_FUNCTIONS[objective['type']](objective)
-        for objective in scenario_info.get('Objective', ()))
+    objectives = loadObjectives(scenario_info.get('Objective', ()))
 
     hidden_user_interface = scenario_content.get('hide_user_interface', False)
 
