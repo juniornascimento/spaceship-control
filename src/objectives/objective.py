@@ -1,5 +1,8 @@
 
+from collections import Sequence
 from abc import ABC, abstractmethod
+
+from anytree import Node
 
 class Objective(ABC):
 
@@ -59,3 +62,14 @@ class ObjectiveGroup(ABC):
 
     def verify(self, space: 'pymunk.Space', ships: 'Sequence[Device]') -> bool:
         return all(objective.verify() for objective in self.__subobjectives)
+
+def createObjectiveTree(objective: 'Union[Objective, Sequence[Objective]]',
+                        parent: 'Node' = None) -> 'Node':
+
+    current_node = Node(objective, parent=parent)
+
+    if isinstance(objective, ObjectiveGroup):
+
+        for subobjective in self.__subobjectives:
+            createObjectiveTree(subobjective, parent=current_node)
+

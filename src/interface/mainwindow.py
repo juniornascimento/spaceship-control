@@ -1,8 +1,10 @@
 
+import sys
 import os
 import signal
 from math import pi
 from threading import Lock
+from pathlib import Path
 
 from PyQt5 import uic
 from PyQt5.QtWidgets import QMainWindow, QGraphicsScene, QFileDialog, QLabel
@@ -10,19 +12,26 @@ from PyQt5.QtCore import QTimer, QDir
 
 import pymunk
 
+import anytree
+
 from .shipgraphicsitem import ShipGraphicsItem
 from .choosefromtreedialog import ChooseFromTreeDialog
 
 from ..utils.fileinfo import FileInfo
 from ..utils.actionqueue import ActionQueue
 
+from ..objectives.objective import createObjectiveTree
+
+# sys.path manipulation used to import nodetreeview.py from ui
+sys.path.insert(0, str(Path(__file__).parent))
 UiMainWindow, _ = uic.loadUiType(FileInfo().uiFilePath('mainwindow.ui'))
+sys.path.pop(0)
 
 class MainWindow(QMainWindow):
 
     def __init__(self, parent=None):
 
-        QMainWindow.__init__(self, parent=parent)
+        super().__init__(parent=parent)
 
         self.__ui = UiMainWindow()
         self.__ui.setupUi(self)
@@ -89,6 +98,7 @@ class MainWindow(QMainWindow):
         self.setWindowTitle(self.__title_basename)
 
         self.__ui.deviceInterfaceComponents.show()
+        self.__ui.treeView.show()
 
         with self.__lock:
             self.__space.remove(self.__space.bodies, self.__space.shapes)
@@ -181,6 +191,19 @@ class MainWindow(QMainWindow):
             widget.show()
 
         self.__current_scenario = scenario
+
+        if self.__scenario_objectives:
+            objectives_root_node = anytree.Node('root')
+            for objective in self.__scenario_objectives:
+                createObjectiveTree(objective, parent=objectives_root_node)
+
+            for node in objectives_root_node.descendants:
+                node.name = node.name.name
+
+            self.__ui.treeView.clear()
+            self.__ui.treeView.addNodes(objectives_root_node.children)
+        else:
+            self.__ui.treeView.hide()
 
     def __timerTimeout(self):
 

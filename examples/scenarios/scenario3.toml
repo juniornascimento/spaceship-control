@@ -21,3 +21,30 @@ id = 's2'
     [Ship.Inheritance]
 
     mode = 'delete'
+
+[[Objective]]
+
+type = 'goto'
+
+x = 200
+y = 200
+
+distance = 50
+
+[[Objective]]
+
+type = 'goto'
+
+x = 500
+y = 500
+
+distance = 100
+
+[[Objective]]
+
+type = 'goto'
+
+x = 1100
+y = 1100
+
+distance = 200

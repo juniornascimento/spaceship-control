@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>687</width>
+    <width>805</width>
     <height>503</height>
    </rect>
   </property>
@@ -70,10 +70,26 @@
         <number>0</number>
        </property>
        <item>
+        <widget class="NodeTreeView" name="treeView">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QGraphicsView" name="view">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="minimumSize">
           <size>
-           <width>0</width>
+           <width>400</width>
            <height>0</height>
           </size>
          </property>
@@ -105,7 +121,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>687</width>
+     <width>805</width>
      <height>30</height>
     </rect>
    </property>
@@ -153,6 +169,13 @@
    </property>
   </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>NodeTreeView</class>
+   <extends>QTreeView</extends>
+   <header>nodetreeview.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
