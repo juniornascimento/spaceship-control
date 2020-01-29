@@ -2,8 +2,8 @@
 from math import pi
 from collections import namedtuple
 
-from .configfileinheritance import resolvePrefix
-from ..objectives.gotoobjective import GoToObjective
+from ..configfileinheritance import resolvePrefix
+from ...objectives.gotoobjective import GoToObjective
 
 ShipInfo = namedtuple('ShipInfo', (
     'name', 'model', 'controller', 'position', 'angle'))

@@ -5,7 +5,7 @@ from pathlib import Path
 from PyQt5 import uic
 from PyQt5.QtWidgets import QDialog, QDialogButtonBox
 
-from ..utils.fileinfo import FileInfo
+from ..storage.fileinfo import FileInfo
 
 # sys.path manipulation used to import nodetreeview.py from ui
 sys.path.insert(0, str(Path(__file__).parent))

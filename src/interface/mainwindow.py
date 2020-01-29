@@ -18,7 +18,8 @@ import anytree
 from .shipgraphicsitem import ShipGraphicsItem
 from .choosefromtreedialog import ChooseFromTreeDialog
 
-from ..utils.fileinfo import FileInfo
+from ..storage.fileinfo import FileInfo
+
 from ..utils.actionqueue import ActionQueue
 
 from ..objectives.objective import createObjectiveTree

@@ -6,8 +6,10 @@ from pathlib import Path
 
 from anytree import Node
 
-from . import (
-    shiploader, scenarioloader, controllerloader, configfileinheritance
+from . import configfileinheritance
+
+from .loaders import (
+    shiploader, scenarioloader, controllerloader
 )
 
 class FileInfo:
