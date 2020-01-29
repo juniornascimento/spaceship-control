@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 
+import sys
 from spctrl_base_controller import ship, send, debug
 
 debug(ship.device)
 
 colors = ('black', 'red', 'blue', 'green')
 color_id = 0
+
+debug(sys.argv[1:])
 
 print('\n   Spaceship Control')
 print('\n\n This is just an example controller')

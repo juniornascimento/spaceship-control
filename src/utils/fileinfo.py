@@ -166,9 +166,9 @@ class FileInfo:
 
         return shiploader.loadShip(ship_content, name, space, action_queue)
 
-    def loadController(self, controller_name, ship, lock):
+    def loadController(self, controller_name, ship, json_info, lock):
         return controllerloader.loadController(
-            self.controllerPath(controller_name), ship, lock)
+            self.controllerPath(controller_name), ship, json_info, lock)
 
     def __addFiles(self, path, files, mode=0o644):
         path_str = str(path)

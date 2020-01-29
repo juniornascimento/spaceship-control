@@ -28,7 +28,7 @@ def __controllerThread(program, device, lock):
 
     process.send_signal(signal.SIGHUP)
 
-def loadController(program_path, ship, lock):
+def loadController(program_path, ship, json_info, lock):
 
     return Thread(target=__controllerThread, daemon=True,
-                  args=([program_path], ship, lock))
+                  args=([program_path, json_info], ship, lock))

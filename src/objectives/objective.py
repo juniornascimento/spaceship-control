@@ -1,6 +1,6 @@
 
 from collections import Sequence
-from abc import ABC, abstractmethod
+from abc import ABC, abstractmethod, abstractproperty
 
 from anytree import Node
 
@@ -35,6 +35,18 @@ class Objective(ABC):
     def _verify(self, space: 'pymunk.Space', ships: 'Sequence[Device]') -> bool:
         pass
 
+    def toDict(self) -> 'Dict[str, Any]':
+        return {
+            'type': self.__class__.__name__,
+            'name': self.name,
+            'description': self.description,
+            'info': self.info
+        }
+
+    @abstractproperty
+    def info(self) -> 'Dict[str, Any]':
+        pass
+
 class ObjectiveGroup(ABC):
 
     def __init__(self, subobjectives: 'Sequence[Objective]',
@@ -62,6 +74,13 @@ class ObjectiveGroup(ABC):
 
     def verify(self, space: 'pymunk.Space', ships: 'Sequence[Device]') -> bool:
         return all(objective.verify() for objective in self.__subobjectives)
+
+    @property
+    def info(self) -> 'Dict[str, Any]':
+        return {
+            'objectives':
+                [objective.toDict() for objective in self.__subobjectives]
+        }
 
 def createObjectiveTree(objective: 'Union[Objective, Sequence[Objective]]',
                         parent: 'Node' = None) -> 'Node':

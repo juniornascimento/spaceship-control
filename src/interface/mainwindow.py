@@ -1,6 +1,7 @@
 
 import sys
 import os
+import json
 import signal
 from math import pi
 from threading import Lock
@@ -139,6 +140,13 @@ class MainWindow(QMainWindow):
 
         ships = [None]*len(scenario_info.ships)
         self.__scenario_objectives = scenario_info.objectives
+
+        json_info = json.dumps({
+
+            'objectives': [objective.toDict() for objective in
+                           self.__scenario_objectives]
+        })
+
         for i, ship_info in enumerate(scenario_info.ships):
 
             ship_model = ship_info.model
@@ -177,7 +185,8 @@ class MainWindow(QMainWindow):
 
                 ship_controller = '/'.join(ship_controller)
 
-            thread = fileinfo.loadController(ship_controller, ship, self.__lock)
+            thread = fileinfo.loadController(ship_controller, ship, json_info,
+                                             self.__lock)
 
             ship_gitem = ShipGraphicsItem(ship.body.shapes)
             self.__ui.view.scene().addItem(ship_gitem)

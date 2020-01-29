@@ -17,6 +17,7 @@ class GoToObjective(Objective):
         super().__init__(name, description)
 
         self.__position = Vec2d(position)
+        self.__distance = distance
         self.__distance_sqrtd = distance**2
 
     def _verifyShip(self, space: 'pymunk.Space', ship: 'Device') -> bool:
@@ -24,4 +25,12 @@ class GoToObjective(Objective):
         return pos.get_dist_sqrd(self.__position) < self.__distance_sqrtd
 
     def _verify(self, space: 'pymunk.Space', ships: 'Sequence[Device]') -> bool:
-        return all(self._verifyShip(space, ship) for ship in ships)
+        return any(self._verifyShip(space, ship) for ship in ships)
+
+    @property
+    def info(self) -> 'Dict[str, Any]':
+        return {
+            'target-x': self.__position.x,
+            'target-y': self.__position.y,
+            'distance': self.__distance
+        }
