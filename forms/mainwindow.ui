@@ -122,6 +122,7 @@
      <addaction name="actionImportController"/>
     </widget>
     <addaction name="actionLoadScenario"/>
+    <addaction name="actionImportPackage"/>
     <addaction name="menuImportData"/>
    </widget>
    <addaction name="menuFile"/>
@@ -144,6 +145,11 @@
   <action name="actionImportController">
    <property name="text">
     <string>Controller</string>
+   </property>
+  </action>
+  <action name="actionImportPackage">
+   <property name="text">
+    <string>Import Package</string>
    </property>
   </action>
  </widget>

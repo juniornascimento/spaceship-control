@@ -58,6 +58,9 @@ class MainWindow(QMainWindow):
         self.__ui.actionImportController.triggered.connect(
             self.__importControllerAction)
 
+        self.__ui.actionImportPackage.triggered.connect(
+            self.__importPackageAction)
+
         self.__title_basename = 'Spaceship Control'
 
         self.__updateTitle()
@@ -223,8 +226,7 @@ class MainWindow(QMainWindow):
 
     def __importControllerAction(self):
 
-        fdialog = QFileDialog(None, 'Controller Import Dialog', '',
-                              'executable files(*)')
+        fdialog = QFileDialog(None, 'Controller Import Dialog')
 
         fdialog.setFileMode(QFileDialog.ExistingFiles)
 
@@ -232,3 +234,16 @@ class MainWindow(QMainWindow):
             return
 
         FileInfo().addControllers(fdialog.selectedFiles())
+
+    def __importPackageAction(self):
+
+        fdialog = QFileDialog(None, 'Controller Import Dialog', '',
+                              'executable files(*)')
+
+        fdialog.setFileMode(QFileDialog.DirectoryOnly)
+
+        if not fdialog.exec_():
+            return
+
+        for package in fdialog.selectedFiles():
+            FileInfo().addPackage(package)

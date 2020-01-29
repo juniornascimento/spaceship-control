@@ -101,6 +101,31 @@ class FileInfo:
         return self.__addFiles(self.__path.joinpath('controllers'), files,
                                mode=0o555)
 
+    def addPackage(self, package_pathname):
+
+        package_path = Path(package_pathname)
+
+        package_name = package_path.name
+
+        for directory, mode, pat in (('scenarios', 0o644, '*.toml'),
+                                     ('ships', 0o644, '*.toml'),
+                                     ('controllers', 0o555, '*')):
+
+            dest_base_path = self.__path.joinpath(directory).joinpath(
+                package_name)
+            package_subdir_path = package_path.joinpath(directory)
+
+            for path in package_subdir_path.rglob(pat):
+                if path.is_file():
+
+                    dest_path = dest_base_path.joinpath(
+                        path.parent.relative_to(package_subdir_path))
+
+                    if not dest_path.exists():
+                        dest_path.mkdir(parents=True)
+
+                    self.__addFiles(dest_path, (path,), mode=mode)
+
     def __getScenarioContent(self, scenario_name):
 
         scenario_path = self.scenarioPath(scenario_name + '.toml')
