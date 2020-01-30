@@ -208,7 +208,7 @@ class MainWindow(QMainWindow):
                 createObjectiveTree(objective, parent=objectives_root_node)
 
             for node in objectives_root_node.descendants:
-                node.name = node.name.name
+                node.name = (node.name.name, node.name.description)
 
             self.__ui.treeView.clear()
             self.__ui.treeView.addNodes(objectives_root_node.children)

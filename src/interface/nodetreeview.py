@@ -39,7 +39,16 @@ class NodeTreeView(QTreeView):
     @staticmethod
     def __addNode(parent_row, options: 'anytree.Node') -> None:
 
-        item = QStandardItem(options.name)
+        node_value = options.name
+        if isinstance(node_value, tuple):
+            node_desc = node_value[1]
+            node_value = node_value[0]
+        else:
+            node_desc = None
+
+        item = QStandardItem(node_value)
+        if node_desc:
+            item.setToolTip(node_desc)
         item.setEditable(False)
         parent_row.appendRow(item)
 
