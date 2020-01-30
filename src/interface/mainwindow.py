@@ -1,19 +1,19 @@
 
 import sys
-import os
 import json
-import signal
 from math import pi
 from threading import Lock
 from pathlib import Path
 
 from PyQt5 import uic
-from PyQt5.QtWidgets import QMainWindow, QGraphicsScene, QFileDialog, QLabel
-from PyQt5.QtCore import QTimer, QDir
+from PyQt5.QtWidgets import QMainWindow, QGraphicsScene, QFileDialog
+from PyQt5.QtCore import QTimer
 
 import pymunk
 
 import anytree
+
+# pylint: disable=relative-beyond-top-level
 
 from .shipgraphicsitem import ShipGraphicsItem
 from .choosefromtreedialog import ChooseFromTreeDialog
@@ -22,9 +22,11 @@ from ..storage.fileinfo import FileInfo
 
 from ..objectives.objective import createObjectiveTree
 
+# pylint: enable=relative-beyond-top-level
+
 # sys.path manipulation used to import nodetreeview.py from ui
 sys.path.insert(0, str(Path(__file__).parent))
-UiMainWindow, _ = uic.loadUiType(FileInfo().uiFilePath('mainwindow.ui'))
+UiMainWindow, _ = uic.loadUiType(FileInfo().uiFilePath('mainwindow.ui')) # pylint: disable=invalid-name
 sys.path.pop(0)
 
 class MainWindow(QMainWindow):
@@ -53,6 +55,8 @@ class MainWindow(QMainWindow):
         self.__scenario_objectives = []
         self.__objectives_complete = False
         self.__current_scenario = None
+
+        self.__widgets = []
 
         self.__ui.actionLoadScenario.triggered.connect(
             self.__loadScenarioAction)
@@ -89,7 +93,7 @@ class MainWindow(QMainWindow):
                 f'{self.__title_basename}({self.__current_scenario}){suffix}')
 
 
-    def closeEvent(self, event):
+    def closeEvent(self, _event):
         self.__ui.view.setScene(None)
 
     def clear(self):
@@ -101,7 +105,7 @@ class MainWindow(QMainWindow):
 
         with self.__lock:
             self.__space.remove(self.__space.bodies, self.__space.shapes)
-            for ship, gitem, widgets, _ in self.__ships:
+            for _, gitem, widgets, _ in self.__ships:
                 self.__ui.view.scene().removeItem(gitem)
                 for widget in widgets:
                     widget.setParent(None)
@@ -110,7 +114,8 @@ class MainWindow(QMainWindow):
 
         self.__current_scenario = None
 
-    def __getOptionDialog(self, title, options):
+    @staticmethod
+    def __getOptionDialog(title, options):
 
         dialog = ChooseFromTreeDialog(options)
         dialog.setWindowTitle(title)
@@ -125,6 +130,52 @@ class MainWindow(QMainWindow):
         if scenario is not None:
             self.loadScenario('/'.join(scenario))
 
+    def __loadShip(self, ship_info, json_info, fileinfo):
+
+        ship_model = ship_info.model
+        if ship_model is None:
+            ship_options = fileinfo.listShipsModelTree().children
+            ship_model = self.__getOptionDialog('Choose ship model',
+                                                ship_options)
+
+            if ship_model is None:
+                return None
+
+            ship_model = '/'.join(ship_model)
+
+        ship, widgets = fileinfo.loadShip(ship_model, ship_info.name,
+                                          self.__space)
+
+        self.__widgets = widgets
+        ship.body.position = ship_info.position
+        ship.body.angle = ship_info.angle
+
+        for widget in widgets:
+            widget.setParent(self.__ui.deviceInterfaceComponents)
+
+        ship_controller = ship_info.controller
+
+        if ship_controller is None:
+
+            controller_options = fileinfo.listControllersTree().children
+            ship_controller = self.__getOptionDialog('Choose controller',
+                                                     controller_options)
+
+            if ship_controller is None:
+                return None
+
+            ship_controller = '/'.join(ship_controller)
+
+        thread = fileinfo.loadController(ship_controller, ship, json_info,
+                                         self.__lock)
+
+        ship_gitem = ShipGraphicsItem(ship.body.shapes)
+        self.__ui.view.scene().addItem(ship_gitem)
+
+        thread.start()
+
+        return ship, ship_gitem, widgets, thread
+
     def loadScenario(self, scenario):
 
         self.clear()
@@ -136,7 +187,6 @@ class MainWindow(QMainWindow):
         self.__ui.deviceInterfaceComponents.setVisible(
             scenario_info.visible_user_interface)
 
-        ships = [None]*len(scenario_info.ships)
         self.__scenario_objectives = scenario_info.objectives
 
         json_info = json.dumps({
@@ -145,52 +195,13 @@ class MainWindow(QMainWindow):
                            self.__scenario_objectives]
         })
 
+        ships = [None]*len(scenario_info.ships)
         for i, ship_info in enumerate(scenario_info.ships):
-
-            ship_model = ship_info.model
-            if ship_model is None:
-                ship_options = fileinfo.listShipsModelTree().children
-                ship_model = self.__getOptionDialog('Choose ship model',
-                                                    ship_options)
-
-                if ship_model is None:
-                    self.clear()
-                    return
-
-                ship_model = '/'.join(ship_model)
-
-            ship, widgets = fileinfo.loadShip(ship_model, ship_info.name,
-                                              self.__space)
-
-            self.__widgets = widgets
-            ship.body.position = ship_info.position
-            ship.body.angle = ship_info.angle
-
-            for widget in widgets:
-                widget.setParent(self.__ui.deviceInterfaceComponents)
-
-            ship_controller = ship_info.controller
-
-            if ship_controller is None:
-
-                controller_options = fileinfo.listControllersTree().children
-                ship_controller = self.__getOptionDialog('Choose controller',
-                                                         controller_options)
-
-                if ship_controller is None:
-                    self.clear()
-                    return
-
-                ship_controller = '/'.join(ship_controller)
-
-            thread = fileinfo.loadController(ship_controller, ship, json_info,
-                                             self.__lock)
-
-            ship_gitem = ShipGraphicsItem(ship.body.shapes)
-            self.__ui.view.scene().addItem(ship_gitem)
-            ships[i] = (ship, ship_gitem, widgets, thread)
-
-            thread.start()
+            ship = self.__loadShip(ship_info, json_info, fileinfo)
+            if ship is None:
+                self.clear()
+                return
+            ships[i] = ship
 
         self.__ships = ships
 
@@ -230,7 +241,8 @@ class MainWindow(QMainWindow):
 
         self.__updateTitle()
 
-    def __importScenarioAction(self):
+    @staticmethod
+    def __importScenarioAction():
 
         fdialog = QFileDialog(None, 'Scenario Import Dialog', '',
                               'TOML files(*.toml)')
@@ -241,7 +253,8 @@ class MainWindow(QMainWindow):
 
         FileInfo().addScenarios(fdialog.selectedFiles())
 
-    def __importShipAction(self):
+    @staticmethod
+    def __importShipAction():
 
         fdialog = QFileDialog(None, 'Ship Import Dialog', '',
                               'TOML files(*.toml)')
@@ -252,7 +265,8 @@ class MainWindow(QMainWindow):
 
         FileInfo().addShips(fdialog.selectedFiles())
 
-    def __importControllerAction(self):
+    @staticmethod
+    def __importControllerAction():
 
         fdialog = QFileDialog(None, 'Controller Import Dialog')
 
@@ -263,7 +277,8 @@ class MainWindow(QMainWindow):
 
         FileInfo().addControllers(fdialog.selectedFiles())
 
-    def __importPackageAction(self):
+    @staticmethod
+    def __importPackageAction():
 
         fdialog = QFileDialog(None, 'Controller Import Dialog', '',
                               'executable files(*)')
