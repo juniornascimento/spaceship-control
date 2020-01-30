@@ -20,8 +20,6 @@ from .choosefromtreedialog import ChooseFromTreeDialog
 
 from ..storage.fileinfo import FileInfo
 
-from ..utils.actionqueue import ActionQueue
-
 from ..objectives.objective import createObjectiveTree
 
 # sys.path manipulation used to import nodetreeview.py from ui
@@ -50,7 +48,6 @@ class MainWindow(QMainWindow):
 
         self.__space = pymunk.Space()
         self.__space.gravity = (0, 0)
-        self.__action_queue = ActionQueue()
 
         self.__ships = []
         self.__scenario_objectives = []
@@ -163,7 +160,7 @@ class MainWindow(QMainWindow):
                 ship_model = '/'.join(ship_model)
 
             ship, widgets = fileinfo.loadShip(ship_model, ship_info.name,
-                                              self.__space, self.__action_queue)
+                                              self.__space)
 
             self.__widgets = widgets
             ship.body.position = ship_info.position
@@ -216,8 +213,6 @@ class MainWindow(QMainWindow):
             self.__ui.treeView.hide()
 
     def __timerTimeout(self):
-
-        self.__action_queue.processItems()
 
         ships = tuple(ship for ship, _, _, _ in self.__ships)
         with self.__lock:

@@ -81,10 +81,8 @@ def __createShape(info: 'Dict[str, Any]') -> 'Shape':
 
     return create_func(info)
 
-def __createLimitedLinearEngine(
-    info: 'Dict[str, Any]', part: StructuralPart,
-    _action_queue: 'ActionQueue') \
-        -> 'Tuple[LimitedLinearEngine, Sequence[QWidget]]':
+def __createLimitedLinearEngine(info: 'Dict[str, Any]', part: StructuralPart) \
+    -> 'Tuple[LimitedLinearEngine, Sequence[QWidget]]':
 
     return LimitedLinearEngine(part, info['min_intensity'],
                                info['max_intensity'], info['min_angle'],
@@ -93,37 +91,30 @@ def __createLimitedLinearEngine(
                                                              1),
                                **__engine_error_kwargs(info.get('Error'))), ()
 
-def __createPositionSensor(
-    info: 'Dict[str, Any]', part: StructuralPart,
-    _action_queue: 'ActionQueue') \
-        -> 'Tuple[PositionSensor, Sequence[QWidget]]':
+def __createPositionSensor(info: 'Dict[str, Any]', part: StructuralPart) \
+    -> 'Tuple[PositionSensor, Sequence[QWidget]]':
 
     return PositionSensor(part, info['reading_time'],
                           read_error_max=info.get('error_max', 0),
                           read_offset_max=info.get('offset_max', 0)), ()
 
-def __createAngleSensor(
-    info: 'Dict[str, Any]', part: StructuralPart,
-    _action_queue: 'ActionQueue') \
-        -> 'Tuple[AngleSensor, Sequence[QWidget]]':
+def __createAngleSensor(info: 'Dict[str, Any]', part: StructuralPart) \
+    -> 'Tuple[AngleSensor, Sequence[QWidget]]':
 
     return AngleSensor(part, info['reading_time'],
                        read_error_max=info.get('error_max', 0),
                        read_offset_max=info.get('offset_max', 0)), ()
 
-def __createSpeedSensor(
-    info: 'Dict[str, Any]', part: StructuralPart,
-    _action_queue: 'ActionQueue') \
-        -> 'Tuple[AngleSensor, Sequence[QWidget]]':
+def __createSpeedSensor(info: 'Dict[str, Any]', part: StructuralPart) \
+    -> 'Tuple[AngleSensor, Sequence[QWidget]]':
 
     return SpeedSensor(part, info['reading_time'],
                        read_error_max=info.get('error_max', 0),
                        read_offset_max=info.get('offset_max', 0),
                        angle=info.get('angle', 0)), ()
 
-def __createTextDisplay(
-    info: 'Dict[str, Any]', part: StructuralPart, action_queue: 'ActionQueue') \
-        -> 'Tuple[TextDisplayDevice, Sequence[QWidget]]':
+def __createTextDisplay(info: 'Dict[str, Any]', part: StructuralPart) \
+    -> 'Tuple[TextDisplayDevice, Sequence[QWidget]]':
 
     label = QLabel('-')
 
@@ -140,11 +131,10 @@ def __createTextDisplay(
     label.setGeometry(info.get('x', 0), info.get('y', 0),
                       info.get('width', 100), info.get('height', 30))
 
-    return TextDisplayDevice(label, action_queue), (label,)
+    return TextDisplayDevice(label), (label,)
 
-def __createConsole(
-    info: 'Dict[str, Any]', part: StructuralPart, action_queue: 'ActionQueue') \
-        -> 'Tuple[InterfaceDevice, Sequence[QWidget]]':
+def __createConsole(info: 'Dict[str, Any]', part: StructuralPart) \
+    -> 'Tuple[InterfaceDevice, Sequence[QWidget]]':
 
     text = QTextEdit()
 
@@ -166,12 +156,11 @@ def __createConsole(
     text.setGeometry(info.get('x', 0), info.get('y', 0),
                      info.get('width', 100), 0)
 
-    return ConsoleDevice(text, action_queue, info.get('columns', 20),
-                         info.get('rows', 5)), (text,)
+    return (ConsoleDevice(text, info.get('columns', 20), info.get('rows', 5)),
+            (text,))
 
-def __createKeyboardReceiver(
-    info: 'Dict[str, Any]', part: StructuralPart, action_queue: 'ActionQueue') \
-        -> 'Tuple[KeyboardButton, Sequence[QWidget]]':
+def __createKeyboardReceiver(info: 'Dict[str, Any]', part: StructuralPart) \
+    -> 'Tuple[KeyboardButton, Sequence[QWidget]]':
 
     button = KeyboardButton()
 
@@ -179,9 +168,8 @@ def __createKeyboardReceiver(
 
     return KeyboardReceiverDevice(button), (button,)
 
-def __createButton(
-    info: 'Dict[str, Any]', part: StructuralPart, action_queue: 'ActionQueue') \
-        -> 'Tuple[ButtonDevice, Sequence[QWidget]]':
+def __createButton(info: 'Dict[str, Any]', part: StructuralPart) \
+    -> 'Tuple[ButtonDevice, Sequence[QWidget]]':
 
     button = PanelPushButton()
 
@@ -208,7 +196,7 @@ __DEVICE_CREATE_FUNCTIONS = {
 
 def __addDevice(
     info: 'Dict[str, Any]', parts: 'Dict[str, StructuralPart]',
-    device_type: str, action_queue: 'ActionQueue') -> 'List[QWidget]':
+    device_type: str) -> 'List[QWidget]':
 
     type_and_model = (device_type, info.get('type'), info.get('model'))
     create_func = __DEVICE_CREATE_FUNCTIONS.get(type_and_model)
@@ -219,14 +207,13 @@ def __addDevice(
         raise ValueError(
             f'Invalid type/model for {device_type} \'{type_and_model_str}\'')
 
-    device, widgets = create_func(info, part, action_queue)
+    device, widgets = create_func(info, part)
     part.addDevice(device, name=info.get('name'))
 
     return widgets
 
-def loadShip(ship_info: str, name: str, space: 'pymunk.Space',
-             action_queue: 'ActionQueue') \
-                 -> 'Tuple[Structure, Sequence[QWidget]]':
+def loadShip(ship_info: str, name: str, space: 'pymunk.Space') \
+    -> 'Tuple[Structure, Sequence[QWidget]]':
 
     shapes = tuple(__createShape(shape_info)
                    for shape_info in ship_info['Shape'])
@@ -252,14 +239,14 @@ def loadShip(ship_info: str, name: str, space: 'pymunk.Space',
         parts[part_name] = part
 
     for info in ship_info.get('Actuator', ()):
-        __addDevice(info, parts, 'Actuator', action_queue)
+        __addDevice(info, parts, 'Actuator')
 
     for info in ship_info.get('Sensor', ()):
-        __addDevice(info, parts, 'Sensor', action_queue)
+        __addDevice(info, parts, 'Sensor')
 
     widgets = []
     for info in ship_info.get('InterfaceDevice', ()):
         widgets.extend(
-            __addDevice(info, parts, 'InterfaceDevice', action_queue))
+            __addDevice(info, parts, 'InterfaceDevice'))
 
     return ship, widgets

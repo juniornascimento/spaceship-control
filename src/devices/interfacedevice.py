@@ -7,7 +7,7 @@ from PyQt5.QtCore import Qt
 
 from .device import DefaultDevice
 
-from ..utils.actionqueue import Action
+from ..utils.actionqueue import ActionQueue, Action
 
 from ..interface.panelpushbutton import PanelPushButton
 
@@ -16,23 +16,26 @@ class InterfaceDevice(DefaultDevice):
     def __init__(self, **kwargs: 'Any') -> None:
         super().__init__(**kwargs)
 
-    def act(self):
-        pass
+        self.__queue = ActionQueue()
+
+    def act(self) -> None:
+        self.__queue.processItems()
+
+    def addAction(self, action: 'Action') -> None:
+        self.__queue.add(action)
 
 class TextDisplayDevice(InterfaceDevice):
 
-    def __init__(self, label: 'QLabel', action_queue: 'ActionQueue',
-                 **kwargs: 'Any') -> None:
+    def __init__(self, label: 'QLabel', **kwargs: 'Any') -> None:
         super().__init__(device_type='text-display', **kwargs)
 
         self.__label = label
-        self.__queue = action_queue
 
     def command(self, command: 'List[str]') -> 'Any':
         return super().command(command, TextDisplayDevice.__COMMANDS)
 
     def setText(self, text: str) -> None:
-        self.__queue.add(Action(QLabel.setText, self.__label, text))
+        self.addAction(Action(QLabel.setText, self.__label, text))
 
     __COMMANDS = {
 
@@ -77,12 +80,11 @@ class KeyboardReceiverDevice(InterfaceDevice):
 
 class ConsoleDevice(InterfaceDevice):
 
-    def __init__(self, text: 'QTextEdit', action_queue: 'ActionQueue',
-                 columns: int, rows: int, **kwargs: 'Any') -> None:
+    def __init__(self, text: 'QTextEdit', columns: int, rows: int,
+                 **kwargs: 'Any') -> None:
         super().__init__(device_type='console-text-display', **kwargs)
 
         self.__text_widget = text
-        self.__queue = action_queue
         self.__col = 0
         self.__row = 0
         self.__total_cols = columns
@@ -170,8 +172,7 @@ class ConsoleDevice(InterfaceDevice):
     def __update(self):
 
         text = html.escape(self.__text).replace(' ', '&nbsp;')
-        self.__queue.add(Action(QTextEdit.setHtml,
-                                self.__text_widget, text))
+        self.addAction(Action(QTextEdit.setHtml, self.__text_widget, text))
 
         return '<<ok>>'
 
