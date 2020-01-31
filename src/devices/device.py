@@ -120,6 +120,21 @@ class DefaultDevice(Device):
             return 'Invalid command'
 
     def setInfo(self, name: str, value: 'Optional[str]') -> None:
+        """This method is used to create, modify or delete device info.
+
+        This will create, delete or modify information that can be obtained
+        by the process communicating with this device through the command
+        `get-info <info_name>` where `<info_name>' is the parameter `name`.
+
+        Args:
+            name: Name of the information that will be set, if the value does
+                not exist and the value is valid, the information will be added
+                otherwise the value will be modified.
+            value: Value of the information that will be set, if None is passed
+                instead, the information with this name will be deleted.
+
+        """
+
         if value is None:
             try:
                 del self.__device_info[name]
@@ -129,12 +144,51 @@ class DefaultDevice(Device):
             self.__device_info[name] = value
 
     def getInfo(self, name: str) -> 'Optional[str]':
+        """This method is used to get device info.
+
+        This method will return the info named `name` if it exists.
+
+        Note:
+            This method is called by the command `get-info <name>`.
+
+        Args:
+            name: The name of the information that will be returned.
+
+        Returns:
+            The value of the information if it exists, None otherwise.
+
+        """
+
         return self.__device_info.get(name)
 
     def deviceType(self) -> str:
+        """This method is used to get the device type.
+
+        This method will return the device type of this device.
+
+        Note:
+            This method is called by the command `device-type`.
+
+        Returns:
+            This device type.
+
+        """
+
         return self.__device_type
 
     def deviceDescription(self) -> str:
+        """This method is used to get the device description.
+
+        This method will return the description of this device.
+
+        Note:
+            This method is called by the command `device-desc`.
+
+        Returns:
+            This device description.
+
+        """
+
         return self.__device_desc
 
     def __command(self, command: 'List[str]',
@@ -157,6 +211,33 @@ class DefaultDevice(Device):
 
     def command(self, command: 'List[str]',
                 *args: 'Dict[str, Callable]') -> 'Any':
+        """Method called by communicate that may be overriden.
+
+        This method is used to handle communicate method and will be called
+        if the input given to communicate is a valid shell-like command, this
+        method will use the first element of `command` to locate a function
+        that will be called passing the rest of the list as parameter.
+
+        More arguments may be passed to be used to be looked upon for a command,
+        that is not an original command.
+
+        Note:
+            This method should be called even if overriden, if you desire to
+            add commands, use the variadic positional parameters.
+
+        Args:
+            command: List with the first argument being the command name and
+                the rest as the arguments.
+            *args: Dicionary containing pair string and callable that will where
+                the command will be looked for if it was not found yet.
+
+        Returns:
+            'Invalid command' if the command is not found.
+            'An error ocurred running the command' if an error occured running
+                the command function.
+            Otherwise it will return the result of the function that was called.
+
+        """
 
         for command_actions in args:
 
