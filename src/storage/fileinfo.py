@@ -1,8 +1,10 @@
 
-import toml
 import os
 import shutil
 from pathlib import Path
+
+import json
+import toml
 
 from anytree import Node
 
@@ -133,7 +135,12 @@ class FileInfo:
         scenario_path = self.scenarioPath(scenario_name + '.toml')
 
         if scenario_path is None:
-            raise Exception('Inexistent scenario')
+            scenario_path = self.scenarioPath(scenario_name + '.json')
+            if scenario_path is None:
+                raise Exception('Inexistent scenario')
+            else:
+                with open(scenario_path) as file:
+                    return json.load(file)
 
         return toml.load(scenario_path)
 
@@ -142,7 +149,12 @@ class FileInfo:
         ship_model_path = self.shipModelPath(ship_model + '.toml')
 
         if ship_model_path is None:
-            raise Exception('Inexistent ship model')
+            ship_model_path = self.shipModelPath(ship_model + '.json')
+            if ship_model_path is None:
+                raise Exception('Inexistent ship model')
+            else:
+                with open(ship_model_path) as file:
+                    return json.load(file)
 
         return toml.load(ship_model_path)
 

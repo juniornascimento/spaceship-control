@@ -5,6 +5,7 @@ name = 'example1'
 
 [[Ship]]
 
+id = 'main-ship'
 name = 'ship1'
 
 x = 300

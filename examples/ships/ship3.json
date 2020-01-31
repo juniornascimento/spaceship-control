@@ -1,0 +1,23 @@
+{
+    "Inheritance": {
+        "parent": ".ship2"
+    },
+    "Shape": [
+
+        {
+            "id": "small-circle-1",
+            "Inheritance": {
+
+                "mode": "delete"
+            }
+        },
+        {
+            "id": "small-circle-2",
+            "Inheritance": {
+
+                "mode": "delete"
+            }
+        }
+    ]
+
+}

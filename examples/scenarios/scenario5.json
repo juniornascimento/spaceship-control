@@ -1,0 +1,11 @@
+{
+    "Inheritance": {
+
+        "parent": ".scenario1"
+    },
+    "Ship": [{
+
+        "id": "main-ship",
+        "model": ".ship3"
+    }]
+}

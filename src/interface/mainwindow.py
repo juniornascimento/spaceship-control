@@ -245,7 +245,7 @@ class MainWindow(QMainWindow):
     def __importScenarioAction():
 
         fdialog = QFileDialog(None, 'Scenario Import Dialog', '',
-                              'TOML files(*.toml)')
+                              'TOML files(*.toml) ;; JSON files(*.json)')
         fdialog.setFileMode(QFileDialog.ExistingFiles)
 
         if not fdialog.exec_():
@@ -257,7 +257,7 @@ class MainWindow(QMainWindow):
     def __importShipAction():
 
         fdialog = QFileDialog(None, 'Ship Import Dialog', '',
-                              'TOML files(*.toml)')
+                              'TOML files(*.toml) ;; JSON files(*.json)')
         fdialog.setFileMode(QFileDialog.ExistingFiles)
 
         if not fdialog.exec_():
@@ -268,7 +268,8 @@ class MainWindow(QMainWindow):
     @staticmethod
     def __importControllerAction():
 
-        fdialog = QFileDialog(None, 'Controller Import Dialog')
+        fdialog = QFileDialog(None, 'Controller Import Dialog', '',
+                              'executable files(*)')
 
         fdialog.setFileMode(QFileDialog.ExistingFiles)
 
@@ -280,8 +281,7 @@ class MainWindow(QMainWindow):
     @staticmethod
     def __importPackageAction():
 
-        fdialog = QFileDialog(None, 'Controller Import Dialog', '',
-                              'executable files(*)')
+        fdialog = QFileDialog(None, 'Controller Import Dialog')
 
         fdialog.setFileMode(QFileDialog.DirectoryOnly)
 
