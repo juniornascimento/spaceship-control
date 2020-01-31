@@ -13,7 +13,7 @@ class Objective(ABC):
         self.__desc = description
         self.__acp = False
 
-    def accomplished() -> bool:
+    def accomplished(self) -> bool:
         return self.__acp
 
     @property
@@ -64,7 +64,7 @@ class ObjectiveGroup(Objective):
     def subobjectives(self):
         return self.__subobjectives
 
-    def objectivesStatus() -> 'Sequence[Objective, bool]':
+    def objectivesStatus(self) -> 'Sequence[Objective, bool]':
 
         return ((objective, objective.accomplished())
                 for objective in  self.__subobjectives)
