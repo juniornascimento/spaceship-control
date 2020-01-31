@@ -1,5 +1,4 @@
 
-import functools
 from abc import ABC, abstractmethod
 from PyQt5.QtWidgets import QGraphicsItem
 from PyQt5.QtCore import QRectF, QPointF, Qt
@@ -73,6 +72,8 @@ class LineDrawingPart(DrawingPart):
     def boundingRect(self) -> QRectF:
         start_x = self.__start.x()
         start_y = self.__start.y()
+        end_x = self.__end.x()
+        end_y = self.__end.y()
         return QRectF(start_x, start_y, end_x - start_x, end_y - start_y)
 
     def _paint(self, painter, option, widget) -> None:
@@ -147,7 +148,8 @@ class ShipGraphicsItem(QGraphicsItem):
         for part in self.__parts:
             self.__bounding_rect |= part.boundingRect()
 
-    def boundingRect(self) -> QRectF:
+    @staticmethod
+    def boundingRect() -> QRectF:
         return QRectF(-100, -100, 200, 200)
 
     def paint(self, painter, option, widget) -> None:

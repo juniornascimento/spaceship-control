@@ -54,4 +54,3 @@ class NodeTreeView(QTreeView):
 
         for child in options.children:
             NodeTreeView.__addNode(item, child)
-

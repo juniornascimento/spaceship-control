@@ -5,11 +5,15 @@ from pathlib import Path
 from PyQt5 import uic
 from PyQt5.QtWidgets import QDialog, QDialogButtonBox
 
+# pylint: disable=relative-beyond-top-level
+
 from ..storage.fileinfo import FileInfo
+
+# pylint: enable=relative-beyond-top-level
 
 # sys.path manipulation used to import nodetreeview.py from ui
 sys.path.insert(0, str(Path(__file__).parent))
-UiChooseFromTree, _ = uic.loadUiType(FileInfo().uiFilePath('choosefromtree.ui'))
+UiChooseFromTree, _ = uic.loadUiType(FileInfo().uiFilePath('choosefromtree.ui')) # pylint: disable=invalid-name
 sys.path.pop(0)
 
 class ChooseFromTreeDialog(QDialog):
