@@ -3,7 +3,7 @@
 
         "parent": ".scenario1"
     },
-    "Ship": [{
+    "ships": [{
 
         "id": "main-ship",
         "model": ".ship3"

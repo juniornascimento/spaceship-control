@@ -14,6 +14,8 @@ from .loaders import (
     shiploader, scenarioloader, controllerloader
 )
 
+from ..utils import dictutils
+
 class FileInfo:
 
     __instance = None
@@ -130,33 +132,52 @@ class FileInfo:
 
                     self.__addFiles(dest_path, (path,), mode=mode)
 
+    @staticmethod
+    def __getContent(filename, get_path):
+
+        filepath = get_path(filename + '.toml')
+
+        if filepath is None:
+            filepath = get_path(filename + '.json')
+            if filepath is None:
+                raise Exception('Inexistent ship model')
+            else:
+                with open(filepath) as file:
+                    content = json.load(file)
+        else:
+            content = toml.load(filepath)
+
+        return content
+
     def __getScenarioContent(self, scenario_name):
 
-        scenario_path = self.scenarioPath(scenario_name + '.toml')
+        content = self.__getContent(scenario_name, self.scenarioPath)
 
-        if scenario_path is None:
-            scenario_path = self.scenarioPath(scenario_name + '.json')
-            if scenario_path is None:
-                raise Exception('Inexistent scenario')
-            else:
-                with open(scenario_path) as file:
-                    return json.load(file)
+        dictutils.mergeMatch(content, (), ('Ship', 'ships'), 'Ship',
+                             absolute=True)
+        dictutils.mergeMatch(content, (), ('Objective', 'objectives'),
+                             'Objective', absolute=True)
 
-        return toml.load(scenario_path)
+        return content
 
     def __getShipContent(self, ship_model):
 
-        ship_model_path = self.shipModelPath(ship_model + '.toml')
+        content = self.__getContent(ship_model, self.shipModelPath)
 
-        if ship_model_path is None:
-            ship_model_path = self.shipModelPath(ship_model + '.json')
-            if ship_model_path is None:
-                raise Exception('Inexistent ship model')
-            else:
-                with open(ship_model_path) as file:
-                    return json.load(file)
+        dictutils.mergeMatch(content, (), ('Shape', 'shapes'), 'Shape',
+                             absolute=True)
+        dictutils.mergeMatch(content, (), ('Actuator', 'actuators'), 'Actuator',
+                             absolute=True)
+        dictutils.mergeMatch(content, (), ('Sensor', 'sensors'), 'Sensor',
+                             absolute=True)
+        dictutils.mergeMatch(content, (),
+                             ('InterfaceDevice', 'interface_devices'),
+                             'InterfaceDevice',
+                             absolute=True)
+        dictutils.mergeMatch(content, ('Shape',), ('Point', 'points'), 'Point',
+                             absolute=True)
 
-        return toml.load(ship_model_path)
+        return content
 
     def loadScenario(self, scenario_name):
 
