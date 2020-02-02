@@ -2,6 +2,38 @@
 from PyQt5.QtWidgets import QTreeView
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
 
+class NodeValue:
+
+    def __init__(self, name, description):
+        self.__name = name
+        self.__desc = description
+        self.__item = None
+
+    @property
+    def name(self):
+        return self.__name
+
+    @name.setter
+    def name(self, new_val):
+        self.__name = new_val
+        if self.__item is not None:
+            self.__item.setText(new_val)
+
+    @property
+    def description(self):
+        return self.__desc
+
+    @description.setter
+    def description(self, new_val):
+        self.__desc = new_val
+        if self.__item is not None:
+            self.__item.setToolTip(new_val)
+
+    def __setItem(self, new_val):
+        self.__item = new_val
+
+    item = property(None, __setItem)
+
 class NodeTreeView(QTreeView):
 
     def __init__(self, parent: 'QWidget' = None) -> None:
@@ -40,13 +72,21 @@ class NodeTreeView(QTreeView):
     def __addNode(parent_row, options: 'anytree.Node') -> None:
 
         node_value = options.name
-        if isinstance(node_value, tuple):
+        set_item = False
+
+        if isinstance(node_value, NodeValue):
+            set_item = True
+            node_desc = node_value.description
+            node_name = node_value.name
+        elif isinstance(node_value, tuple):
             node_desc = node_value[1]
-            node_value = node_value[0]
+            node_name = node_value[0]
         else:
+            node_name = node_value
             node_desc = None
 
-        item = QStandardItem(node_value)
+        item = QStandardItem(node_name)
+
         if node_desc:
             item.setToolTip(node_desc)
         item.setEditable(False)
@@ -54,3 +94,6 @@ class NodeTreeView(QTreeView):
 
         for child in options.children:
             NodeTreeView.__addNode(item, child)
+
+        if set_item is True:
+            node_value.item = item

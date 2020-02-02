@@ -69,11 +69,12 @@ class ObjectiveGroup(Objective):
         return ((objective, objective.accomplished())
                 for objective in  self.__subobjectives)
 
-    def accomplished(self) -> bool:
-        return all(acp for _, acp in accomplishedList())
-
     def _verify(self, space: 'pymunk.Space', ships: 'Sequence[Device]') -> bool:
-        return all(objective.verify(space, ships)
+
+        for objective in self.__subobjectives:
+            objective.verify(space, ships)
+
+        return all(objective.accomplished()
                    for objective in self.__subobjectives)
 
     @property

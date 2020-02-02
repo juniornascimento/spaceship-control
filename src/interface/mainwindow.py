@@ -26,8 +26,22 @@ from ..objectives.objective import createObjectiveTree
 
 # sys.path manipulation used to import nodetreeview.py from ui
 sys.path.insert(0, str(Path(__file__).parent))
+
+# imported here so it is not imported in a different path
+from nodetreeview import NodeValue
 UiMainWindow, _ = uic.loadUiType(FileInfo().uiFilePath('mainwindow.ui')) # pylint: disable=invalid-name
 sys.path.pop(0)
+
+class ObjectiveNodeValue(NodeValue):
+
+    def __init__(self, objective):
+        super().__init__(f'✗ {objective.name}', objective.description)
+
+        self.__objective = objective
+
+    def update(self):
+         symbol = '✓' if self.__objective.accomplished() else '✗'
+         self.name = f'{symbol} {self.__objective.name}'
 
 class MainWindow(QMainWindow):
 
@@ -57,6 +71,7 @@ class MainWindow(QMainWindow):
         self.__current_scenario = None
 
         self.__widgets = []
+        self.__objectives_node_value = []
 
         self.__ui.actionLoadScenario.triggered.connect(
             self.__loadScenarioAction)
@@ -210,13 +225,16 @@ class MainWindow(QMainWindow):
 
         self.__current_scenario = scenario
 
+        self.__objectives_node_value = []
         if self.__scenario_objectives:
             objectives_root_node = anytree.Node('root')
             for objective in self.__scenario_objectives:
                 createObjectiveTree(objective, parent=objectives_root_node)
 
             for node in objectives_root_node.descendants:
-                node.name = (node.name.name, node.name.description)
+                node_value = ObjectiveNodeValue(node.name)
+                node.name = node_value
+                self.__objectives_node_value.append(node_value)
 
             self.__ui.treeView.clear()
             self.__ui.treeView.addNodes(objectives_root_node.children)
@@ -238,6 +256,9 @@ class MainWindow(QMainWindow):
             self.__objectives_complete = all(
                 objective.verify(self.__space, ships)
                 for objective in self.__scenario_objectives)
+
+        for node_value in self.__objectives_node_value:
+            node_value.update()
 
         self.__updateTitle()
 
