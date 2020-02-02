@@ -6,7 +6,9 @@ from threading import Lock
 from pathlib import Path
 
 from PyQt5 import uic
-from PyQt5.QtWidgets import QMainWindow, QGraphicsScene, QFileDialog
+from PyQt5.QtWidgets import (
+    QMainWindow, QGraphicsScene, QFileDialog, QMessageBox
+)
 from PyQt5.QtCore import QTimer
 
 import pymunk
@@ -200,7 +202,13 @@ class MainWindow(QMainWindow):
 
         fileinfo = FileInfo()
 
-        scenario_info = fileinfo.loadScenario(scenario)
+        try:
+            scenario_info = fileinfo.loadScenario(scenario)
+        except Exception as err:
+            QMessageBox.warning(self, 'Error', (
+                'An error occurred loading the scenario: \n'
+                f'{type(err).__name__}: {err}'))
+            return
 
         self.__ui.deviceInterfaceComponents.setVisible(
             scenario_info.visible_user_interface)
@@ -215,7 +223,15 @@ class MainWindow(QMainWindow):
 
         ships = [None]*len(scenario_info.ships)
         for i, ship_info in enumerate(scenario_info.ships):
-            ship = self.__loadShip(ship_info, json_info, fileinfo)
+            try:
+                ship = self.__loadShip(ship_info, json_info, fileinfo)
+            except Exception as err:
+                self.clear()
+                QMessageBox.warning(self, 'Error', (
+                    f'An error occurred loading a ship({ship_info.model}): \n'
+                    f'{type(err).__name__}: {err}'))
+                return
+
             if ship is None:
                 self.clear()
                 return
