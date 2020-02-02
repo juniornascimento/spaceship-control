@@ -90,6 +90,9 @@ class MainWindow(QMainWindow):
 
         self.__title_basename = 'Spaceship Control'
 
+        view_geometry = self.__ui.view.geometry()
+        view_geometry.setWidth(self.geometry().width()//2)
+        self.__ui.view.setGeometry(view_geometry)
         self.__updateTitle()
 
     def __updateTitle(self):
