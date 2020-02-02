@@ -1,4 +1,6 @@
 
+from collections import namedtuple
+
 import toml
 
 from pymunk import Body, Circle, Poly
@@ -6,6 +8,8 @@ from pymunk import Body, Circle, Poly
 from PyQt5.QtWidgets import QLabel, QTextEdit
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont
+
+from ..configfileinheritance import resolvePrefix
 
 from ...utils.errorgenerator import ErrorGenerator
 
@@ -18,6 +22,8 @@ from ...devices.engine import LimitedLinearEngine
 from ...devices.interfacedevice import (
     TextDisplayDevice, ButtonDevice, KeyboardReceiverDevice, ConsoleDevice
 )
+
+ShipConfig = namedtuple('ShipConfig', ('image'))
 
 def __load_error(info: 'Dict[str, Any]') -> ErrorGenerator:
 
@@ -212,7 +218,8 @@ def __addDevice(
 
     return widgets
 
-def loadShip(ship_info: str, name: str, space: 'pymunk.Space') \
+def loadShip(ship_info: str, name: str, space: 'pymunk.Space',
+             prefixes: 'Sequence[str]' = ()) \
     -> 'Tuple[Structure, Sequence[QWidget]]':
 
     shapes = tuple(__createShape(shape_info)
@@ -249,4 +256,13 @@ def loadShip(ship_info: str, name: str, space: 'pymunk.Space') \
         widgets.extend(
             __addDevice(info, parts, 'InterfaceDevice'))
 
-    return ship, widgets
+    config_content = ship_info.get('Config')
+    if config_content is None:
+        config = ShipConfig(None)
+    else:
+        image_path = config_content.get('image')
+        if image_path is not None:
+            image_path, _ = resolvePrefix(image_path, prefixes)
+        config = ShipConfig(image_path)
+
+    return ship, config, widgets

@@ -30,7 +30,8 @@ class FileInfo:
 
         self.__path.mkdir(parents=True, exist_ok=True)
 
-        create_n_link_example_dirs = ['controllers', 'ships', 'scenarios']
+        create_n_link_example_dirs = ['controllers', 'ships', 'scenarios',
+                                      'images']
 
         dist_data_examples_path = self.__dist_data_path.joinpath('examples')
 
@@ -96,6 +97,10 @@ class FileInfo:
     def scenarioPath(self, *args, **kwargs):
         return self.__getPath(
             self.__path.joinpath('scenarios'), *args, **kwargs)
+
+    def dataImagePath(self, *args, **kwargs):
+        return self.__getPath(
+            self.__path.joinpath('images'), *args, **kwargs)
 
     def addScenarios(self, files):
         return self.__addFiles(self.__path.joinpath('scenarios'), files)
@@ -199,7 +204,7 @@ class FileInfo:
         ship_content = configfileinheritance.mergeInheritedFiles(
             ship_content, self.__getShipContent, prefixes=prefixes)
 
-        return shiploader.loadShip(ship_content, name, space)
+        return shiploader.loadShip(ship_content, name, space, prefixes=prefixes)
 
     def loadController(self, controller_name, ship, json_info, lock):
         return controllerloader.loadController(

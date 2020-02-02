@@ -1,0 +1,86 @@
+
+[Config]
+
+image = '.ship4.png'
+
+[[Shape]]
+
+type = 'circle'
+mass = 50
+radius = 100
+elasticity = 0.2
+friction = 1.5
+
+[[Part]]
+
+name = 'part'
+x = 0
+y = 0
+
+[[Sensor]]
+
+part = 'part'
+
+name = 'pos-sensor'
+type = 'position'
+
+reading_time = 1
+
+error_max = 60
+offset_max = 5
+
+[[Sensor]]
+
+part = 'part'
+
+name = 'ang-sensor'
+type = 'angle'
+
+reading_time = 0.6
+
+error_max = 10
+offset_max = 20
+
+[[Sensor]]
+
+part = 'part'
+
+name = 'speed-sensor'
+type = 'speed'
+
+reading_time = 0.2
+
+error_max = 10
+offset_max = 3
+
+[[Actuator]]
+
+part = 'part'
+
+name = 'engine'
+type = 'engine'
+model = 'intensity_range'
+
+min_intensity = -4
+max_intensity = 4
+
+min_angle = 0
+max_angle = 0
+
+[Actuator.Error.Position]
+
+error_max = 5
+offset_max = 5
+
+[[InterfaceDevice]]
+
+part = 'part'
+
+name = 'display'
+type = 'text-display'
+model = 'console'
+
+x = 10
+y = 10
+columns = 25
+rows = 40

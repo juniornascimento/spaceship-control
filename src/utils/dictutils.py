@@ -123,7 +123,5 @@ def mergeMatch(dict_obj: 'Dict[str, Any]', path: 'Sequence[str]',
 
     matches = pathMatch(dict_obj, path, **kwargs)
 
-    if path == ('Shape'):
-        print(matches)
     for match_val in reversed(matches):
         merge_function(match_val, keys, target)

@@ -7,8 +7,9 @@ from pathlib import Path
 
 from PyQt5 import uic
 from PyQt5.QtWidgets import (
-    QMainWindow, QGraphicsScene, QFileDialog, QMessageBox
+    QMainWindow, QGraphicsScene, QFileDialog, QMessageBox, QGraphicsPixmapItem
 )
+from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import QTimer
 
 import pymunk
@@ -163,8 +164,8 @@ class MainWindow(QMainWindow):
 
             ship_model = '/'.join(ship_model)
 
-        ship, widgets = fileinfo.loadShip(ship_model, ship_info.name,
-                                          self.__space)
+        ship, config, widgets = fileinfo.loadShip(ship_model, ship_info.name,
+                                                  self.__space)
 
         self.__widgets = widgets
         ship.body.position = ship_info.position
@@ -189,7 +190,11 @@ class MainWindow(QMainWindow):
         thread = fileinfo.loadController(ship_controller, ship, json_info,
                                          self.__lock)
 
-        ship_gitem = ShipGraphicsItem(ship.body.shapes)
+        if config.image is None:
+            ship_gitem = ShipGraphicsItem(ship.body.shapes)
+        else:
+            ship_gitem = QGraphicsPixmapItem(
+                QPixmap(fileinfo.dataImagePath(config.image, to_string=True)))
         self.__ui.view.scene().addItem(ship_gitem)
 
         thread.start()

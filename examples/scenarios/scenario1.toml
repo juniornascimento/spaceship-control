@@ -8,8 +8,8 @@ name = 'example1'
 id = 'main-ship'
 name = 'ship1'
 
-x = 300
-y = 400
+x = 0
+y = 0
 angle = 45
 
 [[Objective]]
