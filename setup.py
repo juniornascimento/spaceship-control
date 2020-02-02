@@ -33,6 +33,15 @@ class OverrideInstall(install):
             if 'examples/controllers' in filepath:
                 os.chmod(filepath, 0o755)
 
+version = '0.1'
+
+TEMP_DESKTOP_FILE = 'spaceshipcontrol.desktop'
+
+with open('data/spaceshipcontrol.desktop') as file:
+    desktop_file = file.read().replace('{{version}}', version)
+    with open(TEMP_DESKTOP_FILE, 'w') as outf:
+        outf.write(desktop_file)
+
 setup(
     name='spaceship-control',
     version='0.1',
@@ -56,6 +65,12 @@ setup(
             'spaceshipcontrol = spaceship_control.main:main',
         ]
     },
+    data_files = [
+        ('share/applications', [TEMP_DESKTOP_FILE]),
+        ('share/icons', ['imgs/spaceshipcontrol.png'])
+    ],
     cmdclass={'install': OverrideInstall},
     license='LGPL-3.0'
 )
+
+os.remove(TEMP_DESKTOP_FILE)

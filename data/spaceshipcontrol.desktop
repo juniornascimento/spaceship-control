@@ -1,0 +1,8 @@
+[Desktop Entry]
+Encoding=UTF-8
+Version={{version}}
+Type=Application
+Terminal=false
+Exec=spaceshipcontrol
+Name=SpaceshipControl
+Icon=spaceshipcontrol.png
