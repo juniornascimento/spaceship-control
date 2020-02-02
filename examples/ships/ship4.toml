@@ -1,7 +1,11 @@
 
 [Config]
 
-image = '.ship4.png'
+[Config.Image]
+
+path = '.ship4.png'
+width = 200
+height = 200
 
 [[Shape]]
 

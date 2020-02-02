@@ -23,6 +23,7 @@ from ...devices.interfacedevice import (
     TextDisplayDevice, ButtonDevice, KeyboardReceiverDevice, ConsoleDevice
 )
 
+ShipImageInfo = namedtuple('ShipImageInfo', ('name', 'width', 'height'))
 ShipConfig = namedtuple('ShipConfig', ('image'))
 
 def __load_error(info: 'Dict[str, Any]') -> ErrorGenerator:
@@ -260,9 +261,17 @@ def loadShip(ship_info: str, name: str, space: 'pymunk.Space',
     if config_content is None:
         config = ShipConfig(None)
     else:
-        image_path = config_content.get('image')
-        if image_path is not None:
-            image_path, _ = resolvePrefix(image_path, prefixes)
-        config = ShipConfig(image_path)
+        image_config = config_content.get('Image')
+
+        image_info = None
+        if image_config is not None:
+            image_path = image_config.get('path')
+            if image_path is not None:
+                image_path, _ = resolvePrefix(image_path, prefixes)
+                image_info = ShipImageInfo(image_path,
+                                           image_config.get('width'),
+                                           image_config.get('height'))
+
+        config = ShipConfig(image_info)
 
     return ship, config, widgets

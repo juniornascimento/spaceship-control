@@ -113,7 +113,6 @@ class MainWindow(QMainWindow):
             self.setWindowTitle(
                 f'{self.__title_basename}({self.__current_scenario}){suffix}')
 
-
     def closeEvent(self, _event):
         self.__ui.view.setScene(None)
 
@@ -193,8 +192,19 @@ class MainWindow(QMainWindow):
         if config.image is None:
             ship_gitem = ShipGraphicsItem(ship.body.shapes)
         else:
-            ship_gitem = QGraphicsPixmapItem(
-                QPixmap(fileinfo.dataImagePath(config.image, to_string=True)))
+            pixmap = QPixmap(fileinfo.dataImagePath(config.image.name))
+            height = config.image.height
+            width = config.image.width
+
+            if height is None:
+                if width is not None:
+                    pixmap = pixmap.scaledToWidth(width)
+            elif width is None:
+                pixmap = pixmap.scaledToheight(height)
+            else:
+                pixmap = pixmap.scaled(width, height)
+
+            ship_gitem = QGraphicsPixmapItem(pixmap)
         self.__ui.view.scene().addItem(ship_gitem)
 
         thread.start()
