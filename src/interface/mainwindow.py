@@ -133,6 +133,7 @@ class MainWindow(QMainWindow):
             self.__ships = []
 
         self.__current_scenario = None
+        self.__updateTitle()
 
     @staticmethod
     def __getOptionDialog(title, options):
@@ -257,8 +258,6 @@ class MainWindow(QMainWindow):
         for widget in self.__ships[0][2]:
             widget.show()
 
-        self.__current_scenario = scenario
-
         self.__objectives_node_value = []
         if self.__scenario_objectives:
             objectives_root_node = anytree.Node('root')
@@ -275,7 +274,12 @@ class MainWindow(QMainWindow):
         else:
             self.__ui.treeView.hide()
 
+        self.__current_scenario = scenario
+
     def __timerTimeout(self):
+
+        if self.__current_scenario is None:
+            return
 
         ships = tuple(ship for ship, _, _, _ in self.__ships)
         with self.__lock:
