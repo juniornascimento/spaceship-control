@@ -262,6 +262,25 @@ class DefaultDevice(Device):
     }
 
 class DeviceGroup(DefaultDevice):
+    """A device that can have multiple subdevices.
+
+    This class is used to represent a device that consist of multiple devices,
+    the messages send to this device will be verify which of the device will
+    receive the message using ':' as an indicator that an subdevice is used.
+
+    Note:
+        Any commands send to this device must have no ':' characters if the
+        command is meant to be executed by this device, and it must start
+        with `child_device_name_or_id:` if you want to send a message to a
+        subdevice.
+
+    Args:
+        device_type: String that represent what the device is meant to be,
+            using this value consistently it will help the controller to now
+            what the commands it can send to this device.
+        **kwargs: Keyword arguments that will be passed to `DefaultDevice`
+            construtor.
+    """
 
     def __init__(self, device_type: str = 'device-group', **kwargs):
         super().__init__(device_type=device_type, **kwargs)
@@ -272,6 +291,19 @@ class DeviceGroup(DefaultDevice):
         self.setInfo('is-device-group', 'yes')
 
     def addDevice(self, device: Device, name: str = None):
+        """Method used to add devices to `DeviceGroup`.
+
+        This method is used to add devices to this `DeviceGroup` object, it's
+        possible to communicate with each device added using `child_device_name`
+        or `child_device_id` where the first is specified by the argument `name`
+        and the second by the order in which it was added.
+
+
+        Args:
+            device: Device that will be added.
+            name: Name of the device that will may be used as identifier.
+
+        """
 
         self.__device_list.append(device)
         if name is not None:
@@ -280,9 +312,23 @@ class DeviceGroup(DefaultDevice):
                 device.setInfo('device-name-in-group', name)
 
     def deviceCount(self):
+        """Method used to get the device count.
+
+        This method will return the number of devices that are part of this
+        device.
+
+        Returns:
+            Number of subdevices that this device has.
+
+        """
         return len(self.__device_list)
 
     def act(self) -> None:
+        """Method `act` is overriden so it will call `act` for all subdevices.
+
+        This method override `act` of `Device` and is implemented to call `act`
+        for all subdevices.
+        """
         for device in self.__device_list:
             device.act()
 
