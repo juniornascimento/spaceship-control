@@ -121,24 +121,27 @@ class FileInfo:
 
         package_name = package_path.name
 
-        for directory, mode, pat in (('scenarios', 0o644, '*.toml'),
-                                     ('ships', 0o644, '*.toml'),
-                                     ('controllers', 0o555, '*')):
+        for directory, mode, patterns in (
+            ('scenarios', 0o644, ('*.toml', '*.json')),
+            ('ships', 0o644, ('*.toml', '*.json')),
+            ('controllers', 0o555, ('*',)),
+            ('images', 0o644, ('*.png', '*.gif'))):
 
             dest_base_path = self.__path.joinpath(directory).joinpath(
                 package_name)
             package_subdir_path = package_path.joinpath(directory)
 
-            for path in package_subdir_path.rglob(pat):
-                if path.is_file():
+            for pat in patterns:
+                for path in package_subdir_path.rglob(pat):
+                    if path.is_file():
 
-                    dest_path = dest_base_path.joinpath(
-                        path.parent.relative_to(package_subdir_path))
+                        dest_path = dest_base_path.joinpath(
+                            path.parent.relative_to(package_subdir_path))
 
-                    if not dest_path.exists():
-                        dest_path.mkdir(parents=True)
+                        if not dest_path.exists():
+                            dest_path.mkdir(parents=True)
 
-                    self.__addFiles(dest_path, (path,), mode=mode)
+                        self.__addFiles(dest_path, (path,), mode=mode)
 
     @staticmethod
     def __getContent(filename, get_path):
