@@ -88,6 +88,9 @@ class MainWindow(QMainWindow):
         self.__ui.actionImportController.triggered.connect(
             self.__importControllerAction)
 
+        self.__ui.actionImportImage.triggered.connect(
+            self.__importImageAction)
+
         self.__ui.actionImportPackage.triggered.connect(
             self.__importPackageAction)
 
@@ -336,6 +339,19 @@ class MainWindow(QMainWindow):
             return
 
         FileInfo().addControllers(fdialog.selectedFiles())
+
+    @staticmethod
+    def __importImageAction():
+
+        fdialog = QFileDialog(None, 'Image Import Dialog', '',
+                              'image files(*.png *.gif)')
+
+        fdialog.setFileMode(QFileDialog.ExistingFiles)
+
+        if not fdialog.exec_():
+            return
+
+        FileInfo().addImages(fdialog.selectedFiles())
 
     @staticmethod
     def __importPackageAction():

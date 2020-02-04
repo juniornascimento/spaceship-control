@@ -131,8 +131,10 @@
      <addaction name="actionImportScenario"/>
      <addaction name="actionImportShip"/>
      <addaction name="actionImportController"/>
+     <addaction name="actionImportImage"/>
     </widget>
     <addaction name="actionLoadScenario"/>
+    <addaction name="separator"/>
     <addaction name="actionImportPackage"/>
     <addaction name="menuImportData"/>
    </widget>
@@ -161,6 +163,11 @@
   <action name="actionImportPackage">
    <property name="text">
     <string>Import Package</string>
+   </property>
+  </action>
+  <action name="actionImportImage">
+   <property name="text">
+    <string>Image</string>
    </property>
   </action>
  </widget>

@@ -112,6 +112,9 @@ class FileInfo:
         return self.__addFiles(self.__path.joinpath('controllers'), files,
                                mode=0o555)
 
+    def addImages(self, files):
+        return self.__addFiles(self.__path.joinpath('images'), files)
+
     def addPackage(self, package_pathname):
 
         package_path = Path(package_pathname)
