@@ -21,20 +21,24 @@ def subVariables(content, enabled=None, variables=None):
         if variables is None:
             variables = new_variables
         else:
-            variables = variables.copy().update(new_variables)
+            variables = variables.copy()
+            variables.update(new_variables)
 
         for key, value in content.items():
-            new_key = subVariables(key, enabled=enabled, variables=variables)
-            new_val = subVariables(value, enabled=enabled, variables=variables)
+            new_key = subVariables(key, enabled=True, variables=variables)
+            new_val = subVariables(value, enabled=True, variables=variables)
 
             content[new_key] = new_val
 
     elif isinstance(content, list):
         for i, element in enumerate(content):
-            content[i] = subVariables(content, enabled=enabled,
+            content[i] = subVariables(element, enabled=enabled,
                                       variables=variables)
     elif isinstance(content, str):
+        if content.startswith('#'):
+            return content[1:]
         if content.startswith('var#'):
+            print(variables[content[4:].strip()])
             return variables[content[4:].strip()]
 
     return content

@@ -1,11 +1,23 @@
 
 [Config]
 
+variables_enabled = true
+
 [Config.Image]
 
 path = '.ship4.png'
 width = 200
 height = 200
+
+[[Variable]]
+
+id = 'console-x'
+value = 10
+
+[[Variable]]
+
+id = 'console-y'
+value = 10
 
 [[Shape]]
 
@@ -84,7 +96,7 @@ name = 'display'
 type = 'text-display'
 model = 'console'
 
-x = 10
-y = 10
+x = 'var# console-x'
+y = 'var# console-y'
 columns = 25
 rows = 40

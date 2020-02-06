@@ -8,7 +8,7 @@ import toml
 
 from anytree import Node
 
-from . import configfileinheritance
+from . import configfileinheritance, configfilevariables
 
 from .loaders import (
     shiploader, scenarioloader, controllerloader
@@ -169,6 +169,8 @@ class FileInfo:
         dictutils.mergeMatch(content, (), ('Objective', 'objectives'),
                              'Objective', absolute=True)
 
+        configfilevariables.subVariables(content)
+
         return content
 
     def __getShipContent(self, ship_model):
@@ -187,6 +189,8 @@ class FileInfo:
                              absolute=True)
         dictutils.mergeMatch(content, ('Shape',), ('Point', 'points'), 'Point',
                              absolute=True)
+
+        configfilevariables.subVariables(content)
 
         return content
 
