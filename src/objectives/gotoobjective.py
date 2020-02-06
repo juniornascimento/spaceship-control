@@ -20,12 +20,12 @@ class GoToObjective(Objective):
         self.__distance = distance
         self.__distance_sqrtd = distance**2
 
-    def _verifyShip(self, space: 'pymunk.Space', ship: 'Device') -> bool:
+    def _verifyShip(self, ship: 'Device') -> bool:
         pos = ship.body.position
         return pos.get_dist_sqrd(self.__position) < self.__distance_sqrtd
 
     def _verify(self, space: 'pymunk.Space', ships: 'Sequence[Device]') -> bool:
-        return any(self._verifyShip(space, ship) for ship in ships)
+        return any(self._verifyShip(ship) for ship in ships)
 
     @property
     def info(self) -> 'Dict[str, Any]':

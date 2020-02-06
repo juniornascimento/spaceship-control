@@ -9,17 +9,17 @@ def resolvePrefix(name, prefixes):
     else:
         raise ValueError(f'Could\'nt resolve \'{name}\'')
 
-    if dot_count == 0:
+    if dot_count == 0: # pylint: disable=undefined-loop-variable
         return name, prefixes
 
-    parent_returns = dot_count - 1
+    parent_returns = dot_count - 1 # pylint: disable=undefined-loop-variable
 
     if parent_returns > len(prefixes):
         ValueError(f'Could\'nt resolve \'{name}\'')
 
     new_prefix = tuple(prefixes[: len(prefixes) - parent_returns])
 
-    resolved_name = '/'.join(itertools.chain(new_prefix, (name[dot_count:],)))
+    resolved_name = '/'.join(itertools.chain(new_prefix, (name[dot_count:],))) # pylint: disable=undefined-loop-variable
 
     new_prefix += tuple(name.split('/')[: -1])
 

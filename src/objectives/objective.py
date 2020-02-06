@@ -1,5 +1,4 @@
 
-from collections import Sequence
 from abc import ABC, abstractmethod, abstractproperty
 
 from anytree import Node

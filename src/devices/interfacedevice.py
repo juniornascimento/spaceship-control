@@ -1,15 +1,13 @@
 
 import html
 
-from PyQt5.QtGui import QFontMetricsF, QTextCursor
+from PyQt5.QtGui import QFontMetricsF
 from PyQt5.QtWidgets import QLabel, QTextEdit
 from PyQt5.QtCore import Qt
 
 from .device import DefaultDevice
 
 from ..utils.actionqueue import ActionQueue, Action
-
-from ..interface.panelpushbutton import PanelPushButton
 
 class InterfaceDevice(DefaultDevice):
 
@@ -31,8 +29,8 @@ class TextDisplayDevice(InterfaceDevice):
 
         self.__label = label
 
-    def command(self, command: 'List[str]') -> 'Any':
-        return super().command(command, TextDisplayDevice.__COMMANDS)
+    def command(self, command: 'List[str]', *args) -> 'Any':
+        return super().command(command, TextDisplayDevice.__COMMANDS, *args)
 
     def setText(self, text: str) -> None:
         self.addAction(Action(QLabel.setText, self.__label, text))
@@ -49,8 +47,8 @@ class ButtonDevice(InterfaceDevice):
 
         self.__button = button
 
-    def command(self, command: 'List[str]') -> 'Any':
-        return super().command(command, ButtonDevice.__COMMANDS)
+    def command(self, command: 'List[str]', *args) -> 'Any':
+        return super().command(command, ButtonDevice.__COMMANDS, *args)
 
     def __clicked(self) -> None:
         return '1' if self.__button.getPressed() else '0'
@@ -67,8 +65,9 @@ class KeyboardReceiverDevice(InterfaceDevice):
 
         self.__receiver = kb_receiver
 
-    def command(self, command: 'List[str]') -> 'Any':
-        return super().command(command, KeyboardReceiverDevice.__COMMANDS)
+    def command(self, command: 'List[str]', *args) -> 'Any':
+        return super().command(command,
+                               KeyboardReceiverDevice.__COMMANDS, *args)
 
     def __get(self) -> None:
         return self.__receiver.getAll()
@@ -91,7 +90,7 @@ class ConsoleDevice(InterfaceDevice):
         self.__total_rows = rows
         self.__text = ' '*(self.__total_cols*self.__total_rows)
 
-        text.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff);
+        text.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         text.setFocusPolicy(Qt.NoFocus)
 
         tdoc = text.document()
@@ -110,8 +109,8 @@ class ConsoleDevice(InterfaceDevice):
         text.setFixedHeight(height)
         text.setFixedWidth(width)
 
-    def command(self, command: 'List[str]') -> 'Any':
-        return super().command(command, ConsoleDevice.__COMMANDS)
+    def command(self, command: 'List[str]', *args) -> 'Any':
+        return super().command(command, ConsoleDevice.__COMMANDS, *args)
 
     def __setPos(self, column_s, row_s):
 

@@ -3,10 +3,9 @@ from pymunk import Vec2d
 from abc import abstractmethod
 
 import time
-import random
 import math
 
-from .device import DefaultDevice, DeviceGroup, PropertyDevice
+from .device import DeviceGroup, PropertyDevice
 
 from ..utils.errorgenerator import ErrorGenerator
 
@@ -28,7 +27,7 @@ class Structure(DeviceGroup):
     def name(self) -> str:
         return self.__name
 
-    def addDevice(self, device: 'Device', **kwargs: 'Any') -> None:
+    def addDevice(self, device: 'Device', **kwargs: 'Any') -> None: # pylint: disable=arguments-differ
         super().addDevice(device, **kwargs)
 
         if isinstance(device, StructuralPart):
@@ -139,8 +138,8 @@ class Sensor(PropertyDevice):
     def act(self) -> None:
         pass
 
-    def command(self, command: 'List[str]') -> 'Any':
-        return super().command(command, Sensor.__COMMANDS)
+    def command(self, command: 'List[str]', *args) -> 'Any':
+        return super().command(command, Sensor.__COMMANDS, *args)
 
     def __read(self) -> float:
         now = time.time()
@@ -180,13 +179,13 @@ class MultiSensor(DeviceGroup):
                                               read_offset_max=read_offset_max))
             self.addDevice(self.__sensors[-1], name=sensor_name)
 
-    def command(self, command: 'List[str]') -> 'Any':
+    def command(self, command: 'List[str]', *args) -> 'Any':
         if self.__sensors and command and \
             command[0] in MultiSensor.__REDIRECT_COMMANDS:
 
             return self.__sensors[0].command(command)
 
-        return super().command(command)
+        return super().command(command, *args)
 
     __REDIRECT_COMMANDS = {'reading-time', 'max-error', 'max-offset'}
 

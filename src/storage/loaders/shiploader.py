@@ -1,8 +1,6 @@
 
 from collections import namedtuple
 
-import toml
-
 from pymunk import Body, Circle, Poly
 
 from PyQt5.QtWidgets import QLabel, QTextEdit
@@ -120,7 +118,7 @@ def __createSpeedSensor(info: 'Dict[str, Any]', part: StructuralPart) \
                        read_offset_max=info.get('offset_max', 0),
                        angle=info.get('angle', 0)), ()
 
-def __createTextDisplay(info: 'Dict[str, Any]', part: StructuralPart) \
+def __createTextDisplay(info: 'Dict[str, Any]', _part: StructuralPart) \
     -> 'Tuple[TextDisplayDevice, Sequence[QWidget]]':
 
     label = QLabel('-')
@@ -140,7 +138,7 @@ def __createTextDisplay(info: 'Dict[str, Any]', part: StructuralPart) \
 
     return TextDisplayDevice(label), (label,)
 
-def __createConsole(info: 'Dict[str, Any]', part: StructuralPart) \
+def __createConsole(info: 'Dict[str, Any]', _part: StructuralPart) \
     -> 'Tuple[InterfaceDevice, Sequence[QWidget]]':
 
     text = QTextEdit()
@@ -166,7 +164,7 @@ def __createConsole(info: 'Dict[str, Any]', part: StructuralPart) \
     return (ConsoleDevice(text, info.get('columns', 20), info.get('rows', 5)),
             (text,))
 
-def __createKeyboardReceiver(info: 'Dict[str, Any]', part: StructuralPart) \
+def __createKeyboardReceiver(info: 'Dict[str, Any]', _part: StructuralPart) \
     -> 'Tuple[KeyboardButton, Sequence[QWidget]]':
 
     button = KeyboardButton()
@@ -175,7 +173,7 @@ def __createKeyboardReceiver(info: 'Dict[str, Any]', part: StructuralPart) \
 
     return KeyboardReceiverDevice(button), (button,)
 
-def __createButton(info: 'Dict[str, Any]', part: StructuralPart) \
+def __createButton(info: 'Dict[str, Any]', _part: StructuralPart) \
     -> 'Tuple[ButtonDevice, Sequence[QWidget]]':
 
     button = PanelPushButton()

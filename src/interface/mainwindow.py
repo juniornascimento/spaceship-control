@@ -43,8 +43,8 @@ class ObjectiveNodeValue(NodeValue):
         self.__objective = objective
 
     def update(self):
-         symbol = '✓' if self.__objective.accomplished() else '✗'
-         self.name = f'{symbol} {self.__objective.name}'
+        symbol = '✓' if self.__objective.accomplished() else '✗'
+        self.name = f'{symbol} {self.__objective.name}'
 
 class MainWindow(QMainWindow):
 

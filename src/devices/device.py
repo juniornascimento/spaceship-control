@@ -25,7 +25,6 @@ class Device(ABC):
         actions that are done over time.
 
         """
-        pass
 
     @abstractmethod
     def communicate(self, input_: str) -> str:
@@ -50,9 +49,8 @@ class Device(ABC):
             A string that contain no control characters.
 
         """
-        pass
 
-class DefaultDevice(Device):
+class DefaultDevice(Device): # pylint: disable=abstract-method
     """Device that use shell-like command to communicate.
 
     This class represent a more concrete device than the 'Device' class, classes
@@ -206,7 +204,7 @@ class DefaultDevice(Device):
             command_args = iter(command)
             next(command_args)
             return command_func(self, *command_args)
-        except Exception:
+        except Exception: # pylint: disable=broad-except
             return 'An error ocurred running the command'
 
     def command(self, command: 'List[str]',
@@ -355,15 +353,15 @@ class DeviceGroup(DefaultDevice):
 
         return super().communicate(input_)
 
-    def command(self, command: 'List[str]') -> 'Any':
-        return super().command(command, DeviceGroup.__COMMANDS)
+    def command(self, command: 'List[str]', *args) -> 'Any':
+        return super().command(command, DeviceGroup.__COMMANDS, *args)
 
     __COMMANDS = {
 
         'device-count': deviceCount
     }
 
-class PropertyDevice(DefaultDevice):
+class PropertyDevice(DefaultDevice): # pylint: disable=abstract-method
 
     def __init__(self,
                  properties: 'Dict[str, property]' = None,
@@ -393,11 +391,12 @@ class PropertyDevice(DefaultDevice):
 
         return '<<OK>>'
 
+    @property
     def properties(self) -> 'Iterable[Tuple[str, Any]]':
         return self.__properties.items()
 
     def __listPropertiesStr(self) -> str:
-        return ':'.join(key for key, _ in self.properties),
+        return ':'.join(key for key, _ in self.properties)
 
     def __showPropertiesStr(self) -> str:
         return ':'.join(f'{key}={val}' for key, val in self.properties)
