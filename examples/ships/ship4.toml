@@ -11,13 +11,13 @@ height = 200
 
 [[Variable]]
 
-id = 'console-x'
+id = 'console_x'
 value = 10
 
 [[Variable]]
 
-id = 'console-y'
-value = 10
+id = 'half_console_y'
+value = 5
 
 [[Shape]]
 
@@ -96,7 +96,7 @@ name = 'display'
 type = 'text-display'
 model = 'console'
 
-x = 'var# console-x'
-y = 'var# console-y'
+x = 'var# console_x'
+y = 'expr# 2*half_console_y'
 columns = 25
 rows = 40

@@ -1,4 +1,6 @@
 
+from simpleeval import simple_eval
+
 def subVariables(content, enabled=None, variables=None):
 
     if enabled is False:
@@ -37,8 +39,11 @@ def subVariables(content, enabled=None, variables=None):
     elif isinstance(content, str):
         if content.startswith('#'):
             return content[1:]
+        if content.startswith('raw#'):
+            return content[4:]
         if content.startswith('var#'):
-            print(variables[content[4:].strip()])
             return variables[content[4:].strip()]
+        if content.startswith('expr#'):
+            return simple_eval(content[5:], names=variables)
 
     return content
