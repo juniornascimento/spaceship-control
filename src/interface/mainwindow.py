@@ -94,12 +94,17 @@ class MainWindow(QMainWindow):
         self.__ui.actionImportPackage.triggered.connect(
             self.__importPackageAction)
 
+        self.__ui.deviceInterfaceComboBox.currentIndexChanged.connect(
+            self.__deviceInterfaceComboBoxIndexChange)
+
         self.__title_basename = 'Spaceship Control'
 
         view_geometry = self.__ui.view.geometry()
         view_geometry.setWidth(self.geometry().width()//2)
         self.__ui.view.setGeometry(view_geometry)
         self.__updateTitle()
+
+        self.__current_ship_widgets_index = 0
 
     def __updateTitle(self):
 
@@ -123,6 +128,7 @@ class MainWindow(QMainWindow):
 
         self.setWindowTitle(self.__title_basename)
 
+        self.__ui.deviceInterfaceComboBox.clear()
         self.__ui.deviceInterfaceComponents.show()
         self.__ui.treeView.show()
 
@@ -136,6 +142,7 @@ class MainWindow(QMainWindow):
             self.__ships = []
 
         self.__current_scenario = None
+        self.__current_ship_widgets_index = 0
         self.__updateTitle()
 
     @staticmethod
@@ -211,6 +218,9 @@ class MainWindow(QMainWindow):
             ship_gitem = QGraphicsPixmapItem(pixmap)
         self.__ui.view.scene().addItem(ship_gitem)
 
+        self.__ui.deviceInterfaceComboBox.addItem(
+            f'{ship_info.name} ({ship_model})')
+
         thread.start()
 
         return ship, ship_gitem, widgets, thread
@@ -229,7 +239,7 @@ class MainWindow(QMainWindow):
                 f'{type(err).__name__}: {err}'))
             return
 
-        self.__ui.deviceInterfaceComponents.setVisible(
+        self.__ui.deviceInterfaceWidgets.setVisible(
             scenario_info.visible_user_interface)
 
         self.__scenario_objectives = scenario_info.objectives
@@ -278,6 +288,7 @@ class MainWindow(QMainWindow):
             self.__ui.treeView.hide()
 
         self.__current_scenario = scenario
+        self.__ui.deviceInterfaceComboBox.setVisible(len(self.__ships) > 1)
 
     def __timerTimeout(self):
 
@@ -365,3 +376,17 @@ class MainWindow(QMainWindow):
 
         for package in fdialog.selectedFiles():
             FileInfo().addPackage(package)
+
+    def __deviceInterfaceComboBoxIndexChange(self, cur_index):
+
+        if cur_index == -1 or cur_index >= len(self.__ships):
+            return
+
+        for widget in self.__ships[self.__current_ship_widgets_index][2]:
+            widget.hide()
+
+        for widget in self.__ships[cur_index][2]:
+            widget.show()
+
+        self.__current_ship_widgets_index = cur_index
+
