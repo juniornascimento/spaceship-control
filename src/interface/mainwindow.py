@@ -91,6 +91,15 @@ class MainWindow(QMainWindow):
         self.__ui.actionImportImage.triggered.connect(
             self.__importImageAction)
 
+        self.__ui.actionOpenScenario.triggered.connect(
+            self.__openScenarioAction)
+
+        self.__ui.actionOpenShip.triggered.connect(
+            self.__openShipAction)
+
+        self.__ui.actionOpenController.triggered.connect(
+            self.__openControllerAction)
+
         self.__ui.actionImportPackage.triggered.connect(
             self.__importPackageAction)
 
@@ -390,3 +399,29 @@ class MainWindow(QMainWindow):
 
         self.__current_ship_widgets_index = cur_index
 
+    @staticmethod
+    def __openScenarioAction():
+
+        scenario = MainWindow.__getOptionDialog(
+            'Choose scenario', FileInfo().listScenariosTree().children)
+
+        if scenario is not None:
+            FileInfo().openScenarioFile('/'.join(scenario))
+
+    @staticmethod
+    def __openShipAction():
+
+        ship = MainWindow.__getOptionDialog(
+            'Choose ship model', FileInfo().listShipsModelTree().children)
+
+        if ship is not None:
+            FileInfo().openShipModelFile('/'.join(ship))
+
+    @staticmethod
+    def __openControllerAction():
+
+        controller = MainWindow.__getOptionDialog(
+            'Choose controller', FileInfo().listControllersTree().children)
+
+        if controller is not None:
+            FileInfo().openControllerFile('/'.join(controller))

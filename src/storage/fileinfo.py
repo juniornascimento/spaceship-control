@@ -2,6 +2,7 @@
 import os
 import shutil
 from pathlib import Path
+import subprocess
 
 import json
 import toml
@@ -144,25 +145,34 @@ class FileInfo:
                         self.__addFiles(dest_path, (path,), mode=mode)
 
     @staticmethod
-    def __getContent(filename, get_path):
+    def __findSuffix(basename, get_path, valid_suffixes):
 
-        filepath = get_path(filename + '.toml')
+        for valid_suffix in valid_suffixes:
+            filepath = get_path(basename + valid_suffix)
+            if filepath is not None:
+                return filepath, valid_suffix
+
+        return None, None
+
+    @staticmethod
+    def __getContent(basename, get_path, inexistent_message):
+
+        filepath, suffix = FileInfo.__findSuffix(
+            basename, get_path, ('.toml', '.json'))
 
         if filepath is None:
-            filepath = get_path(filename + '.json')
-            if filepath is None:
-                raise Exception('Inexistent ship model')
-            else:
-                with open(filepath) as file:
-                    content = json.load(file)
-        else:
-            content = toml.load(filepath)
+            raise Exception(inexistent_message)
 
-        return content
+        if suffix == '.json':
+            with open(filepath) as file:
+                return json.load(file)
+
+        return toml.load(filepath)
 
     def __getScenarioContent(self, scenario_name):
 
-        content = self.__getContent(scenario_name, self.scenarioPath)
+        content = self.__getContent(scenario_name, self.scenarioPath,
+                                    'Inexistent scenario')
 
         dictutils.mergeMatch(content, (), ('Ship', 'ships'), 'Ship',
                              absolute=True)
@@ -175,7 +185,8 @@ class FileInfo:
 
     def __getShipContent(self, ship_model):
 
-        content = self.__getContent(ship_model, self.shipModelPath)
+        content = self.__getContent(ship_model, self.shipModelPath,
+                                    'Inexistent ship model')
 
         dictutils.mergeMatch(content, (), ('Shape', 'shapes'), 'Shape',
                              absolute=True)
@@ -219,6 +230,33 @@ class FileInfo:
     def loadController(self, controller_name, ship, json_info, lock):
         return controllerloader.loadController(
             self.controllerPath(controller_name), ship, json_info, lock)
+
+    def openScenarioFile(self, scenario):
+
+        scenario_path, _ = self.__findSuffix(
+            scenario, self.scenarioPath, ('.toml', '.json'))
+
+        if scenario_path is not None:
+            self.__openFile(scenario_path)
+
+    def openShipModelFile(self, ship_model):
+
+        model_path, _ = self.__findSuffix(
+            ship_model, self.shipModelPath, ('.toml', '.json'))
+
+        if model_path is not None:
+            self.__openFile(model_path)
+
+    def openControllerFile(self, controller):
+
+        controller_path = self.controllerPath(controller)
+
+        if controller_path is not None:
+            self.__openFile(controller_path)
+
+    @staticmethod
+    def __openFile(path):
+        subprocess.call(['xdg-open', path])
 
     def __addFiles(self, path, files, mode=0o644):
         path_str = str(path)

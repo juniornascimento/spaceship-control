@@ -136,7 +136,17 @@
      <addaction name="actionImportController"/>
      <addaction name="actionImportImage"/>
     </widget>
+    <widget class="QMenu" name="menuOpenFile">
+     <property name="title">
+      <string>Open File</string>
+     </property>
+     <addaction name="actionOpenScenario"/>
+     <addaction name="actionOpenShip"/>
+     <addaction name="actionOpenController"/>
+    </widget>
     <addaction name="actionLoadScenario"/>
+    <addaction name="separator"/>
+    <addaction name="menuOpenFile"/>
     <addaction name="separator"/>
     <addaction name="actionImportPackage"/>
     <addaction name="menuImportData"/>
@@ -169,6 +179,26 @@
    </property>
   </action>
   <action name="actionImportImage">
+   <property name="text">
+    <string>Image</string>
+   </property>
+  </action>
+  <action name="actionOpenScenario">
+   <property name="text">
+    <string>Scenario</string>
+   </property>
+  </action>
+  <action name="actionOpenShip">
+   <property name="text">
+    <string>Ship</string>
+   </property>
+  </action>
+  <action name="actionOpenController">
+   <property name="text">
+    <string>Controller</string>
+   </property>
+  </action>
+  <action name="actionOpenImage">
    <property name="text">
     <string>Image</string>
    </property>
