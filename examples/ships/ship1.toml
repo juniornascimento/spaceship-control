@@ -67,7 +67,13 @@ y = 0
 
 name = 'part2'
 x = 0
-y = 25
+y = 50
+
+[[Part]]
+
+name = 'part3'
+x = 0
+y = -50
 
 [[Sensor]]
 
@@ -119,7 +125,7 @@ max_angle = 0
 [Actuator.Error.Position]
 
 error_max = 30
-offset_max = 30
+offset_max = 0
 
 [[Actuator]]
 
@@ -135,11 +141,11 @@ max_intensity = 4
 min_angle = 0
 max_angle = 0
 
-intensity_mult = 4
+intensity_mult = 0.5
 
 [[Actuator]]
 
-part = 'part2'
+part = 'part3'
 
 name = 'engine3'
 type = 'engine'
@@ -150,6 +156,8 @@ max_intensity = 4
 
 min_angle = 0
 max_angle = 0
+
+intensity_mult = 0.5
 
 [[InterfaceDevice]]
 
