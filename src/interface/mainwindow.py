@@ -100,6 +100,9 @@ class MainWindow(QMainWindow):
         self.__ui.actionOpenController.triggered.connect(
             self.__openControllerAction)
 
+        self.__ui.actionOpenImage.triggered.connect(
+            self.__openImageAction)
+
         self.__ui.actionImportPackage.triggered.connect(
             self.__importPackageAction)
 
@@ -425,3 +428,12 @@ class MainWindow(QMainWindow):
 
         if controller is not None:
             FileInfo().openControllerFile('/'.join(controller))
+
+    @staticmethod
+    def __openImageAction():
+
+        image = MainWindow.__getOptionDialog(
+            'Choose image', FileInfo().listImagesTree().children)
+
+        if image is not None:
+            FileInfo().openImageFile('/'.join(image))

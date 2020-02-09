@@ -66,6 +66,10 @@ class FileInfo:
                                Node('controllers'), blacklist=('__pycache__',),
                                remove_suffix=False)
 
+    def listImagesTree(self):
+        return self.__listTree(self.__path.joinpath('images'),
+                               Node('images'), remove_suffix=False)
+
     def __listTree(self, base_path, current_node, blacklist=(),
                    remove_suffix=True):
 
@@ -94,6 +98,10 @@ class FileInfo:
     def controllerPath(self, *args, **kwargs):
         return self.__getPath(
             self.__path.joinpath('controllers'), *args, **kwargs)
+
+    def imagePath(self, *args, **kwargs):
+        return self.__getPath(
+            self.__path.joinpath('images'), *args, **kwargs)
 
     def scenarioPath(self, *args, **kwargs):
         return self.__getPath(
@@ -253,6 +261,13 @@ class FileInfo:
 
         if controller_path is not None:
             self.__openFile(controller_path)
+
+    def openImageFile(self, image):
+
+        image_path = self.imagePath(image)
+
+        if image_path is not None:
+            self.__openFile(image_path)
 
     @staticmethod
     def __openFile(path):

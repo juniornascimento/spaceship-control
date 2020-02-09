@@ -143,6 +143,7 @@
      <addaction name="actionOpenScenario"/>
      <addaction name="actionOpenShip"/>
      <addaction name="actionOpenController"/>
+     <addaction name="actionOpenImage"/>
     </widget>
     <addaction name="actionLoadScenario"/>
     <addaction name="separator"/>
