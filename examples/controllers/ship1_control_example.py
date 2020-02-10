@@ -20,7 +20,7 @@ while True:
             if color_id >= len(colors):
                 color_id = 0
 
-        commands_str = send('1:3: get')
+        commands_str = input()
         commands = []
         for i in range(10, len(commands_str) + 1, 10):
             commands.append(commands_str[i - 10: i])
@@ -63,4 +63,4 @@ while True:
     except Exception as err:
         debug(f'Error: {err}')
 
-    ship.run(1)
+    ship.run(.25)

@@ -8,8 +8,6 @@ import collections
 __device_comm_write = sys.__stdout__
 __device_comm_read = sys.__stdin__
 
-sys.stdin = None
-
 class Device:
 
     def __init__(self, device_path=''):
@@ -88,19 +86,35 @@ class Ship:
         def flush(self):
             pass
 
+    class KeyboardReader:
+
+        def __init__(self, ship):
+            self.__ship = ship
+
+        def readline(self):
+            return self.__ship.readKeyboard() + '\n'
+
     def __init__(self):
         self.__device = Device()
         self.__sensor_devices = {}
-        self.__text_display_devices = {}
-        self.__main_console = None
+        self.__interface_devices = {}
         self.__console_printer = Ship.ConsolePrinter(self)
+        self.__keyboard_reader = Ship.KeyboardReader(self)
         self.__message_buffer = ''
 
         self.__find_position_devices(self.__device)
 
-        console = self.__text_display_devices.get('console-text-display')
+        console = self.__interface_devices.get('console-text-display')
         if console:
             self.__main_console = console[0]
+        else:
+            self.__main_console = None
+
+        keyboard = self.__interface_devices.get('keyboard')
+        if keyboard:
+            self.__main_keyboard = keyboard[0]
+        else:
+            self.__main_keyboard = None
 
     def __printMsg(self, text):
         self.__main_console.sendMessage(f'write "{text}"')
@@ -130,12 +144,19 @@ class Ship:
     def console_printer(self):
         return self.__console_printer
 
+    @property
+    def keyboard_reader(self):
+        return self.__keyboard_reader
+
     def writeConsole(self, text):
         self.__message_buffer += text
 
+    def readKeyboard(self):
+        return self.__main_keyboard.sendMessage('get')
+
     def displayPrint(self, message):
 
-        text_displays = self.__text_display_devices.get('text-display')
+        text_displays = self.__interface_devices.get('text-display')
         if text_displays:
             text_displays[0].sendMessage(f'set-text "{message}"')
 
@@ -192,10 +213,11 @@ class Ship:
                 devices.append(sensor_info)
             return
 
-        if device.type_ in ('text-display', 'console-text-display'):
-            devices = self.__text_display_devices.get(device.type_)
+        if device.type_ in ('text-display', 'console-text-display',
+                            'keyboard'):
+            devices = self.__interface_devices.get(device.type_)
             if devices is None:
-                self.__text_display_devices[device.type_] = [device]
+                self.__interface_devices[device.type_] = [device]
             else:
                 devices.append(sensor_info)
             return
@@ -221,3 +243,4 @@ def debug(*args, **kwargs):
 ship = Ship()
 
 sys.stdout = ship.console_printer
+sys.stdin = ship.keyboard_reader
