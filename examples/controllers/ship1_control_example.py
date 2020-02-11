@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import sys
-from spctrl_base_controller import ship, send, debug
+from lib.spctrl_base_controller import ship, send, debug
 
 debug(ship.device)
 
