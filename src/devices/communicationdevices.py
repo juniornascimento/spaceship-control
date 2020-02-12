@@ -1,7 +1,17 @@
 
+from abc import ABC, abstractmethod
+
 from random import random
 
+from .devices import DefaultDevice
+
 class CommunicationEngine:
+
+    class Receiver(ABC):
+
+        @abstractemethod
+        def signalReceived(self, intensity, frequency):
+            pass
 
     class _Signal:
 
@@ -31,8 +41,8 @@ class CommunicationEngine:
 
             if self.__sqrd_min_distance < dist < self.__sqrd_max_distance:
                 noise = (random.random() - 0.5)*self.__engine._noise_max
-                receiver.sendSignal(abs(self.__cur_intensity + noise),
-                                    self.__frequency)
+                receiver.sinalReceived(abs(self.__cur_intensity + noise),
+                                       self.__frequency)
 
         def isValid(self):
             return self.__engine._ignore_lesser
@@ -60,3 +70,34 @@ class CommunicationEngine:
             signals[i] = signals[len(invalid_signals_indexes) - i - 1]
 
         del signals[-len(invalid_signals_indexes):]
+
+    def addReceiver(self, receiver):
+        self.__receivers.append(receiver)
+
+    def clearReceivers(self):
+        self.__receivers.clear()
+
+class BasicReceiver(DefaultDevice, CommunicationEngine.Receiver):
+
+    def __init__(self, sensibility, frequency, frequency_tolerance=0.1):
+        self.__sensibility = sensibility
+        self.__frequency = frequency
+        self.__frequency_tol = frequency_tolerance
+
+        self.__received_signals = []
+
+    def signalReceived(self, intensity, frequency):
+
+        frequency_diff = abs(frequency - self.__frequency)
+
+        if abs(frequency_diff) > self.__frequency_tol:
+            return
+
+        if frequency_diff != 0:
+            intensity *= \
+                (self.__frequency_tol - frequency_diff)/self.__frequency_tol
+
+        if intensity <= self.__sensibility:
+            return
+
+        self.__received_signals.append(intensity - self.__sensibility)
