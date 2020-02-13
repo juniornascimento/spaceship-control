@@ -1,7 +1,9 @@
 
-from abc import ABC, abstractmethod
+from abc import ABC, abstractmethod, abstractproperty
 
 from random import random
+
+from pymunk import Vec2d
 
 from .devices import DefaultDevice
 
@@ -9,8 +11,12 @@ class CommunicationEngine:
 
     class Receiver(ABC):
 
-        @abstractemethod
+        @abstractmethod
         def signalReceived(self, intensity, frequency):
+            pass
+
+        @abstractproperty
+        def position(self):
             pass
 
     class _Signal:
@@ -37,7 +43,7 @@ class CommunicationEngine:
             self.__cur_intensity = self.__cur_distance*self.__inital_intensity
 
         def sendTo(self, receiver):
-            dist = receiver.position.get_squared_distance(self.__start)
+            dist = Vec2d(receiver.position).get_squared_distance(self.__start)
 
             if self.__sqrd_min_distance < dist < self.__sqrd_max_distance:
                 noise = (random.random() - 0.5)*self.__engine._noise_max
@@ -71,33 +77,73 @@ class CommunicationEngine:
 
         del signals[-len(invalid_signals_indexes):]
 
+    def newSignal(self, start_point, initial_intensity, frequency):
+        self.__signals.append(CommunicationEngine._Signal(
+            start_point, initial_intensity, frequency, self))
+
     def addReceiver(self, receiver):
         self.__receivers.append(receiver)
 
-    def clearReceivers(self):
+    def clear(self):
         self.__receivers.clear()
+        self.__signals.clear()
 
 class BasicReceiver(DefaultDevice, CommunicationEngine.Receiver):
 
-    def __init__(self, sensibility, frequency, frequency_tolerance=0.1):
-        self.__sensibility = sensibility
-        self.__frequency = frequency
-        self.__frequency_tol = frequency_tolerance
+    def __init__(self, part, sensibility, frequency, frequency_tolerance=0.1,
+                 engine=None):
+        DefaultDevice.__init__(self)
+        CommunicationEngine.Receiver.__init__(self)
+
+        self.__part = part
+        self._sensibility = sensibility
+        self._frequency = frequency
+        self._frequency_tol = frequency_tolerance
 
         self.__received_signals = []
 
+        if engine is not None:
+            engine.addReceiver(self)
+
     def signalReceived(self, intensity, frequency):
 
-        frequency_diff = abs(frequency - self.__frequency)
+        frequency_diff = abs(frequency - self._frequency)
 
-        if abs(frequency_diff) > self.__frequency_tol:
+        if abs(frequency_diff) > self._frequency_tol:
             return
 
         if frequency_diff != 0:
             intensity *= \
-                (self.__frequency_tol - frequency_diff)/self.__frequency_tol
+                (self._frequency_tol - frequency_diff)/self._frequency_tol
 
-        if intensity <= self.__sensibility:
+        if intensity <= self._sensibility:
             return
 
-        self.__received_signals.append(intensity - self.__sensibility)
+        self.__received_signals.append(intensity - self._sensibility)
+
+class BasicSender(DefaultDevice)
+
+    def __init__(self, part, engine, intensity, frequency,
+                 frequency_err_gen=None, intensity_err_gen=None):
+        super().__init__()
+
+        self.__part = part
+        self.__engine = engine
+        self.__int_err_gen = intensity_err_gen
+        self.__freq_err_gen = frequency_err_gen
+        self._frequency = frequency
+        self._intensity = intensity
+
+    def send(self):
+
+        if self.__freq_err_gen is None:
+            frequency = self.__frequency
+        else:
+            frequency = abs(self.__freq_err_gen(self.__frequency))
+
+        if self.__int_err_gen is None:
+            intensity = self.__intensity
+        else:
+            intensity = abs(self.__freq_err_gen(self.__intensity))
+
+        self.__engine.newSignal(self.__part.position(), intensity, frequency)
