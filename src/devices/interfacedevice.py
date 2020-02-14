@@ -24,10 +24,24 @@ class InterfaceDevice(DefaultDevice):
 
 class TextDisplayDevice(InterfaceDevice):
 
-    def __init__(self, label: 'QLabel', **kwargs: 'Any') -> None:
+    def __init__(self, **kwargs: 'Any') -> None:
         super().__init__(device_type='text-display', **kwargs)
 
-        self.__label = label
+        self.__label = QLabel('-')
+
+        self.__label.setStyleSheet('''
+
+            background-color: white;
+            border-color: black;
+            border-width: 1px;
+            border-style: solid;
+            font-family: "Courier";
+
+        ''')
+
+    @property
+    def widget(self):
+        return self.__label
 
     def command(self, command: 'List[str]', *args) -> 'Any':
         return super().command(command, TextDisplayDevice.__COMMANDS, *args)

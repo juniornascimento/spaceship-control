@@ -3,7 +3,7 @@ from collections import namedtuple
 
 from pymunk import Body, Circle, Poly
 
-from PyQt5.QtWidgets import QLabel, QTextEdit
+from PyQt5.QtWidgets import QTextEdit
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont
 
@@ -121,22 +121,14 @@ def __createSpeedSensor(info: 'Dict[str, Any]', part: StructuralPart) \
 def __createTextDisplay(info: 'Dict[str, Any]', _part: StructuralPart) \
     -> 'Tuple[TextDisplayDevice, Sequence[QWidget]]':
 
-    label = QLabel('-')
+    device = TextDisplayDevice()
 
-    label.setStyleSheet('''
-
-        background-color: white;
-        border-color: black;
-        border-width: 1px;
-        border-style: solid;
-        font-family: "Courier";
-
-    ''')
+    label = device.widget
 
     label.setGeometry(info.get('x', 0), info.get('y', 0),
                       info.get('width', 100), info.get('height', 30))
 
-    return TextDisplayDevice(label), (label,)
+    return device, (label,)
 
 def __createConsole(info: 'Dict[str, Any]', _part: StructuralPart) \
     -> 'Tuple[InterfaceDevice, Sequence[QWidget]]':
