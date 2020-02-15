@@ -3,9 +3,7 @@ from collections import namedtuple
 
 from pymunk import Body, Circle, Poly
 
-from PyQt5.QtWidgets import QTextEdit
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QFont
 
 from ..configfileinheritance import resolvePrefix
 
@@ -133,28 +131,14 @@ def __createTextDisplay(info: 'Dict[str, Any]', _part: StructuralPart) \
 def __createConsole(info: 'Dict[str, Any]', _part: StructuralPart) \
     -> 'Tuple[InterfaceDevice, Sequence[QWidget]]':
 
-    text = QTextEdit()
+    device = ConsoleDevice(info.get('columns', 20), info.get('rows', 5))
 
-    text.setReadOnly(True)
-
-    text.setStyleSheet('''
-
-        color: white;
-        background-color: black;
-        border-color: black;
-        border-width: 1px;
-        border-style: solid;
-    ''')
-
-    font = QFont('Monospace')
-    font.setStyleHint(QFont.TypeWriter)
-    text.setFont(font)
+    text = device.widget
 
     text.setGeometry(info.get('x', 0), info.get('y', 0),
                      info.get('width', 100), 0)
 
-    return (ConsoleDevice(text, info.get('columns', 20), info.get('rows', 5)),
-            (text,))
+    return (device, (text,))
 
 def __createKeyboardReceiver(info: 'Dict[str, Any]', _part: StructuralPart) \
     -> 'Tuple[KeyboardButton, Sequence[QWidget]]':

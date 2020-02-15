@@ -1,7 +1,7 @@
 
 import html
 
-from PyQt5.QtGui import QFontMetricsF
+from PyQt5.QtGui import QFontMetricsF, QFont
 from PyQt5.QtWidgets import QLabel, QTextEdit
 from PyQt5.QtCore import Qt
 
@@ -93,11 +93,10 @@ class KeyboardReceiverDevice(InterfaceDevice):
 
 class ConsoleDevice(InterfaceDevice):
 
-    def __init__(self, text: 'QTextEdit', columns: int, rows: int,
-                 **kwargs: 'Any') -> None:
+    def __init__(self, columns: int, rows: int, **kwargs: 'Any') -> None:
         super().__init__(device_type='console-text-display', **kwargs)
 
-        self.__text_widget = text
+        self.__text_widget = text = QTextEdit()
         self.__col = 0
         self.__row = 0
         self.__total_cols = columns
@@ -106,6 +105,21 @@ class ConsoleDevice(InterfaceDevice):
 
         text.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         text.setFocusPolicy(Qt.NoFocus)
+
+        text.setReadOnly(True)
+
+        text.setStyleSheet('''
+
+            color: white;
+            background-color: black;
+            border-color: black;
+            border-width: 1px;
+            border-style: solid;
+        ''')
+
+        font = QFont('Monospace')
+        font.setStyleHint(QFont.TypeWriter)
+        text.setFont(font)
 
         tdoc = text.document()
         fmetrics = QFontMetricsF(tdoc.defaultFont())
@@ -122,6 +136,10 @@ class ConsoleDevice(InterfaceDevice):
 
         text.setFixedHeight(height)
         text.setFixedWidth(width)
+
+    @property
+    def widget(self):
+        return self.__text_widget
 
     def command(self, command: 'List[str]', *args) -> 'Any':
         return super().command(command, ConsoleDevice.__COMMANDS, *args)
