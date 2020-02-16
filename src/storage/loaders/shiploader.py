@@ -10,7 +10,6 @@ from ..configfileinheritance import resolvePrefix
 from ...utils.errorgenerator import ErrorGenerator
 
 from ...interface.panelpushbutton import PanelPushButton
-from ...interface.keyboardbutton import KeyboardButton
 
 from ...devices.structure import Structure, StructuralPart
 from ...devices.sensors import PositionSensor, AngleSensor, SpeedSensor
@@ -141,13 +140,15 @@ def __createConsole(info: 'Dict[str, Any]', _part: StructuralPart) \
     return (device, (text,))
 
 def __createKeyboardReceiver(info: 'Dict[str, Any]', _part: StructuralPart) \
-    -> 'Tuple[KeyboardButton, Sequence[QWidget]]':
+    -> 'Tuple[KeyboardReceiverDevice, Sequence[QWidget]]':
 
-    button = KeyboardButton()
+    device = KeyboardReceiverDevice()
+
+    button = device.widget
 
     button.setGeometry(info.get('x', 0), info.get('y', 0), 20, 20)
 
-    return KeyboardReceiverDevice(button), (button,)
+    return device, (button,)
 
 def __createButton(info: 'Dict[str, Any]', _part: StructuralPart) \
     -> 'Tuple[ButtonDevice, Sequence[QWidget]]':

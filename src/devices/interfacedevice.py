@@ -9,6 +9,8 @@ from .device import DefaultDevice
 
 from ..utils.actionqueue import ActionQueue, Action
 
+from ..interface.keyboardbutton import KeyboardButton
+
 class InterfaceDevice(DefaultDevice):
 
     def __init__(self, **kwargs: 'Any') -> None:
@@ -74,10 +76,14 @@ class ButtonDevice(InterfaceDevice):
 
 class KeyboardReceiverDevice(InterfaceDevice):
 
-    def __init__(self, kb_receiver: 'KeyboardButton', **kwargs: 'Any') -> None:
+    def __init__(self, **kwargs: 'Any') -> None:
         super().__init__(device_type='keyboard', **kwargs)
 
-        self.__receiver = kb_receiver
+        self.__receiver = KeyboardButton()
+
+    @property
+    def widget(self):
+        return self.__receiver
 
     def command(self, command: 'List[str]', *args) -> 'Any':
         return super().command(command,
