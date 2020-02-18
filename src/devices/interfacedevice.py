@@ -9,6 +9,7 @@ from .device import DefaultDevice
 
 from ..utils.actionqueue import ActionQueue, Action
 
+from ..interface.panelpushbutton import PanelPushButton
 from ..interface.keyboardbutton import KeyboardButton
 
 class InterfaceDevice(DefaultDevice):
@@ -58,10 +59,18 @@ class TextDisplayDevice(InterfaceDevice):
 
 class ButtonDevice(InterfaceDevice):
 
-    def __init__(self, button: 'PanelPushButton', **kwargs: 'Any') -> None:
+    def __init__(self, **kwargs: 'Any') -> None:
         super().__init__(device_type='button', **kwargs)
 
-        self.__button = button
+        self.__button = PanelPushButton()
+
+        self.__button.setFocusPolicy(Qt.NoFocus)
+
+        self.__button.setStyleSheet('background-color: red;')
+
+    @property
+    def widget(self):
+        return self.__button
 
     def command(self, command: 'List[str]', *args) -> 'Any':
         return super().command(command, ButtonDevice.__COMMANDS, *args)

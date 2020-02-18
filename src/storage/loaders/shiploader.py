@@ -9,8 +9,6 @@ from ..configfileinheritance import resolvePrefix
 
 from ...utils.errorgenerator import ErrorGenerator
 
-from ...interface.panelpushbutton import PanelPushButton
-
 from ...devices.structure import Structure, StructuralPart
 from ...devices.sensors import PositionSensor, AngleSensor, SpeedSensor
 from ...devices.engine import LimitedLinearEngine
@@ -153,15 +151,11 @@ def __createKeyboardReceiver(info: 'Dict[str, Any]', _part: StructuralPart) \
 def __createButton(info: 'Dict[str, Any]', _part: StructuralPart) \
     -> 'Tuple[ButtonDevice, Sequence[QWidget]]':
 
-    button = PanelPushButton()
+    device = ButtonDevice()
 
-    button.setFocusPolicy(Qt.NoFocus)
+    button = device.widget
 
-    button.setStyleSheet('background-color: red;')
-
-    button.setGeometry(info.get('x', 0), info.get('y', 0), 50, 50)
-
-    return ButtonDevice(button), (button,)
+    return device, (button,)
 
 __DEVICE_CREATE_FUNCTIONS = {
 
