@@ -5,7 +5,7 @@ from random import random
 
 from pymunk import Vec2d
 
-from .devices import DefaultDevice
+from .device import DefaultDevice
 
 class CommunicationEngine:
 
@@ -121,7 +121,20 @@ class BasicReceiver(DefaultDevice, CommunicationEngine.Receiver):
 
         self.__received_signals.append(intensity - self._sensibility)
 
-class BasicSender(DefaultDevice)
+    def command(self, command: 'List[str]', *args) -> 'Any':
+        return super().command(command, BasicReceiver.__COMMANDS, *args)
+
+    def __getReceived(self):
+        signals = self.__received_signals
+        self.__received_signals.clear()
+        return signals
+
+    __COMMANDS = {
+        'get-frequency': lambda self: self._frequency,
+        'get-received': __getReceived
+    }
+
+class BasicSender(DefaultDevice):
 
     def __init__(self, part, engine, intensity, frequency,
                  frequency_err_gen=None, intensity_err_gen=None):
@@ -147,3 +160,17 @@ class BasicSender(DefaultDevice)
             intensity = abs(self.__freq_err_gen(self.__intensity))
 
         self.__engine.newSignal(self.__part.position(), intensity, frequency)
+
+    def command(self, command: 'List[str]', *args) -> 'Any':
+        return super().command(command, BasicReceiver.__COMMANDS, *args)
+
+    def __getReceived(self):
+        signals = self.__received_signals
+        self.__received_signals.clear()
+        return signals
+
+    __COMMANDS = {
+        'get-frequency': lambda self: self._frequency,
+        'get-intensity': lambda self: self._intensity,
+        'send-signal': send
+    }
