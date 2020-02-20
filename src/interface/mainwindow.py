@@ -118,6 +118,8 @@ class MainWindow(QMainWindow):
 
         self.__current_ship_widgets_index = 0
 
+        self.__comm_engine = None
+
     def __updateTitle(self):
 
         if self.__current_scenario is None:
@@ -254,6 +256,8 @@ class MainWindow(QMainWindow):
         self.__ui.deviceInterfaceWidgets.setVisible(
             scenario_info.visible_user_interface)
 
+        self.__comm_engine = scenario_info.communication_engine
+
         self.__scenario_objectives = scenario_info.objectives
 
         json_info = json.dumps({
@@ -317,6 +321,9 @@ class MainWindow(QMainWindow):
                 gitem.setY(pos.y)
                 gitem.prepareGeometryChange()
                 gitem.setRotation(180*ship.body.angle/pi)
+
+            self.__comm_engine.step()
+
             self.__objectives_complete = all(
                 objective.verify(self.__space, ships)
                 for objective in self.__scenario_objectives)

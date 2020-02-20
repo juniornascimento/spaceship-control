@@ -3,14 +3,19 @@ from math import pi
 from collections import namedtuple
 
 from ..configfileinheritance import resolvePrefix
+
 from ...objectives.objective import ObjectiveGroup
 from ...objectives.gotoobjective import GoToObjective
+
+from ...devices.communicationdevices import CommunicationEngine
 
 ShipInfo = namedtuple('ShipInfo', (
     'name', 'model', 'controller', 'position', 'angle'))
 
 ScenarioInfo = namedtuple('ScenarioInfo', (
-    'name', 'ships', 'objectives', 'visible_user_interface'))
+    'name', 'ships', 'objectives', 'visible_user_interface',
+    'communication_engine'
+))
 
 def __createGoToObjective(objective_content) -> 'GoToObjective':
 
@@ -61,6 +66,12 @@ def __readShipInfo(ship_content, prefixes) -> 'ShipInfo':
 
     return ShipInfo(**ship_info_kwargs)
 
+def loadCommunicationEngine(engine_info: 'Dict[str, Any]'):
+
+    return CommunicationEngine(engine_info.get('max_noise', 10),
+                               engine_info.get('speed', 10000),
+                               engine_info.get('negligible_intensity', 10000))
+
 def loadObjectives(objectives):
     return tuple(__OBJECTIVE_CREATE_FUNCTIONS[objective['type']](objective)
                  for objective in objectives)
@@ -78,5 +89,9 @@ def loadScenario(scenario_info: 'Dict[str, Any]',
 
     hidden_user_interface = scenario_content.get('hide_user_interface', False)
 
+    comm_engine = loadCommunicationEngine(
+        scenario_info.get('CommunicationEngine', {}))
+
     return ScenarioInfo(name=s_name, ships=ships, objectives=objectives,
-                        visible_user_interface=not(hidden_user_interface))
+                        visible_user_interface=not(hidden_user_interface),
+                        communication_engine=comm_engine)
