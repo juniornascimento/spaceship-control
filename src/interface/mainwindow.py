@@ -175,7 +175,11 @@ class MainWindow(QMainWindow):
         if scenario is not None:
             self.loadScenario('/'.join(scenario))
 
-    def __loadShip(self, ship_info, json_info, fileinfo):
+    def __loadShip(self, ship_info, arg_scenario_info, fileinfo):
+
+        arg_scenario_info['starting-position'] = ship_info.position
+
+        json_info = json.dumps(arg_scenario_info)
 
         ship_model = ship_info.model
         if ship_model is None:
@@ -260,16 +264,17 @@ class MainWindow(QMainWindow):
 
         self.__scenario_objectives = scenario_info.objectives
 
-        json_info = json.dumps({
+        arg_scenario_info = {
 
             'objectives': [objective.toDict() for objective in
                            self.__scenario_objectives]
-        })
+        }
 
         ships = [None]*len(scenario_info.ships)
         for i, ship_info in enumerate(scenario_info.ships):
             try:
-                ship = self.__loadShip(ship_info, json_info, fileinfo)
+                ship = self.__loadShip(ship_info, arg_scenario_info.copy(),
+                                       fileinfo)
             except Exception as err:
                 self.clear()
                 QMessageBox.warning(self, 'Error', (
