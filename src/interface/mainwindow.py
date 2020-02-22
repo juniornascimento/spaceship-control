@@ -192,8 +192,9 @@ class MainWindow(QMainWindow):
 
             ship_model = '/'.join(ship_model)
 
-        ship, config, widgets = fileinfo.loadShip(ship_model, ship_info.name,
-                                                  self.__space)
+        ship, config, widgets = fileinfo.loadShip(
+            ship_model, ship_info.name, self.__space,
+            communication_engine=self.__comm_engine)
 
         self.__widgets = widgets
         ship.body.position = ship_info.position

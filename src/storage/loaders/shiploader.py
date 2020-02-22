@@ -15,6 +15,7 @@ from ...devices.engine import LimitedLinearEngine
 from ...devices.interfacedevice import (
     TextDisplayDevice, ButtonDevice, KeyboardReceiverDevice, ConsoleDevice
 )
+from ...devices.communicationdevices import BasicReceiver, BasicSender
 
 ShipImageInfo = namedtuple('ShipImageInfo', ('name', 'width', 'height'))
 ShipConfig = namedtuple('ShipConfig', ('image'))
@@ -157,6 +158,20 @@ def __createButton(info: 'Dict[str, Any]', _part: StructuralPart) \
 
     return device, (button,)
 
+def __createBasicReceiver(info: 'Dict[str, Any]', part: StructuralPart,
+                          engine: 'CommunicationEngine' = None, **kwargs) \
+    -> 'Tuple[Device, Sequence[QWidget]]':
+
+    return BasicReceiver(part, info.get('minimum_intensity', 0),
+                         info['frequency'], info.get('tolerance', 0.5),
+                         engine=engine), ()
+
+def __createBasicSender(info: 'Dict[str, Any]', part: StructuralPart,
+                        engine: 'CommunicationEngine' = None, **kwargs) \
+    -> 'Tuple[Device, Sequence[QWidget]]':
+
+    return BasicSender(part, engine, info['intensity'], info['frequency']), ()
+
 __DEVICE_CREATE_FUNCTIONS = {
 
     ('Actuator', 'engine', 'intensity_range'): __createLimitedLinearEngine,
@@ -167,12 +182,14 @@ __DEVICE_CREATE_FUNCTIONS = {
     ('InterfaceDevice', 'text-display', 'line'): __createTextDisplay,
     ('InterfaceDevice', 'text-display', 'console'): __createConsole,
     ('InterfaceDevice', 'button', None): __createButton,
-    ('InterfaceDevice', 'keyboard', None): __createKeyboardReceiver
+    ('InterfaceDevice', 'keyboard', None): __createKeyboardReceiver,
+    ('Communication', 'receiver', None): __createBasicReceiver,
+    ('Communication', 'sender', None): __createBasicSender
 }
 
 def __addDevice(
     info: 'Dict[str, Any]', parts: 'Dict[str, StructuralPart]',
-    device_type: str) -> 'List[QWidget]':
+    device_type: str, **kwargs) -> 'List[QWidget]':
 
     type_and_model = (device_type, info.get('type'), info.get('model'))
     create_func = __DEVICE_CREATE_FUNCTIONS.get(type_and_model)
@@ -183,13 +200,13 @@ def __addDevice(
         raise ValueError(
             f'Invalid type/model for {device_type} \'{type_and_model_str}\'')
 
-    device, widgets = create_func(info, part)
+    device, widgets = create_func(info, part, **kwargs)
     part.addDevice(device, name=info.get('name'))
 
     return widgets
 
 def loadShip(ship_info: str, name: str, space: 'pymunk.Space',
-             prefixes: 'Sequence[str]' = ()) \
+             prefixes: 'Sequence[str]' = (), communication_engine = None) \
     -> 'Tuple[Structure, Sequence[QWidget]]':
 
     shapes = tuple(__createShape(shape_info)
@@ -220,6 +237,9 @@ def loadShip(ship_info: str, name: str, space: 'pymunk.Space',
 
     for info in ship_info.get('Sensor', ()):
         __addDevice(info, parts, 'Sensor')
+
+    for info in ship_info.get('Communication', ()):
+        __addDevice(info, parts, 'Communication', engine=communication_engine)
 
     widgets = []
     for info in ship_info.get('InterfaceDevice', ()):

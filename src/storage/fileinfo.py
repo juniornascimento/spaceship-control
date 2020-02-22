@@ -224,7 +224,7 @@ class FileInfo:
 
         return scenarioloader.loadScenario(scenario_content, prefixes=prefixes)
 
-    def loadShip(self, model, name, space):
+    def loadShip(self, model, name, space, communication_engine=None):
 
         prefixes = model.split('/')[:-1]
 
@@ -233,7 +233,8 @@ class FileInfo:
         ship_content = configfileinheritance.mergeInheritedFiles(
             ship_content, self.__getShipContent, prefixes=prefixes)
 
-        return shiploader.loadShip(ship_content, name, space, prefixes=prefixes)
+        return shiploader.loadShip(ship_content, name, space, prefixes=prefixes,
+                                   communication_engine=communication_engine)
 
     def loadController(self, controller_name, ship, json_info, lock):
         return controllerloader.loadController(
