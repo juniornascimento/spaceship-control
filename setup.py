@@ -15,8 +15,8 @@ with open(DIR_PATH.joinpath('requirements.txt')) as file:
 
 PACKAGE_BASE_NAME = 'spaceship_control'
 SOURCE_PATH = 'src'
-EXTRA_PACKAGES = ('examples.controllers', 'examples.ships',
-                  'examples.scenarios', 'examples.images', 'forms')
+EXTRA_PACKAGES = ('examples.ships', 'examples.scenarios', 'examples.images',
+                  'examples.controllers', 'examples.controllers.lib', 'forms')
 
 packages = [PACKAGE_BASE_NAME]
 packages.extend(add_package_prefix(find_namespace_packages(where=SOURCE_PATH),
@@ -60,7 +60,9 @@ setup(
             ['*.toml', '*.json', '*.yml', '*.yaml'],
         'spaceship_control.examples.scenarios':
             ['*.toml', '*.json', '*.yml', '*.yaml'],
-        'spaceship_control.examples.images': ['*.png']
+        'spaceship_control.examples.images': ['*.png'],
+        'spaceship_control.examples.controllers': ['*.py'],
+        'spaceship_control.examples.controllers.lib': ['*.py']
     },
     entry_points={
 
