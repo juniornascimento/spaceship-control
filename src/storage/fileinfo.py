@@ -6,6 +6,7 @@ import subprocess
 
 import json
 import toml
+import yaml
 
 from anytree import Node
 
@@ -131,8 +132,8 @@ class FileInfo:
         package_name = package_path.name
 
         for directory, mode, patterns in (
-            ('scenarios', 0o644, ('*.toml', '*.json')),
-            ('ships', 0o644, ('*.toml', '*.json')),
+            ('scenarios', 0o644, ('*.toml', '*.json', '*.yml', '*.yaml')),
+            ('ships', 0o644, ('*.toml', '*.json', '*.yml', '*.yaml')),
             ('controllers', 0o555, ('*',)),
             ('images', 0o644, ('*.png', '*.gif'))):
 
@@ -166,7 +167,7 @@ class FileInfo:
     def __getContent(basename, get_path, inexistent_message):
 
         filepath, suffix = FileInfo.__findSuffix(
-            basename, get_path, ('.toml', '.json'))
+            basename, get_path, ('.toml', '.json', '.yaml', '.yml'))
 
         if filepath is None:
             raise Exception(inexistent_message)
@@ -174,6 +175,10 @@ class FileInfo:
         if suffix == '.json':
             with open(filepath) as file:
                 return json.load(file)
+
+        if suffix in ('.yaml', '.yml'):
+            with open(filepath) as file:
+                return yaml.safe_load(file)
 
         return toml.load(filepath)
 

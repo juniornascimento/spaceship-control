@@ -343,7 +343,8 @@ class MainWindow(QMainWindow):
     def __importScenarioAction():
 
         fdialog = QFileDialog(None, 'Scenario Import Dialog', '',
-                              'TOML files(*.toml) ;; JSON files(*.json)')
+                              'TOML files(*.toml) ;; JSON files(*.json) ;;'
+                              'YAML files(*.yml *.yaml)')
         fdialog.setFileMode(QFileDialog.ExistingFiles)
 
         if not fdialog.exec_():
@@ -355,7 +356,8 @@ class MainWindow(QMainWindow):
     def __importShipAction():
 
         fdialog = QFileDialog(None, 'Ship Import Dialog', '',
-                              'TOML files(*.toml) ;; JSON files(*.json)')
+                              'TOML files(*.toml) ;; JSON files(*.json) ;;'
+                              'YAML files(*.yml *.yaml)')
         fdialog.setFileMode(QFileDialog.ExistingFiles)
 
         if not fdialog.exec_():

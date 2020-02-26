@@ -56,8 +56,10 @@ setup(
     package_data={
 
         'spaceship_control.forms': ['*.ui'],
-        'spaceship_control.examples.ships': ['*.toml', '*.json'],
-        'spaceship_control.examples.scenarios': ['*.toml', '*.json'],
+        'spaceship_control.examples.ships':
+            ['*.toml', '*.json', '*.yml', '*.yaml'],
+        'spaceship_control.examples.scenarios':
+            ['*.toml', '*.json', '*.yml', '*.yaml'],
         'spaceship_control.examples.images': ['*.png']
     },
     entry_points={

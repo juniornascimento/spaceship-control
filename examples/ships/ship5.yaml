@@ -1,0 +1,9 @@
+Inheritance:
+  parent: .ship1
+Shape:
+  - id: poly-shape
+    type: polygon
+    mass: 3
+    Point:
+      - x: -120
+
