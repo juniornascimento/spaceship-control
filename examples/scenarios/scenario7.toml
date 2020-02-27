@@ -1,0 +1,26 @@
+
+[Scenario]
+
+name = 'example1'
+
+[[Ship]]
+
+id = 'main-ship'
+name = 'sender'
+model = '.ship6'
+controller = '.ship6_control_example.py'
+
+x = 0
+y = 0
+angle = 45
+
+[[Ship]]
+
+id = 'main-ship'
+name = 'receiver'
+model = '.ship7'
+controller = '.ship7_control_example.py'
+
+x = 100
+y = 100
+angle = -45

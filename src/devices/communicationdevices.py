@@ -1,7 +1,7 @@
 
 from abc import ABC, abstractmethod, abstractproperty
 
-from random import random
+import random
 
 from pymunk import Vec2d
 
@@ -32,23 +32,29 @@ class CommunicationEngine:
             self.__cur_intensity = initial_intensity
             self.__frequency = frequency
 
-        def step(self):
-            speed = self.__engine._speed
-            half_speed = speed/2
+            self.__calc_dist()
 
-            self.__cur_distance += speed
-            self.__sqrd_min_distance = (self.__cur_distance - half_speed)**2
+        def __calc_dist(self):
+
+            half_speed = self.__engine._speed/2
+
+            self.__sqrd_min_distance = (
+                max(0, self.__cur_distance - half_speed))**2
             self.__sqrd_max_distance = (self.__cur_distance + half_speed)**2
 
-            self.__cur_intensity = self.__cur_distance*self.__inital_intensity
+        def step(self):
+            self.__cur_distance += self.__engine._speed
+            self.__calc_dist()
 
         def sendTo(self, receiver):
-            dist = Vec2d(receiver.position).get_squared_distance(self.__start)
+            dist = Vec2d(receiver.position).get_dist_sqrd(self.__start)
 
             if self.__sqrd_min_distance < dist < self.__sqrd_max_distance:
                 noise = (random.random() - 0.5)*self.__engine._noise_max
-                receiver.sinalReceived(abs(self.__cur_intensity + noise),
-                                       self.__frequency)
+                intensity = self.__inital_intensity if dist < 1 else \
+                    self.__inital_intensity/dist
+                receiver.signalReceived(abs(intensity + noise),
+                                        self.__frequency)
 
         def isValid(self):
             return self.__engine._ignore_lesser
@@ -62,15 +68,16 @@ class CommunicationEngine:
         self.__receivers = []
 
     def step(self):
+
         invalid_signals_indexes = []
         signals = self.__signals
         for i, signal in enumerate(signals):
-            signal.step()
             if not signal.isValid():
                 invalid_signals_indexes.append(i)
                 continue
             for receiver in self.__receivers:
                 signal.sendTo(receiver)
+            signal.step()
 
         for i in reversed(invalid_signals_indexes):
             signals[i] = signals[len(invalid_signals_indexes) - i - 1]
@@ -92,7 +99,7 @@ class BasicReceiver(DefaultDevice, CommunicationEngine.Receiver):
 
     def __init__(self, part, sensibility, frequency, frequency_tolerance=0.1,
                  engine=None):
-        DefaultDevice.__init__(self)
+        DefaultDevice.__init__(self, device_type='basic-receiver')
         CommunicationEngine.Receiver.__init__(self)
 
         self.__part = part
@@ -104,6 +111,13 @@ class BasicReceiver(DefaultDevice, CommunicationEngine.Receiver):
 
         if engine is not None:
             engine.addReceiver(self)
+
+    def act(self):
+        pass
+
+    @property
+    def position(self):
+        return self.__part.position
 
     def signalReceived(self, intensity, frequency):
 
@@ -122,10 +136,11 @@ class BasicReceiver(DefaultDevice, CommunicationEngine.Receiver):
         self.__received_signals.append(intensity - self._sensibility)
 
     def command(self, command: 'List[str]', *args) -> 'Any':
-        return super().command(command, BasicReceiver.__COMMANDS, *args)
+        return DefaultDevice.command(self, command,
+                                     BasicReceiver.__COMMANDS, *args)
 
     def __getReceived(self):
-        signals = self.__received_signals
+        signals = ','.join(str(signal) for signal in self.__received_signals)
         self.__received_signals.clear()
         return signals
 
@@ -138,7 +153,7 @@ class BasicSender(DefaultDevice):
 
     def __init__(self, part, engine, intensity, frequency,
                  frequency_err_gen=None, intensity_err_gen=None):
-        super().__init__()
+        super().__init__(device_type='basic-sender')
 
         self.__part = part
         self.__engine = engine
@@ -147,22 +162,25 @@ class BasicSender(DefaultDevice):
         self._frequency = frequency
         self._intensity = intensity
 
+    def act(self):
+        pass
+
     def send(self):
 
         if self.__freq_err_gen is None:
-            frequency = self.__frequency
+            frequency = self._frequency
         else:
-            frequency = abs(self.__freq_err_gen(self.__frequency))
+            frequency = abs(self.__freq_err_gen(self._frequency))
 
         if self.__int_err_gen is None:
-            intensity = self.__intensity
+            intensity = self._intensity
         else:
-            intensity = abs(self.__freq_err_gen(self.__intensity))
+            intensity = abs(self.__freq_err_gen(self._intensity))
 
-        self.__engine.newSignal(self.__part.position(), intensity, frequency)
+        self.__engine.newSignal(self.__part.position, intensity, frequency)
 
     def command(self, command: 'List[str]', *args) -> 'Any':
-        return super().command(command, BasicReceiver.__COMMANDS, *args)
+        return super().command(command, BasicSender.__COMMANDS, *args)
 
     def __getReceived(self):
         signals = self.__received_signals

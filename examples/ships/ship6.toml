@@ -1,0 +1,23 @@
+
+[[Shape]]
+
+type = 'circle'
+mass = 10
+radius = 15
+elasticity = 0.95
+friction = 0.9
+
+[[Part]]
+
+name = 'part'
+x = 0
+y = 0
+
+[[Communication]]
+
+part = 'part'
+
+type = 'sender'
+
+intensity = 10
+frequency = 10000
