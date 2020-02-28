@@ -2,6 +2,7 @@
 from abc import ABC, abstractmethod, abstractproperty
 
 import random
+import math
 
 from pymunk import Vec2d
 
@@ -98,8 +99,8 @@ class CommunicationEngine:
 class BasicReceiver(DefaultDevice, CommunicationEngine.Receiver):
 
     def __init__(self, part, sensibility, frequency, frequency_tolerance=0.1,
-                 engine=None):
-        DefaultDevice.__init__(self, device_type='basic-receiver')
+                 engine=None, device_type='basic-receiver'):
+        DefaultDevice.__init__(self, device_type=device_type)
         CommunicationEngine.Receiver.__init__(self)
 
         self.__part = part
@@ -147,6 +148,38 @@ class BasicReceiver(DefaultDevice, CommunicationEngine.Receiver):
     __COMMANDS = {
         'get-frequency': lambda self: self._frequency,
         'get-received': __getReceived
+    }
+
+class ConfigurableReceiver(BasicReceiver):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs, device_type='receiver',
+                         min_frequency=0, max_frequency=math.inf)
+
+        self.__min_freq = min_frequency
+        self.__max_freq = max_frequency
+
+    def command(self, command: 'List[str]', *args) -> 'Any':
+        return super().command(self, command,
+                               ConfigurableReceiver.__COMMANDS, *args)
+
+    @property
+    def frequency(self, frequency):
+        return self._frequency
+
+    @frequency.setter
+    def frequency(self, value):
+        if self.__min_freq <= self._frequency <= self.__max_freq:
+            self._frequency = value
+
+    def __setFreq(self, value):
+        self.frequency = value
+        return '<<ok>>'
+
+    __COMMANDS = {
+        'set-frequency': frequency.fset,
+        'min-frequency': lambda self: self.__min_freq,
+        'max-frequency': lambda self: self.__max_freq
     }
 
 class BasicSender(DefaultDevice):
