@@ -193,14 +193,19 @@ def __addDevice(
 
     type_and_model = (device_type, info.get('type'), info.get('model'))
     create_func = __DEVICE_CREATE_FUNCTIONS.get(type_and_model)
-    part = parts.get(info['part'])
+
+    part_name = info.get('part')
+    part = parts.get(part_name)
+    if part is None:
+        raise Exception(f"{device_type} has invalid part \'{part_name}\'.")
 
     if create_func is None:
         type_and_model_str = f'{type_and_model[1]}/{type_and_model[2]}'
         raise ValueError(
-            f'Invalid type/model for {device_type} \'{type_and_model_str}\'')
+            f'Invalid type/model for {device_type} \'{type_and_model_str}\'.')
 
     device, widgets = create_func(info, part, **kwargs)
+
     part.addDevice(device, name=info.get('name'))
 
     return widgets
