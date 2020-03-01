@@ -170,7 +170,7 @@ class FileInfo:
             basename, get_path, ('.toml', '.json', '.yaml', '.yml'))
 
         if filepath is None:
-            raise Exception(inexistent_message)
+            raise Exception(inexistent_message.format(name=basename))
 
         if suffix == '.json':
             with open(filepath) as file:
@@ -185,7 +185,7 @@ class FileInfo:
     def __getScenarioContent(self, scenario_name):
 
         content = self.__getContent(scenario_name, self.scenarioPath,
-                                    'Inexistent scenario')
+                                    'Inexistent scenario named \'{name}\'')
 
         dictutils.mergeMatch(content, (), ('Ship', 'ships'), 'Ship',
                              absolute=True)
@@ -199,7 +199,7 @@ class FileInfo:
     def __getShipContent(self, ship_model):
 
         content = self.__getContent(ship_model, self.shipModelPath,
-                                    'Inexistent ship model')
+                                    'Inexistent ship model named \'{name}\'')
 
         dictutils.mergeMatch(content, (), ('Shape', 'shapes'), 'Shape',
                              absolute=True)
