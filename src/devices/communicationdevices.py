@@ -152,9 +152,9 @@ class BasicReceiver(DefaultDevice, CommunicationEngine.Receiver):
 
 class ConfigurableReceiver(BasicReceiver):
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs, device_type='receiver',
-                         min_frequency=0, max_frequency=math.inf)
+    def __init__(self, *args, min_frequency=0, max_frequency=math.inf,
+                 **kwargs):
+        super().__init__(*args, **kwargs, device_type='receiver')
 
         self.__min_freq = min_frequency
         self.__max_freq = max_frequency
@@ -171,10 +171,6 @@ class ConfigurableReceiver(BasicReceiver):
     def frequency(self, value):
         if self.__min_freq <= self._frequency <= self.__max_freq:
             self._frequency = value
-
-    def __setFreq(self, value):
-        self.frequency = value
-        return '<<ok>>'
 
     __COMMANDS = {
         'set-frequency': frequency.fset,
@@ -224,4 +220,46 @@ class BasicSender(DefaultDevice):
         'get-frequency': lambda self: self._frequency,
         'get-intensity': lambda self: self._intensity,
         'send-signal': send
+    }
+
+class ConfigurableSender(BasicSender):
+
+    def __init__(self, *args, min_frequency=0, max_frequency=math.inf,
+                 min_intensity=0, max_intensity=math.inf, **kwargs):
+        super().__init__(*args, **kwargs, device_type='sender')
+
+        self.__min_freq = min_frequency
+        self.__max_freq = max_frequency
+        self.__min_int = min_intensity
+        self.__max_int = max_intensity
+
+    def command(self, command: 'List[str]', *args) -> 'Any':
+        return super().command(self, command,
+                               ConfigurableSender.__COMMANDS, *args)
+
+    @property
+    def frequency(self, frequency):
+        return self._frequency
+
+    @frequency.setter
+    def frequency(self, value):
+        if self.__min_freq <= self._frequency <= self.__max_freq:
+            self._frequency = value
+
+    @property
+    def intensity(self, intensity):
+        return self._intensity
+
+    @intensity.setter
+    def intensity(self, value):
+        if self.__min_freq <= self._intensity <= self.__max_freq:
+            self._intensity = value
+
+    __COMMANDS = {
+        'set-frequency': frequency.fset,
+        'set-intensity': intensity.fset,
+        'min-frequency': lambda self: self.__min_freq,
+        'max-frequency': lambda self: self.__max_freq,
+        'min-intensity': lambda self: self.__min_int,
+        'max-intensity': lambda self: self.__max_int
     }
