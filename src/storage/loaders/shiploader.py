@@ -31,19 +31,29 @@ def __load_error_dict(
 
     return {name: __load_error(info) for name, info in errors.items()}
 
-def __engine_error_kwargs(
-    errors: 'Dict[str, Dict[str, Any]]') -> 'Dict[str, ErrorGenerator]':
+def __get_error_kwargs(content: 'Dict[str, Dict[str, Any]]',
+                       errors: 'Dict[str, str]') -> 'Dict[str, ErrorGenerator]':
 
-    if errors is None:
+    errors_content = content.get('Error')
+
+    if errors_content is None:
         return {}
 
-    err_gens_dict = __load_error_dict(errors)
+    errors_dict = __load_error_dict(errors_content)
 
-    return {
-        'thrust_error_gen': err_gens_dict.get('Thrust'),
-        'angle_error_gen': err_gens_dict.get('Angle'),
-        'position_error_gen': err_gens_dict.get('Position')
-    }
+    return {key: value for key, value in
+            ((error_keyword, errors_dict.get(error_tablename))
+             for error_tablename, error_keyword in errors.items())
+            if value is not None}
+
+def __engine_error_kwargs(
+    content: 'Dict[str, Dict[str, Any]]') -> 'Dict[str, ErrorGenerator]':
+
+    return __get_error_kwargs(content, {
+        'Thrust': 'thrust_error_gen',
+        'Angle': 'angle_error_gen',
+        'Position': 'position_error_gen'
+    })
 
 def __createCircleShape(info: 'Dict[str, Any]') -> 'Circle':
 
@@ -90,7 +100,7 @@ def __createLimitedLinearEngine(info: 'Dict[str, Any]', part: StructuralPart) \
                                info['max_angle'],
                                intensity_multiplier=info.get('intensity_mult',
                                                              1),
-                               **__engine_error_kwargs(info.get('Error'))), ()
+                               **__engine_error_kwargs(info)), ()
 
 def __createPositionSensor(info: 'Dict[str, Any]', part: StructuralPart) \
     -> 'Tuple[PositionSensor, Sequence[QWidget]]':
@@ -170,7 +180,13 @@ def __createBasicSender(info: 'Dict[str, Any]', part: StructuralPart,
                         engine: 'CommunicationEngine' = None, **kwargs) \
     -> 'Tuple[Device, Sequence[QWidget]]':
 
-    return BasicSender(part, engine, info['intensity'], info['frequency']), ()
+    errors = __get_error_kwargs(info, {
+        'Frequency': 'frequency_err_gen',
+        'Intensity': 'intensity_err_gen'
+    })
+
+    return (BasicSender(part, engine, info['intensity'], info['frequency'],
+                        **errors), ())
 
 __DEVICE_CREATE_FUNCTIONS = {
 
