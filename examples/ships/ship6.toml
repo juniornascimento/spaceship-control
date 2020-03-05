@@ -19,6 +19,10 @@ part = 'part'
 
 type = 'sender'
 
-intensity = 10
+intensity = 1e6
 frequency = 10000
 
+[Communication.Error.Intensity]
+
+error_max = 3e4 # noise will also cause error
+offset_max = 1e5

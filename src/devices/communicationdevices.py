@@ -32,6 +32,7 @@ class CommunicationEngine:
             self.__sqrd_max_distance = 0
             self.__cur_intensity = initial_intensity
             self.__frequency = frequency
+            self.__valid = True
 
             self.__calc_dist()
 
@@ -54,11 +55,15 @@ class CommunicationEngine:
                 noise = (random.random() - 0.5)*self.__engine._noise_max
                 intensity = self.__inital_intensity if dist < 1 else \
                     self.__inital_intensity/dist
-                receiver.signalReceived(abs(intensity + noise),
-                                        self.__frequency)
+                if intensity < self.__engine._ignore_lesser:
+                    self.__valid = False
+
+                if intensity > 2*abs(noise):
+                    receiver.signalReceived(abs(intensity + noise),
+                                            self.__frequency)
 
         def isValid(self):
-            return self.__engine._ignore_lesser
+            return self.__valid
 
     def __init__(self, max_noise, speed, negligible_intensity):
         self._noise_max = max_noise
@@ -80,10 +85,11 @@ class CommunicationEngine:
                 signal.sendTo(receiver)
             signal.step()
 
-        for i in reversed(invalid_signals_indexes):
-            signals[i] = signals[len(invalid_signals_indexes) - i - 1]
+        if invalid_signals_indexes:
+            for i in reversed(invalid_signals_indexes):
+                signals[i] = signals[len(invalid_signals_indexes) - i - 1]
 
-        del signals[-len(invalid_signals_indexes):]
+            del signals[-len(invalid_signals_indexes):]
 
     def newSignal(self, start_point, initial_intensity, frequency):
         self.__signals.append(CommunicationEngine._Signal(
