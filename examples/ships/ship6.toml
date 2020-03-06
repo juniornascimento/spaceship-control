@@ -18,6 +18,7 @@ y = 0
 part = 'part'
 
 type = 'sender'
+model = 'configurable'
 
 intensity = 1e6
 frequency = 10000

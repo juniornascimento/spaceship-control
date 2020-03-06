@@ -16,6 +16,7 @@ y = 0
 [[Communication]]
 
 part = 'part'
+model = 'configurable'
 
 type = 'receiver'
 

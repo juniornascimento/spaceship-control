@@ -15,7 +15,10 @@ from ...devices.engine import LimitedLinearEngine
 from ...devices.interfacedevice import (
     TextDisplayDevice, ButtonDevice, KeyboardReceiverDevice, ConsoleDevice
 )
-from ...devices.communicationdevices import BasicReceiver, BasicSender
+from ...devices.communicationdevices import (
+
+    BasicReceiver, BasicSender, ConfigurableReceiver, ConfigurableSender
+)
 
 ShipImageInfo = namedtuple('ShipImageInfo', ('name', 'width', 'height'))
 ShipConfig = namedtuple('ShipConfig', ('image'))
@@ -188,6 +191,26 @@ def __createBasicSender(info: 'Dict[str, Any]', part: StructuralPart,
     return (BasicSender(part, engine, info['intensity'], info['frequency'],
                         **errors), ())
 
+def __createConfReceiver(info: 'Dict[str, Any]', part: StructuralPart,
+                          engine: 'CommunicationEngine' = None, **kwargs) \
+    -> 'Tuple[Device, Sequence[QWidget]]':
+
+    return ConfigurableReceiver(part, info.get('minimum_intensity', 0),
+                                info['frequency'], info.get('tolerance', 0.5),
+                                engine=engine), ()
+
+def __createConfSender(info: 'Dict[str, Any]', part: StructuralPart,
+                       engine: 'CommunicationEngine' = None, **kwargs) \
+    -> 'Tuple[Device, Sequence[QWidget]]':
+
+    errors = __get_error_kwargs(info, {
+        'Frequency': 'frequency_err_gen',
+        'Intensity': 'intensity_err_gen'
+    })
+
+    return (ConfigurableSender(part, engine, info['intensity'],
+                               info['frequency'], **errors), ())
+
 __DEVICE_CREATE_FUNCTIONS = {
 
     ('Actuator', 'engine', 'intensity_range'): __createLimitedLinearEngine,
@@ -200,7 +223,9 @@ __DEVICE_CREATE_FUNCTIONS = {
     ('InterfaceDevice', 'button', None): __createButton,
     ('InterfaceDevice', 'keyboard', None): __createKeyboardReceiver,
     ('Communication', 'receiver', None): __createBasicReceiver,
-    ('Communication', 'sender', None): __createBasicSender
+    ('Communication', 'sender', None): __createBasicSender,
+    ('Communication', 'receiver', 'configurable'): __createConfReceiver,
+    ('Communication', 'sender', 'configurable'): __createConfSender
 }
 
 def __addDevice(

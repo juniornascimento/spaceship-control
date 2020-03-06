@@ -166,8 +166,7 @@ class ConfigurableReceiver(BasicReceiver):
         self.__max_freq = max_frequency
 
     def command(self, command: 'List[str]', *args) -> 'Any':
-        return super().command(self, command,
-                               ConfigurableReceiver.__COMMANDS, *args)
+        return super().command(command, ConfigurableReceiver.__COMMANDS, *args)
 
     @property
     def frequency(self, frequency):
@@ -187,8 +186,9 @@ class ConfigurableReceiver(BasicReceiver):
 class BasicSender(DefaultDevice):
 
     def __init__(self, part, engine, intensity, frequency,
-                 frequency_err_gen=None, intensity_err_gen=None):
-        super().__init__(device_type='basic-sender')
+                 frequency_err_gen=None, intensity_err_gen=None,
+                 device_type='basic-sender'):
+        super().__init__(device_type=device_type)
 
         self.__part = part
         self.__engine = engine
@@ -241,8 +241,7 @@ class ConfigurableSender(BasicSender):
         self.__max_int = max_intensity
 
     def command(self, command: 'List[str]', *args) -> 'Any':
-        return super().command(self, command,
-                               ConfigurableSender.__COMMANDS, *args)
+        return super().command(command, ConfigurableSender.__COMMANDS, *args)
 
     @property
     def frequency(self, frequency):
