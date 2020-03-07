@@ -9,6 +9,7 @@ debug(sys.argv[1:])
 
 while True:
     try:
+        send('0:0: set-intensity 20000000')
         send('0:0: send-signal')
         ship.run(.25)
     except BrokenPipeError:

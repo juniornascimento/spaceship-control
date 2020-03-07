@@ -178,7 +178,8 @@ class ConfigurableReceiver(BasicReceiver):
             self._frequency = value
 
     __COMMANDS = {
-        'set-frequency': frequency.fset,
+        'set-frequency': lambda self, val:
+            ConfigurableReceiver.intensity.fset(self, float(val)),
         'min-frequency': lambda self: self.__min_freq,
         'max-frequency': lambda self: self.__max_freq
     }
@@ -258,12 +259,14 @@ class ConfigurableSender(BasicSender):
 
     @intensity.setter
     def intensity(self, value):
-        if self.__min_freq <= self._intensity <= self.__max_freq:
+        if self.__min_int <= self._intensity <= self.__max_int:
             self._intensity = value
 
     __COMMANDS = {
-        'set-frequency': frequency.fset,
-        'set-intensity': intensity.fset,
+        'set-frequency': lambda self, val:
+            ConfigurableSender.frequency.fset(self, float(val)),
+        'set-intensity': lambda self, val:
+            ConfigurableSender.intensity.fset(self, float(val)),
         'min-frequency': lambda self: self.__min_freq,
         'max-frequency': lambda self: self.__max_freq,
         'min-intensity': lambda self: self.__min_int,
