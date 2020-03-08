@@ -212,7 +212,6 @@ class BasicSender(DefaultDevice):
             intensity = self._intensity
         else:
             intensity = abs(self.__int_err_gen(self._intensity))
-            print(self._intensity, intensity)
 
         self.__engine.newSignal(self.__part.position, intensity, frequency)
 

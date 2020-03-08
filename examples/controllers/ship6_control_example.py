@@ -7,10 +7,24 @@ debug(ship.device)
 
 debug(sys.argv[1:])
 
+HIGH_INTENSITY = 20000000
+
+def send_bit(bit):
+    send(f'0:0: set-intensity {HIGH_INTENSITY if bit else HIGH_INTENSITY//2}')
+    send('0:0: send-signal')
+
+def send_char(char):
+    value = ord(char)
+    send_bit(1)
+    send_bit(0)
+    send_bit(1)
+    send_bit(0)
+    for i in range(8):
+        send_bit((value & (1 << i)) >> i)
+
 while True:
     try:
-        send('0:0: set-intensity 20000000')
-        send('0:0: send-signal')
+        send_char('A')
         ship.run(.25)
     except BrokenPipeError:
         break
