@@ -136,6 +136,7 @@ class MainWindow(QMainWindow):
                 f'{self.__title_basename}({self.__current_scenario}){suffix}')
 
     def closeEvent(self, _event):
+        self.clear()
         self.__ui.view.setScene(None)
 
     def clear(self):
@@ -147,7 +148,7 @@ class MainWindow(QMainWindow):
         self.__ui.treeView.show()
 
         with self.__lock:
-            self.__space.remove(self.__space.bodies, self.__space.shapes)
+            self.__space.remove(*self.__space.bodies, *self.__space.shapes)
             for _, gitem, widgets, _ in self.__ships:
                 self.__ui.view.scene().removeItem(gitem)
                 for widget in widgets:
