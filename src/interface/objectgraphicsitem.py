@@ -125,7 +125,7 @@ class PolyDrawingPart(DrawingPart):
 
         painter.drawPolygon(self.__polygon)
 
-class ShipGraphicsItem(QGraphicsItem):
+class ObjectGraphicsItem(QGraphicsItem):
 
     def __init__(self, shapes) -> None:
         super().__init__()

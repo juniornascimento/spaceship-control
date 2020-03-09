@@ -18,7 +18,7 @@ import anytree
 
 # pylint: disable=relative-beyond-top-level
 
-from .shipgraphicsitem import ShipGraphicsItem
+from .objectgraphicsitem import ObjectGraphicsItem
 from .choosefromtreedialog import ChooseFromTreeDialog
 
 from ..storage.fileinfo import FileInfo
@@ -220,7 +220,7 @@ class MainWindow(QMainWindow):
                                          self.__lock)
 
         if config.image is None:
-            ship_gitem = ShipGraphicsItem(ship.body.shapes)
+            ship_gitem = ObjectGraphicsItem(ship.body.shapes)
         else:
             pixmap = QPixmap(fileinfo.dataImagePath(config.image.name))
             height = config.image.height
