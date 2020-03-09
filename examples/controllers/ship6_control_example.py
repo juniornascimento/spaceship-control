@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
 import sys
+import random
+
 from lib.spctrl_base_controller import ship, send, debug
 
 debug(ship.device)
@@ -24,7 +26,9 @@ def send_char(char):
 
 while True:
     try:
-        send_char('A')
+        char = chr(random.randint(ord('A'), ord('Z')))
+        debug(f'Sending: {char}')
+        send_char(char)
         ship.run(.25)
     except BrokenPipeError:
         break
