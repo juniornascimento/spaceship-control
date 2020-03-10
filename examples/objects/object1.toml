@@ -1,0 +1,30 @@
+
+[[Shape]]
+
+id = 'square'
+type = 'polygon'
+mass = 30
+
+    [[Shape.Point]]
+
+    id = 'p1'
+    x = -40
+    y = -40
+
+    [[Shape.Point]]
+
+    id = 'p2'
+    x = -40
+    y = 40
+
+    [[Shape.Point]]
+
+    id = 'p3'
+    x = 40
+    y = 40
+
+    [[Shape.Point]]
+
+    id = 'p4'
+    x = 40
+    y = -40
