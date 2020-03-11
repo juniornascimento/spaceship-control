@@ -74,7 +74,7 @@ class FileInfo:
     def __listTree(self, base_path, current_node, blacklist=(),
                    remove_suffix=True):
 
-        for path in base_path.iterdir():
+        for path in sorted(base_path.iterdir()):
 
             if path.name in blacklist:
                 continue
