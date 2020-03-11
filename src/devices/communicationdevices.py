@@ -38,24 +38,24 @@ class CommunicationEngine:
 
         def __calc_dist(self):
 
-            half_speed = self.__engine._speed/2
+            half_speed = self.__engine._speed/2 # pylint: disable=protected-access
 
             self.__sqrd_min_distance = (
                 max(0, self.__cur_distance - half_speed))**2
             self.__sqrd_max_distance = (self.__cur_distance + half_speed)**2
 
         def step(self):
-            self.__cur_distance += self.__engine._speed
+            self.__cur_distance += self.__engine._speed # pylint: disable=protected-access
             self.__calc_dist()
 
         def sendTo(self, receiver):
             dist = Vec2d(receiver.position).get_dist_sqrd(self.__start)
 
             if self.__sqrd_min_distance < dist < self.__sqrd_max_distance:
-                noise = (random.random() - 0.5)*self.__engine._noise_max
+                noise = (random.random() - 0.5)*self.__engine._noise_max # pylint: disable=protected-access
                 intensity = self.__inital_intensity if dist < 1 else \
                     self.__inital_intensity/dist
-                if intensity < self.__engine._ignore_lesser:
+                if intensity < self.__engine._ignore_lesser: # pylint: disable=protected-access
                     self.__valid = False
 
                 if intensity > 2*abs(noise):
@@ -152,7 +152,7 @@ class BasicReceiver(DefaultDevice, CommunicationEngine.Receiver):
         return signals
 
     __COMMANDS = {
-        'get-frequency': lambda self: self._frequency,
+        'get-frequency': lambda self: self._frequency, # pylint: disable=protected-access
         'get-received': __getReceived
     }
 
@@ -169,7 +169,7 @@ class ConfigurableReceiver(BasicReceiver):
         return super().command(command, ConfigurableReceiver.__COMMANDS, *args)
 
     @property
-    def frequency(self, frequency):
+    def frequency(self):
         return self._frequency
 
     @frequency.setter
@@ -179,9 +179,9 @@ class ConfigurableReceiver(BasicReceiver):
 
     __COMMANDS = {
         'set-frequency': lambda self, val:
-            ConfigurableReceiver.intensity.fset(self, float(val)),
-        'min-frequency': lambda self: self.__min_freq,
-        'max-frequency': lambda self: self.__max_freq
+            ConfigurableReceiver.frequency.fset(self, float(val)),
+        'min-frequency': lambda self: self.__min_freq, # pylint: disable=protected-access
+        'max-frequency': lambda self: self.__max_freq # pylint: disable=protected-access
     }
 
 class BasicSender(DefaultDevice):
@@ -218,14 +218,9 @@ class BasicSender(DefaultDevice):
     def command(self, command: 'List[str]', *args) -> 'Any':
         return super().command(command, BasicSender.__COMMANDS, *args)
 
-    def __getReceived(self):
-        signals = self.__received_signals
-        self.__received_signals.clear()
-        return signals
-
     __COMMANDS = {
-        'get-frequency': lambda self: self._frequency,
-        'get-intensity': lambda self: self._intensity,
+        'get-frequency': lambda self: self._frequency, # pylint: disable=protected-access
+        'get-intensity': lambda self: self._intensity, # pylint: disable=protected-access
         'send-signal': send
     }
 
@@ -244,7 +239,7 @@ class ConfigurableSender(BasicSender):
         return super().command(command, ConfigurableSender.__COMMANDS, *args)
 
     @property
-    def frequency(self, frequency):
+    def frequency(self):
         return self._frequency
 
     @frequency.setter
@@ -253,7 +248,7 @@ class ConfigurableSender(BasicSender):
             self._frequency = value
 
     @property
-    def intensity(self, intensity):
+    def intensity(self):
         return self._intensity
 
     @intensity.setter
@@ -266,8 +261,8 @@ class ConfigurableSender(BasicSender):
             ConfigurableSender.frequency.fset(self, float(val)),
         'set-intensity': lambda self, val:
             ConfigurableSender.intensity.fset(self, float(val)),
-        'min-frequency': lambda self: self.__min_freq,
-        'max-frequency': lambda self: self.__max_freq,
-        'min-intensity': lambda self: self.__min_int,
-        'max-intensity': lambda self: self.__max_int
+        'min-frequency': lambda self: self.__min_freq, # pylint: disable=protected-access
+        'max-frequency': lambda self: self.__max_freq, # pylint: disable=protected-access
+        'min-intensity': lambda self: self.__min_int, # pylint: disable=protected-access
+        'max-intensity': lambda self: self.__max_int # pylint: disable=protected-access
     }

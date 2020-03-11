@@ -3,8 +3,6 @@ from collections import namedtuple
 
 from pymunk import Body, Circle, Poly
 
-from PyQt5.QtCore import Qt
-
 from ..configfileinheritance import resolvePrefix
 
 from ...utils.errorgenerator import ErrorGenerator
@@ -162,7 +160,7 @@ def __createKeyboardReceiver(info: 'Dict[str, Any]', _part: StructuralPart) \
 
     return device, (button,)
 
-def __createButton(info: 'Dict[str, Any]', _part: StructuralPart) \
+def __createButton(_info: 'Dict[str, Any]', _part: StructuralPart) \
     -> 'Tuple[ButtonDevice, Sequence[QWidget]]':
 
     device = ButtonDevice()
@@ -172,7 +170,7 @@ def __createButton(info: 'Dict[str, Any]', _part: StructuralPart) \
     return device, (button,)
 
 def __createBasicReceiver(info: 'Dict[str, Any]', part: StructuralPart,
-                          engine: 'CommunicationEngine' = None, **kwargs) \
+                          engine: 'CommunicationEngine' = None, **_kwargs) \
     -> 'Tuple[Device, Sequence[QWidget]]':
 
     return BasicReceiver(part, info.get('minimum_intensity', 0),
@@ -180,7 +178,7 @@ def __createBasicReceiver(info: 'Dict[str, Any]', part: StructuralPart,
                          engine=engine), ()
 
 def __createBasicSender(info: 'Dict[str, Any]', part: StructuralPart,
-                        engine: 'CommunicationEngine' = None, **kwargs) \
+                        engine: 'CommunicationEngine' = None, **_kwargs) \
     -> 'Tuple[Device, Sequence[QWidget]]':
 
     errors = __get_error_kwargs(info, {
@@ -192,7 +190,7 @@ def __createBasicSender(info: 'Dict[str, Any]', part: StructuralPart,
                         **errors), ())
 
 def __createConfReceiver(info: 'Dict[str, Any]', part: StructuralPart,
-                          engine: 'CommunicationEngine' = None, **kwargs) \
+                          engine: 'CommunicationEngine' = None, **_kwargs) \
     -> 'Tuple[Device, Sequence[QWidget]]':
 
     return ConfigurableReceiver(part, info.get('minimum_intensity', 0),
@@ -200,7 +198,7 @@ def __createConfReceiver(info: 'Dict[str, Any]', part: StructuralPart,
                                 engine=engine), ()
 
 def __createConfSender(info: 'Dict[str, Any]', part: StructuralPart,
-                       engine: 'CommunicationEngine' = None, **kwargs) \
+                       engine: 'CommunicationEngine' = None, **_kwargs) \
     -> 'Tuple[Device, Sequence[QWidget]]':
 
     errors = __get_error_kwargs(info, {

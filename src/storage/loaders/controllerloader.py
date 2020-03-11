@@ -3,7 +3,7 @@ import time
 
 import signal
 from subprocess import Popen, PIPE
-from threading import Thread, Lock
+from threading import Thread
 
 def __controllerThreadWatcher(process, device, lock):
 
