@@ -92,4 +92,3 @@ def createObjectiveTree(objective: 'Union[Objective, Sequence[Objective]]',
 
         for subobjective in objective.subobjectives:
             createObjectiveTree(subobjective, parent=current_node)
-

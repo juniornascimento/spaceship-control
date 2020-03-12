@@ -132,10 +132,10 @@ class FileInfo:
         package_name = package_path.name
 
         for directory, mode, patterns in (
-            ('scenarios', 0o644, ('*.toml', '*.json', '*.yml', '*.yaml')),
-            ('ships', 0o644, ('*.toml', '*.json', '*.yml', '*.yaml')),
-            ('controllers', 0o555, ('*',)),
-            ('images', 0o644, ('*.png', '*.gif'))):
+                ('scenarios', 0o644, ('*.toml', '*.json', '*.yml', '*.yaml')),
+                ('ships', 0o644, ('*.toml', '*.json', '*.yml', '*.yaml')),
+                ('controllers', 0o555, ('*',)),
+                ('images', 0o644, ('*.png', '*.gif'))):
 
             dest_base_path = self.__path.joinpath(directory).joinpath(
                 package_name)

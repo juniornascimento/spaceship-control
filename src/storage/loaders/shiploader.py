@@ -21,36 +21,36 @@ from ...devices.communicationdevices import (
 ShipImageInfo = namedtuple('ShipImageInfo', ('name', 'width', 'height'))
 ShipConfig = namedtuple('ShipConfig', ('image'))
 
-def __load_error(info: 'Dict[str, Any]') -> ErrorGenerator:
+def __loadError(info: 'Dict[str, Any]') -> ErrorGenerator:
 
     return ErrorGenerator(error_max=info.get('error_max'),
                           offset_max=info.get('offset_max'),
                           error_max_minfac=info.get('error_max_minfac', 1))
 
-def __load_error_dict(
-    errors: 'Dict[str, Dict[str, Any]]') -> 'Dict[str, ErrorGenerator]':
+def __loadErrorDict(
+        errors: 'Dict[str, Dict[str, Any]]') -> 'Dict[str, ErrorGenerator]':
 
-    return {name: __load_error(info) for name, info in errors.items()}
+    return {name: __loadError(info) for name, info in errors.items()}
 
-def __get_error_kwargs(content: 'Dict[str, Dict[str, Any]]',
-                       errors: 'Dict[str, str]') -> 'Dict[str, ErrorGenerator]':
+def __getErrorKwargs(content: 'Dict[str, Dict[str, Any]]',
+                     errors: 'Dict[str, str]') -> 'Dict[str, ErrorGenerator]':
 
     errors_content = content.get('Error')
 
     if errors_content is None:
         return {}
 
-    errors_dict = __load_error_dict(errors_content)
+    errors_dict = __loadErrorDict(errors_content)
 
     return {key: value for key, value in
             ((error_keyword, errors_dict.get(error_tablename))
              for error_tablename, error_keyword in errors.items())
             if value is not None}
 
-def __engine_error_kwargs(
-    content: 'Dict[str, Dict[str, Any]]') -> 'Dict[str, ErrorGenerator]':
+def __engineErrorKwargs(
+        content: 'Dict[str, Dict[str, Any]]') -> 'Dict[str, ErrorGenerator]':
 
-    return __get_error_kwargs(content, {
+    return __getErrorKwargs(content, {
         'Thrust': 'thrust_error_gen',
         'Angle': 'angle_error_gen',
         'Position': 'position_error_gen'
@@ -101,7 +101,7 @@ def __createLimitedLinearEngine(info: 'Dict[str, Any]', part: StructuralPart) \
                                info['max_angle'],
                                intensity_multiplier=info.get('intensity_mult',
                                                              1),
-                               **__engine_error_kwargs(info)), ()
+                               **__engineErrorKwargs(info)), ()
 
 def __createPositionSensor(info: 'Dict[str, Any]', part: StructuralPart) \
     -> 'Tuple[PositionSensor, Sequence[QWidget]]':
@@ -181,7 +181,7 @@ def __createBasicSender(info: 'Dict[str, Any]', part: StructuralPart,
                         engine: 'CommunicationEngine' = None, **_kwargs) \
     -> 'Tuple[Device, Sequence[QWidget]]':
 
-    errors = __get_error_kwargs(info, {
+    errors = __getErrorKwargs(info, {
         'Frequency': 'frequency_err_gen',
         'Intensity': 'intensity_err_gen'
     })
@@ -190,7 +190,7 @@ def __createBasicSender(info: 'Dict[str, Any]', part: StructuralPart,
                         **errors), ())
 
 def __createConfReceiver(info: 'Dict[str, Any]', part: StructuralPart,
-                          engine: 'CommunicationEngine' = None, **_kwargs) \
+                         engine: 'CommunicationEngine' = None, **_kwargs) \
     -> 'Tuple[Device, Sequence[QWidget]]':
 
     return ConfigurableReceiver(part, info.get('minimum_intensity', 0),
@@ -201,7 +201,7 @@ def __createConfSender(info: 'Dict[str, Any]', part: StructuralPart,
                        engine: 'CommunicationEngine' = None, **_kwargs) \
     -> 'Tuple[Device, Sequence[QWidget]]':
 
-    errors = __get_error_kwargs(info, {
+    errors = __getErrorKwargs(info, {
         'Frequency': 'frequency_err_gen',
         'Intensity': 'intensity_err_gen'
     })
@@ -227,8 +227,8 @@ __DEVICE_CREATE_FUNCTIONS = {
 }
 
 def __addDevice(
-    info: 'Dict[str, Any]', parts: 'Dict[str, StructuralPart]',
-    device_type: str, **kwargs) -> 'List[QWidget]':
+        info: 'Dict[str, Any]', parts: 'Dict[str, StructuralPart]',
+        device_type: str, **kwargs) -> 'List[QWidget]':
 
     type_and_model = (device_type, info.get('type'), info.get('model'))
     create_func = __DEVICE_CREATE_FUNCTIONS.get(type_and_model)
@@ -250,7 +250,7 @@ def __addDevice(
     return widgets
 
 def loadShip(ship_info: str, name: str, space: 'pymunk.Space',
-             prefixes: 'Sequence[str]' = (), communication_engine = None) \
+             prefixes: 'Sequence[str]' = (), communication_engine=None) \
     -> 'Tuple[Structure, Sequence[QWidget]]':
 
     shapes = tuple(__createShape(shape_info)

@@ -1,4 +1,6 @@
 
+MERGE_FUNCTION_TYPE = 'Callable[[Dict[str, Any], Sequence[str], str], None]'
+
 def getMapOp(operation: 'Callable', dict_obj: 'Dict[str, Any]',
              initial_value: 'Any', *args: str) -> 'Any':
 
@@ -22,8 +24,9 @@ def getListConcat(dict_obj: 'Dict[str, List[Any]]', *args: str) -> 'List[Any]':
                     *args)
 
 def mergeBase(
-    dict_obj: 'Dict[str, Any]', keys: 'Sequence[str]', target: str,
-    function: 'Callable[[Dict[str, Any], List[str]], Dict[str, Any]]') -> None:
+        dict_obj: 'Dict[str, Any]', keys: 'Sequence[str]', target: str,
+        function: 'Callable[[Dict[str, Any], List[str]], Dict[str, Any]]') \
+            -> None:
 
     result = function(dict_obj, *keys)
     for key in keys:
@@ -112,8 +115,7 @@ def pathMatch(dict_obj: 'Dict[str, Any]', path: 'Sequence[str]',
 
 def mergeMatch(dict_obj: 'Dict[str, Any]', path: 'Sequence[str]',
                keys: 'Sequence[str]', target: str,
-               merge_function: ('Callable[[Dict[str, Any], Sequence[str]'
-                                ', str], None]') = merge, **kwargs) -> None:
+               merge_function: MERGE_FUNCTION_TYPE = merge, **kwargs) -> None:
 
     if 'has_keys' not in kwargs:
         kwargs['has_keys'] = tuple(key for key in keys if key != target)

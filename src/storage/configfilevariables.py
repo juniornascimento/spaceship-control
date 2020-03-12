@@ -18,7 +18,7 @@ def subVariables(content, enabled=None, variables=None):
                 return content
 
         new_variables = {variable['id']: variable['value']
-                        for variable in content.get('Variable', ())}
+                         for variable in content.get('Variable', ())}
 
         if variables is None:
             variables = new_variables

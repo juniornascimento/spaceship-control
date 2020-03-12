@@ -1,9 +1,10 @@
 
-from pymunk import Vec2d
 from abc import abstractmethod
 
 import time
 import math
+
+from pymunk import Vec2d
 
 from .device import DeviceGroup, PropertyDevice
 

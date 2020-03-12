@@ -34,9 +34,9 @@ class CommunicationEngine:
             self.__frequency = frequency
             self.__valid = True
 
-            self.__calc_dist()
+            self.__calcDist()
 
-        def __calc_dist(self):
+        def __calcDist(self):
 
             half_speed = self.__engine._speed/2 # pylint: disable=protected-access
 
@@ -46,7 +46,7 @@ class CommunicationEngine:
 
         def step(self):
             self.__cur_distance += self.__engine._speed # pylint: disable=protected-access
-            self.__calc_dist()
+            self.__calcDist()
 
         def sendTo(self, receiver):
             dist = Vec2d(receiver.position).get_dist_sqrd(self.__start)
@@ -179,7 +179,7 @@ class ConfigurableReceiver(BasicReceiver):
 
     __COMMANDS = {
         'set-frequency': lambda self, val:
-            ConfigurableReceiver.frequency.fset(self, float(val)),
+                         ConfigurableReceiver.frequency.fset(self, float(val)),
         'min-frequency': lambda self: self.__min_freq, # pylint: disable=protected-access
         'max-frequency': lambda self: self.__max_freq # pylint: disable=protected-access
     }
@@ -258,9 +258,9 @@ class ConfigurableSender(BasicSender):
 
     __COMMANDS = {
         'set-frequency': lambda self, val:
-            ConfigurableSender.frequency.fset(self, float(val)),
+                         ConfigurableSender.frequency.fset(self, float(val)),
         'set-intensity': lambda self, val:
-            ConfigurableSender.intensity.fset(self, float(val)),
+                         ConfigurableSender.intensity.fset(self, float(val)),
         'min-frequency': lambda self: self.__min_freq, # pylint: disable=protected-access
         'max-frequency': lambda self: self.__max_freq, # pylint: disable=protected-access
         'min-intensity': lambda self: self.__min_int, # pylint: disable=protected-access
