@@ -1,7 +1,7 @@
 
 from collections import namedtuple
 
-from pymunk import Body, Circle, Poly
+from pymunk import Body
 
 from ..configfileinheritance import resolvePrefix
 
@@ -17,6 +17,8 @@ from ...devices.communicationdevices import (
 
     BasicReceiver, BasicSender, ConfigurableReceiver, ConfigurableSender
 )
+
+from .shapeloader import loadShapes
 
 ShipImageInfo = namedtuple('ShipImageInfo', ('name', 'width', 'height'))
 ShipConfig = namedtuple('ShipConfig', ('image'))
@@ -55,43 +57,6 @@ def __engineErrorKwargs(
         'Angle': 'angle_error_gen',
         'Position': 'position_error_gen'
     })
-
-def __createCircleShape(info: 'Dict[str, Any]') -> 'Circle':
-
-    shape = Circle(None, info['radius'],
-                   (info.get('x', 0), info.get('y', 0)))
-
-    shape.mass = info['mass']
-    shape.elasticity = info.get('elasticity', 0.5)
-    shape.friction = info.get('friction', 0.5)
-
-    return shape
-
-def __createPolyShape(info: 'Dict[str, Any]') -> 'Poly':
-
-    points = tuple((point.get('x', 0), point.get('y', 0))
-                   for point in info['Point'])
-    shape = Poly(None, points)
-
-    shape.mass = info['mass']
-    shape.elasticity = info.get('elasticity', 0.5)
-    shape.friction = info.get('friction', 0.5)
-
-    return shape
-
-__SHAPE_CREATE_FUNCTIONS = {
-
-    'circle': __createCircleShape,
-    'polygon': __createPolyShape
-}
-
-def __createShape(info: 'Dict[str, Any]') -> 'Shape':
-
-    type_ = info.get('type')
-
-    create_func = __SHAPE_CREATE_FUNCTIONS.get(type_)
-
-    return create_func(info)
 
 def __createLimitedLinearEngine(info: 'Dict[str, Any]', part: StructuralPart) \
     -> 'Tuple[LimitedLinearEngine, Sequence[QWidget]]':
@@ -253,8 +218,7 @@ def loadShip(ship_info: str, name: str, space: 'pymunk.Space',
              prefixes: 'Sequence[str]' = (), communication_engine=None) \
     -> 'Tuple[Structure, Sequence[QWidget]]':
 
-    shapes = tuple(__createShape(shape_info)
-                   for shape_info in ship_info['Shape'])
+    shapes = loadShapes(ship_info['Shape'])
 
     mass = sum(shape.mass for shape in shapes)
     moment = sum(shape.moment for shape in shapes)
