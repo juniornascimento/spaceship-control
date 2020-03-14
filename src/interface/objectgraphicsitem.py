@@ -127,7 +127,7 @@ class PolyDrawingPart(DrawingPart):
 
 class ObjectGraphicsItem(QGraphicsItem):
 
-    def __init__(self, shapes) -> None:
+    def __init__(self, shapes, color=Qt.blue) -> None:
         super().__init__()
 
         self.__parts = []
@@ -135,14 +135,14 @@ class ObjectGraphicsItem(QGraphicsItem):
             if isinstance(shape, pymunk.Circle):
                 offset_pym = shape.offset
                 offset = QPointF(offset_pym.x, offset_pym.y)
-                circle = CircleDrawingPart(shape.radius, color=Qt.blue,
+                circle = CircleDrawingPart(shape.radius, color=color,
                                            offset=offset)
                 self.__parts.append(circle)
 
             elif isinstance(shape, pymunk.Poly):
                 points = tuple(QPointF(point.x, point.y) for point in
                                shape.get_vertices())
-                self.__parts.append(PolyDrawingPart(points, color=Qt.blue))
+                self.__parts.append(PolyDrawingPart(points, color=color))
 
         self.__bounding_rect = QRectF(0, 0, 0, 0)
         for part in self.__parts:
