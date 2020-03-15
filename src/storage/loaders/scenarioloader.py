@@ -9,11 +9,13 @@ from ...objectives.gotoobjective import GoToObjective
 
 from ...devices.communicationdevices import CommunicationEngine
 
+ObjectInfo = namedtuple('ObjectInfo', ('model', 'position', 'angle'))
+
 ShipInfo = namedtuple('ShipInfo', (
     'name', 'model', 'controller', 'position', 'angle'))
 
 ScenarioInfo = namedtuple('ScenarioInfo', (
-    'name', 'ships', 'objectives', 'visible_user_interface',
+    'name', 'ships', 'objectives', 'objects', 'visible_user_interface',
     'communication_engine'
 ))
 
@@ -66,6 +68,20 @@ def __readShipInfo(ship_content, prefixes) -> 'ShipInfo':
 
     return ShipInfo(**ship_info_kwargs)
 
+def __readObjectInfo(obj_content, prefixes) -> 'ObjectInfo':
+
+    model = ship_content.get('model')
+    if model is not None:
+        model, _ = resolvePrefix(model, prefixes)
+
+        if model is None:
+            raise ValueError(f'Object model not found')
+
+    position = (ship_content.get('x', 0), ship_content.get('y', 0))
+    angle = pi*ship_content.get('angle', 0)/180
+
+    return ObjectInfo(model=model, position=position, angle=angle)
+
 def loadCommunicationEngine(engine_info: 'Dict[str, Any]'):
 
     return CommunicationEngine(engine_info.get('max_noise', 10),
@@ -85,7 +101,10 @@ def loadScenario(scenario_info: 'Dict[str, Any]',
     ships = tuple(__readShipInfo(ship, prefixes)
                   for ship in scenario_info.get('Ship', ()))
 
-    objectives = loadObjectives(scenario_info.get('Objective', ()))
+    objectives = tuple(loadObjectives(scenario_info.get('Objective', ())))
+
+    objects = tuple(__readObjectInfo(ship, prefixes)
+                    for ship in scenario_info.get('Object', ()))
 
     hidden_user_interface = scenario_content.get('hide_user_interface', False)
 
@@ -94,4 +113,4 @@ def loadScenario(scenario_info: 'Dict[str, Any]',
 
     return ScenarioInfo(name=s_name, ships=ships, objectives=objectives,
                         visible_user_interface=not(hidden_user_interface),
-                        communication_engine=comm_engine)
+                        communication_engine=comm_engine, objects=objects)
