@@ -13,7 +13,7 @@ from anytree import Node
 from . import configfileinheritance, configfilevariables
 
 from .loaders import (
-    shiploader, scenarioloader, controllerloader
+    shiploader, scenarioloader, controllerloader, objectloader
 )
 
 from ..utils import dictutils
@@ -108,6 +108,10 @@ class FileInfo:
         return self.__getPath(
             self.__path.joinpath('scenarios'), *args, **kwargs)
 
+    def objectModelPath(self, *args, **kwargs):
+        return self.__getPath(
+            self.__path.joinpath('objects'), *args, **kwargs)
+
     def dataImagePath(self, *args, **kwargs):
         return self.__getPath(
             self.__path.joinpath('images'), *args, **kwargs)
@@ -122,6 +126,9 @@ class FileInfo:
         return self.__addFiles(self.__path.joinpath('controllers'), files,
                                mode=0o555)
 
+    def addObjects(self, files):
+        return self.__addFiles(self.__path.joinpath('objects'), files)
+
     def addImages(self, files):
         return self.__addFiles(self.__path.joinpath('images'), files)
 
@@ -134,6 +141,7 @@ class FileInfo:
         for directory, mode, patterns in (
                 ('scenarios', 0o644, ('*.toml', '*.json', '*.yml', '*.yaml')),
                 ('ships', 0o644, ('*.toml', '*.json', '*.yml', '*.yaml')),
+                ('objects', 0o644, ('*.toml', '*.json', '*.yml', '*.yaml')),
                 ('controllers', 0o555, ('*',)),
                 ('images', 0o644, ('*.png', '*.gif'))):
 
@@ -218,6 +226,20 @@ class FileInfo:
 
         return content
 
+    def __getObjectContent(self, object_model):
+
+        content = self.__getContent(object_model, self.objectModelPath,
+                                    'Inexistent object model named \'{name}\'')
+
+        dictutils.mergeMatch(content, (), ('Shape', 'shapes'), 'Shape',
+                             absolute=True)
+        dictutils.mergeMatch(content, ('Shape',), ('Point', 'points'), 'Point',
+                             absolute=True)
+
+        configfilevariables.subVariables(content)
+
+        return content
+
     def loadScenario(self, scenario_name):
 
         prefixes = scenario_name.split('/')[:-1]
@@ -241,6 +263,17 @@ class FileInfo:
         return shiploader.loadShip(ship_content, name, space, prefixes=prefixes,
                                    communication_engine=communication_engine)
 
+    def loadObject(self, model, space):
+
+        prefixes = model.split('/')[:-1]
+
+        obj_content = self.__getObjectContent(model)
+
+        obj_content = configfileinheritance.mergeInheritedFiles(
+            obj_content, self.__getObjectContent, prefixes=prefixes)
+
+        return objectloader.loadShip(obj_content, space, prefixes=prefixes)
+
     def loadController(self, controller_name, ship, json_info, lock):
         return controllerloader.loadController(
             self.controllerPath(controller_name), ship, json_info, lock)
@@ -248,7 +281,7 @@ class FileInfo:
     def openScenarioFile(self, scenario):
 
         scenario_path, _ = self.__findSuffix(
-            scenario, self.scenarioPath, ('.toml', '.json'))
+            scenario, self.scenarioPath, ('.toml', '.json', '.yaml', '.yml'))
 
         if scenario_path is not None:
             self.__openFile(scenario_path)
@@ -256,7 +289,15 @@ class FileInfo:
     def openShipModelFile(self, ship_model):
 
         model_path, _ = self.__findSuffix(
-            ship_model, self.shipModelPath, ('.toml', '.json'))
+            ship_model, self.shipModelPath, ('.toml', '.json', '.yaml', '.yml'))
+
+        if model_path is not None:
+            self.__openFile(model_path)
+
+    def openObjectModelFile(self, obj_model):
+
+        model_path, _ = self.__findSuffix(
+            obj_model, self.shipModelPath, ('.toml', '.json', '.yaml', '.yml'))
 
         if model_path is not None:
             self.__openFile(model_path)

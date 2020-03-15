@@ -42,6 +42,4 @@ def loadObject(obj_info: str, space: 'pymunk.Space',
 
         config = ObjectConfig(image_info)
 
-    ObjectInfo(body=body, shapes=shapes, image=)
-
-    return body, shapes, config, widgets
+    return body, shapes, config
