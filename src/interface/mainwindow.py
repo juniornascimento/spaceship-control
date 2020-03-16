@@ -351,6 +351,8 @@ class MainWindow(QMainWindow):
         self.__ships = ships
         self.__objects = objects
 
+        self.__space.reindex_static()
+
         for widget in self.__ships[0][2]:
             widget.show()
 

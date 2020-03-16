@@ -14,19 +14,35 @@ def loadObject(obj_info: str, space: 'pymunk.Space',
                prefixes: 'Sequence[str]' = ()) \
     -> 'Tuple[Structure, Sequence[QWidget]]':
 
+    config_content = obj_info.get('Config', {})
+
+    if config_content is None:
+        is_static = False
+    else:
+        is_static = config_content.get('static', False)
+
     shapes = loadShapes(obj_info['Shape'])
 
-    mass = sum(shape.mass for shape in shapes)
-    moment = sum(shape.moment for shape in shapes)
+    if is_static is True:
 
-    body = Body(mass, moment)
+        body = Body(body_type=Body.STATIC)
 
-    for shape in shapes:
-        shape.body = body
+        for shape in shapes:
+            shape.body = body
 
-    space.add(body, shapes)
+        space.add(shapes)
 
-    config_content = obj_info.get('Config')
+    else:
+        mass = sum(shape.mass for shape in shapes)
+        moment = sum(shape.moment for shape in shapes)
+
+        body = Body(mass, moment)
+
+        for shape in shapes:
+            shape.body = body
+
+        space.add(body, shapes)
+
     if config_content is None:
         config = ObjectConfig(None)
     else:
