@@ -14,7 +14,7 @@ def loadObject(obj_info: str, space: 'pymunk.Space',
                prefixes: 'Sequence[str]' = ()) \
     -> 'Tuple[Structure, Sequence[QWidget]]':
 
-    shapes = loadShapes(ship_info['Shape'])
+    shapes = loadShapes(obj_info['Shape'])
 
     mass = sum(shape.mass for shape in shapes)
     moment = sum(shape.moment for shape in shapes)
@@ -26,7 +26,7 @@ def loadObject(obj_info: str, space: 'pymunk.Space',
 
     space.add(body, shapes)
 
-    config_content = ship_info.get('Config')
+    config_content = obj_info.get('Config')
     if config_content is None:
         config = ObjectConfig(None)
     else:
@@ -42,4 +42,4 @@ def loadObject(obj_info: str, space: 'pymunk.Space',
 
         config = ObjectConfig(image_info)
 
-    return body, shapes, config
+    return body, config

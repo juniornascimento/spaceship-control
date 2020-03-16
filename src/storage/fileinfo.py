@@ -272,7 +272,7 @@ class FileInfo:
         obj_content = configfileinheritance.mergeInheritedFiles(
             obj_content, self.__getObjectContent, prefixes=prefixes)
 
-        return objectloader.loadShip(obj_content, space, prefixes=prefixes)
+        return objectloader.loadObject(obj_content, space, prefixes=prefixes)
 
     def loadController(self, controller_name, ship, json_info, lock):
         return controllerloader.loadController(

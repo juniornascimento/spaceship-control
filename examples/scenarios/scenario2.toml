@@ -34,3 +34,10 @@ controller = 'examples/ship1_control_example.py'
 
 x = 200
 y = 100
+
+[[Object]]
+
+model = '.object1'
+
+x = 100
+y = 100

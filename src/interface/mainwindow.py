@@ -10,7 +10,7 @@ from PyQt5.QtWidgets import (
     QMainWindow, QGraphicsScene, QFileDialog, QMessageBox, QGraphicsPixmapItem
 )
 from PyQt5.QtGui import QPixmap
-from PyQt5.QtCore import QTimer
+from PyQt5.QtCore import QTimer, Qt
 
 import pymunk
 
@@ -69,6 +69,7 @@ class MainWindow(QMainWindow):
         self.__space.gravity = (0, 0)
 
         self.__ships = []
+        self.__objects = []
         self.__scenario_objectives = []
         self.__objectives_complete = False
         self.__current_scenario = None
@@ -149,12 +150,18 @@ class MainWindow(QMainWindow):
 
         with self.__lock:
             self.__space.remove(*self.__space.bodies, *self.__space.shapes)
+
+            scene = self.__ui.view.scene()
             for _, gitem, widgets, _ in self.__ships:
-                self.__ui.view.scene().removeItem(gitem)
+                scene.removeItem(gitem)
                 for widget in widgets:
                     widget.setParent(None)
 
+            for _, gitem in self.__objects:
+                scene.removeItem(gitem)
+
             self.__ships = []
+            self.__objects = []
 
         self.__current_scenario = None
         self.__current_ship_widgets_index = 0
@@ -245,6 +252,45 @@ class MainWindow(QMainWindow):
 
         return ship, ship_gitem, widgets, thread
 
+    def __loadObject(self, obj_info, fileinfo):
+
+        obj_model = obj_info.model
+        if obj_model is None:
+            options = fileinfo.listObjectsModelTree().children
+            obj_model = self.__getOptionDialog('Choose object model',
+                                               options)
+
+            if obj_model is None:
+                return None
+
+            obj_model = '/'.join(obj_model)
+
+        body, config = fileinfo.loadObject(obj_model, self.__space)
+
+        body.position = obj_info.position
+        body.angle = obj_info.angle
+
+        if config.image is None:
+            object_gitem = ObjectGraphicsItem(body.shapes, color=Qt.gray)
+        else:
+            pixmap = QPixmap(fileinfo.dataImagePath(config.image.name))
+            height = config.image.height
+            width = config.image.width
+
+            if height is None:
+                if width is not None:
+                    pixmap = pixmap.scaledToWidth(width)
+            elif width is None:
+                pixmap = pixmap.scaledToheight(height)
+            else:
+                pixmap = pixmap.scaled(width, height)
+
+            object_gitem = QGraphicsPixmapItem(pixmap)
+
+        self.__ui.view.scene().addItem(object_gitem)
+
+        return body, object_gitem
+
     def loadScenario(self, scenario):
 
         self.clear()
@@ -289,7 +335,21 @@ class MainWindow(QMainWindow):
                 return
             ships[i] = ship
 
+        objects = [None]*len(scenario_info.objects)
+        for i, obj_info in enumerate(scenario_info.objects):
+            try:
+                obj = self.__loadObject(obj_info, fileinfo)
+            except Exception as err:
+                self.clear()
+                QMessageBox.warning(self, 'Error', (
+                    f'An error occurred loading an object({obj_info.model}): \n'
+                    f'{type(err).__name__}: {err}'))
+                return
+
+            objects[i] = obj
+
         self.__ships = ships
+        self.__objects = objects
 
         for widget in self.__ships[0][2]:
             widget.show()
@@ -313,6 +373,15 @@ class MainWindow(QMainWindow):
         self.__current_scenario = scenario
         self.__ui.deviceInterfaceComboBox.setVisible(len(self.__ships) > 1)
 
+    @staticmethod
+    def __updateGraphicsItem(body, gitem):
+
+        pos = body.position
+        gitem.setX(pos.x)
+        gitem.setY(pos.y)
+        gitem.prepareGeometryChange()
+        gitem.setRotation(180*body.angle/pi)
+
     def __timerTimeout(self):
 
         if self.__current_scenario is None:
@@ -323,11 +392,10 @@ class MainWindow(QMainWindow):
             self.__space.step(0.02)
             for ship, gitem, _, _ in self.__ships:
                 ship.act()
-                pos = ship.body.position
-                gitem.setX(pos.x)
-                gitem.setY(pos.y)
-                gitem.prepareGeometryChange()
-                gitem.setRotation(180*ship.body.angle/pi)
+                self.__updateGraphicsItem(ship.body, gitem)
+
+            for obj_body, gitem in self.__objects:
+                self.__updateGraphicsItem(obj_body, gitem)
 
             self.__comm_engine.step()
 

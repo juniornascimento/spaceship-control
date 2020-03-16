@@ -70,15 +70,15 @@ def __readShipInfo(ship_content, prefixes) -> 'ShipInfo':
 
 def __readObjectInfo(obj_content, prefixes) -> 'ObjectInfo':
 
-    model = ship_content.get('model')
+    model = obj_content.get('model')
     if model is not None:
         model, _ = resolvePrefix(model, prefixes)
 
         if model is None:
             raise ValueError(f'Object model not found')
 
-    position = (ship_content.get('x', 0), ship_content.get('y', 0))
-    angle = pi*ship_content.get('angle', 0)/180
+    position = (obj_content.get('x', 0), obj_content.get('y', 0))
+    angle = pi*obj_content.get('angle', 0)/180
 
     return ObjectInfo(model=model, position=position, angle=angle)
 
