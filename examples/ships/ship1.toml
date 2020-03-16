@@ -122,6 +122,8 @@ max_intensity = 4
 min_angle = 0
 max_angle = 0
 
+intensity_mult = 20
+
 [Actuator.Error.Position]
 
 error_max = 30
@@ -141,7 +143,7 @@ max_intensity = 4
 min_angle = 0
 max_angle = 0
 
-intensity_mult = 0.5
+intensity_mult = 10
 
 [[Actuator]]
 
@@ -157,7 +159,7 @@ max_intensity = 4
 min_angle = 0
 max_angle = 0
 
-intensity_mult = 0.5
+intensity_mult = 10
 
 [[InterfaceDevice]]
 

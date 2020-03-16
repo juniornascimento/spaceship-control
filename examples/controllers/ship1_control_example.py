@@ -43,7 +43,6 @@ while True:
         else:
             engine_three_intensity = 0
 
-
         debug(commands)
 
         debug('Speed:', send('0:3: read'))
@@ -63,4 +62,4 @@ while True:
     except Exception as err:
         debug(f'Error: {err}')
 
-    ship.run(.25)
+    ship.run(.1)
