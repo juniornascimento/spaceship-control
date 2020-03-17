@@ -31,7 +31,7 @@ from ..objectives.objective import createObjectiveTree
 sys.path.insert(0, str(Path(__file__).parent))
 
 # imported here so it is not imported in a different path
-from nodetreeview import NodeValue
+from nodetreeview import NodeValue # pylint: disable=wrong-import-order
 UiMainWindow, _ = uic.loadUiType(FileInfo().uiFilePath('mainwindow.ui')) # pylint: disable=invalid-name
 sys.path.pop(0)
 
@@ -291,6 +291,45 @@ class MainWindow(QMainWindow):
 
         return body, object_gitem
 
+    def __loadScenarioShips(self, ships_info, arg_scenario_info):
+
+        ships = [None]*len(ships_info)
+        for i, ship_info in enumerate(ships_info):
+            try:
+                ship = self.__loadShip(ship_info, arg_scenario_info.copy(),
+                                       FileInfo())
+            except Exception as err:
+                self.clear()
+                QMessageBox.warning(self, 'Error', (
+                    f'An error occurred loading a ship({ship_info.model}): \n'
+                    f'{type(err).__name__}: {err}'))
+                return None
+
+            if ship is None:
+                self.clear()
+                return None
+
+            ships[i] = ship
+
+        return ships
+
+    def __loadScenarioObjects(self, objects_info):
+
+        objects = [None]*len(objects_info)
+        for i, obj_info in enumerate(objects_info):
+            try:
+                obj = self.__loadObject(obj_info, FileInfo())
+            except Exception as err:
+                self.clear()
+                QMessageBox.warning(self, 'Error', (
+                    f'An error occurred loading an object({obj_info.model}): \n'
+                    f'{type(err).__name__}: {err}'))
+                return None
+
+            objects[i] = obj
+
+        return objects
+
     def loadScenario(self, scenario):
 
         self.clear()
@@ -318,35 +357,13 @@ class MainWindow(QMainWindow):
                            self.__scenario_objectives]
         }
 
-        ships = [None]*len(scenario_info.ships)
-        for i, ship_info in enumerate(scenario_info.ships):
-            try:
-                ship = self.__loadShip(ship_info, arg_scenario_info.copy(),
-                                       fileinfo)
-            except Exception as err:
-                self.clear()
-                QMessageBox.warning(self, 'Error', (
-                    f'An error occurred loading a ship({ship_info.model}): \n'
-                    f'{type(err).__name__}: {err}'))
-                return
+        ships = self.__loadScenarioShips(scenario_info.ships, arg_scenario_info)
+        if ships is None:
+            return
 
-            if ship is None:
-                self.clear()
-                return
-            ships[i] = ship
-
-        objects = [None]*len(scenario_info.objects)
-        for i, obj_info in enumerate(scenario_info.objects):
-            try:
-                obj = self.__loadObject(obj_info, fileinfo)
-            except Exception as err:
-                self.clear()
-                QMessageBox.warning(self, 'Error', (
-                    f'An error occurred loading an object({obj_info.model}): \n'
-                    f'{type(err).__name__}: {err}'))
-                return
-
-            objects[i] = obj
+        objects = self.__loadScenarioObjects(scenario_info.objects)
+        if objects is None:
+            return
 
         self.__ships = ships
         self.__objects = objects
