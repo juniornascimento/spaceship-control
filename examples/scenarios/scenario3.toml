@@ -10,7 +10,7 @@ hide_user_interface = true
 [[Ship]]
 
 id = 's1'
-model = '.ship2'
+model = ['.ship1', '.ship2']
 x = -100
 y = 0
 

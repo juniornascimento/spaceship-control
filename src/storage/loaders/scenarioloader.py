@@ -43,14 +43,24 @@ __OBJECTIVE_CREATE_FUNCTIONS = {
     'list': __createObjectiveGroup
 }
 
+def __resolveShipModelPrefix(model, prefixes):
+
+    model_after, _ = resolvePrefix(model, prefixes)
+
+    if model_after is None:
+        raise ValueError(f'Ship model not found \'{model}\'')
+
+    return model_after
+
 def __readShipInfo(ship_content, prefixes) -> 'ShipInfo':
 
     model = ship_content.get('model')
     if model is not None:
-        model, _ = resolvePrefix(model, prefixes)
-
-        if model is None:
-            raise ValueError(f'Ship model not found')
+        if isinstance(model, list):
+            model = tuple(__resolveShipModelPrefix(single_model, prefixes)
+                          for single_model in model)
+        else:
+            model = __resolveShipModelPrefix(model, prefixes)
 
     controller = ship_content.get('controller')
 

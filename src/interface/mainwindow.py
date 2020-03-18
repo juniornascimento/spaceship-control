@@ -190,8 +190,15 @@ class MainWindow(QMainWindow):
         json_info = json.dumps(arg_scenario_info)
 
         ship_model = ship_info.model
-        if ship_model is None:
-            ship_options = fileinfo.listShipsModelTree().children
+        ship_model_is_tuple = isinstance(ship_model, tuple)
+
+        if ship_model_is_tuple or ship_model is None:
+            if ship_model_is_tuple:
+                ship_options = tuple(anytree.Node(model_option)
+                                     for model_option in ship_model)
+            else:
+                ship_options = fileinfo.listShipsModelTree().children
+
             ship_model = self.__getOptionDialog('Choose ship model',
                                                 ship_options)
 
