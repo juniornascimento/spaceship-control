@@ -126,7 +126,7 @@ intensity_mult = 20
 
 [Actuator.Error.Position]
 
-error_max = 30
+error_max = 2
 offset_max = 0
 
 [[Actuator]]

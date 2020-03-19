@@ -68,11 +68,8 @@ class StructuralPart(DeviceGroup):
         body = self.__structure.body
         body_angle = body.angle
 
-        body.apply_impulse_at_local_point(
-            (math.cos(angle + body_angle)*val,
-             math.sin(angle + body_angle)*val),
-            Vec2d(self.__offset[0] + x, self.__offset[1] + y).rotated(
-                body_angle))
+        body.apply_impulse_at_local_point((math.cos(angle)*val,
+                                           math.sin(angle)*val), self.__offset)
 
     @property
     def position(self) -> 'Tuple[float, float]':
