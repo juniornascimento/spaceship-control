@@ -214,6 +214,38 @@ def __addDevice(
 
     return widgets
 
+def __loadShipStructure(ship_info, name, space, body):
+
+    ship = Structure(name, space, body, device_type='ship')
+
+    parts = {}
+    for part_info in ship_info.get('Part', ()):
+        part_name = part_info['name']
+        part = StructuralPart(offset=(part_info['x'], part_info['y']))
+
+        ship.addDevice(part, name=part_name)
+        parts[part_name] = part
+
+    return ship, parts
+
+def __loadConfig(ship_info, prefixes):
+
+    config_content = ship_info.get('Config')
+
+    image_info = None
+    if config_content is not None:
+        image_config = config_content.get('Image')
+
+        if image_config is not None:
+            image_path = image_config.get('path')
+            if image_path is not None:
+                image_path, _ = resolvePrefix(image_path, prefixes)
+                image_info = ShipImageInfo(image_path,
+                                           image_config.get('width'),
+                                           image_config.get('height'))
+
+    return ShipConfig(image_info)
+
 def loadShip(ship_info: str, name: str, space: 'pymunk.Space',
              prefixes: 'Sequence[str]' = (), communication_engine=None) \
     -> 'Tuple[Structure, Sequence[QWidget]]':
@@ -230,15 +262,7 @@ def loadShip(ship_info: str, name: str, space: 'pymunk.Space',
 
     space.add(body, shapes)
 
-    ship = Structure(name, space, body, device_type='ship')
-
-    parts = {}
-    for part_info in ship_info.get('Part', ()):
-        part_name = part_info['name']
-        part = StructuralPart(offset=(part_info['x'], part_info['y']))
-
-        ship.addDevice(part, name=part_name)
-        parts[part_name] = part
+    ship, parts = __loadShipStructure(ship_info, name, space, body)
 
     for info in ship_info.get('Actuator', ()):
         __addDevice(info, parts, 'Actuator')
@@ -254,21 +278,4 @@ def loadShip(ship_info: str, name: str, space: 'pymunk.Space',
         widgets.extend(
             __addDevice(info, parts, 'InterfaceDevice'))
 
-    config_content = ship_info.get('Config')
-    if config_content is None:
-        config = ShipConfig(None)
-    else:
-        image_config = config_content.get('Image')
-
-        image_info = None
-        if image_config is not None:
-            image_path = image_config.get('path')
-            if image_path is not None:
-                image_path, _ = resolvePrefix(image_path, prefixes)
-                image_info = ShipImageInfo(image_path,
-                                           image_config.get('width'),
-                                           image_config.get('height'))
-
-        config = ShipConfig(image_info)
-
-    return ship, config, widgets
+    return ship, __loadConfig(ship_info, prefixes), widgets
