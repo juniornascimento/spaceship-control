@@ -6,7 +6,7 @@ import math
 
 from pymunk import Vec2d
 
-from .device import DeviceGroup, PropertyDevice
+from .device import DeviceGroup, DefaultDevice
 
 from ..utils.errorgenerator import ErrorGenerator
 
@@ -102,7 +102,7 @@ class StructuralPart(DeviceGroup):
     def offset(self) -> 'Tuple[Union[int, float], Union[int, float]]':
         return self.__offset
 
-class Sensor(PropertyDevice):
+class Sensor(DefaultDevice):
 
     def __init__(self, st_part: StructuralPart,
                  read_time: 'Union[float, int]',
@@ -187,7 +187,7 @@ class MultiSensor(DeviceGroup):
 
     __REDIRECT_COMMANDS = {'reading-time', 'max-error', 'max-offset'}
 
-class Actuator(PropertyDevice):
+class Actuator(DefaultDevice):
 
     def __init__(self, part: StructuralPart, **kwargs: 'Any') -> None:
         super().__init__(**kwargs)

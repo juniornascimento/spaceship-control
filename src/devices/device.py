@@ -75,15 +75,14 @@ class DefaultDevice(Device): # pylint: disable=abstract-method
 
     def __init__(self, device_type: str = 'none',
                  device_desc: str = 'not specified',
-                 device_info: 'Dict[str, str]' = None):
+                 device_info: 'Dict[str, str]' = None,
+                 properties: 'Dict[str, property]' = None):
 
         self.__device_type = device_type
         self.__device_desc = device_desc
 
-        if device_info is None:
-            self.__device_info = {}
-        else:
-            self.__device_info = device_info.copy()
+        self.__device_info = {} if device_info is None else device_info.copy()
+        self.__properties = {} if properties is None else properties.copy()
 
     def communicate(self, input_: str) -> str:
         """Method used to communicate with the device controller.
@@ -252,11 +251,47 @@ class DefaultDevice(Device): # pylint: disable=abstract-method
 
         return result
 
+
+    def getProperty(self, prop_name: str) -> 'Any':
+        prop = self.__properties.get(prop_name)
+        if prop is None:
+            return '<<Unknown property>>'
+
+        return prop.fget(self)
+
+    def setProperty(self, prop_name: str, val: 'Any') -> 'Any':
+        prop = self.__properties.get(prop_name)
+        if prop is None:
+            return '<<Unknown property>>'
+
+        setter = prop.fset
+
+        if setter is None:
+            return '<<This property can\'t be set>>'
+
+        setter(self, val)
+
+        return '<<OK>>'
+
+    @property
+    def properties(self) -> 'Iterable[Tuple[str, Any]]':
+        return self.__properties.items()
+
+    def __listPropertiesStr(self) -> str:
+        return ':'.join(key for key, _ in self.properties)
+
+    def __showPropertiesStr(self) -> str:
+        return ':'.join(f'{key}={val}' for key, val in self.properties)
+
     __COMMANDS = {
 
         'device-type': deviceType,
         'device-desc': deviceDescription,
-        'get-info': lambda self, name: self.getInfo(name) or '<<null>>'
+        'get-info': lambda self, name: self.getInfo(name) or '<<null>>',
+        'set-property': setProperty,
+        'get-property': getProperty,
+        'list-properties': __listPropertiesStr,
+        'show-properties': __showPropertiesStr
     }
 
 class DeviceGroup(DefaultDevice):
@@ -359,56 +394,4 @@ class DeviceGroup(DefaultDevice):
     __COMMANDS = {
 
         'device-count': deviceCount
-    }
-
-class PropertyDevice(DefaultDevice): # pylint: disable=abstract-method
-
-    def __init__(self,
-                 properties: 'Dict[str, property]' = None,
-                 **kwargs: 'Any') -> None:
-        super().__init__(**kwargs)
-
-        self.__properties = {} if properties is None else properties.copy()
-
-    def getProperty(self, prop_name: str) -> 'Any':
-        prop = self.__properties.get(prop_name)
-        if prop is None:
-            return '<<Unknown property>>'
-
-        return prop.fget(self)
-
-    def setProperty(self, prop_name: str, val: 'Any') -> 'Any':
-        prop = self.__properties.get(prop_name)
-        if prop is None:
-            return '<<Unknown property>>'
-
-        setter = prop.fset
-
-        if setter is None:
-            return '<<This property can\'t be set>>'
-
-        setter(self, val)
-
-        return '<<OK>>'
-
-    @property
-    def properties(self) -> 'Iterable[Tuple[str, Any]]':
-        return self.__properties.items()
-
-    def __listPropertiesStr(self) -> str:
-        return ':'.join(key for key, _ in self.properties)
-
-    def __showPropertiesStr(self) -> str:
-        return ':'.join(f'{key}={val}' for key, val in self.properties)
-
-    def command(self, command: 'List[str]',
-                *args: 'Dict[str, Callable]') -> 'Any':
-        return super().command(command, PropertyDevice.__COMMANDS, *args)
-
-    __COMMANDS = {
-
-        'set-property': setProperty,
-        'get-property': getProperty,
-        'list-properties': __listPropertiesStr,
-        'show-properties': __showPropertiesStr
     }
