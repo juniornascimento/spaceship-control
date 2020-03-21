@@ -255,6 +255,9 @@ def loadShip(ship_info: str, name: str, space: 'pymunk.Space',
     mass = sum(shape.mass for shape in shapes)
     moment = sum(shape.moment for shape in shapes)
 
+    if mass <= 0:
+        raise Exception(f"Ship \'{name}\' has invalid mass")
+
     body = Body(mass, moment)
 
     for shape in shapes:
