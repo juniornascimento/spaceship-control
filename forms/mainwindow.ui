@@ -144,6 +144,7 @@
      <addaction name="actionOpenShip"/>
      <addaction name="actionOpenController"/>
      <addaction name="actionOpenImage"/>
+     <addaction name="actionOpenObject"/>
     </widget>
     <addaction name="actionLoadScenario"/>
     <addaction name="separator"/>
@@ -202,6 +203,11 @@
   <action name="actionOpenImage">
    <property name="text">
     <string>Image</string>
+   </property>
+  </action>
+  <action name="actionOpenObject">
+   <property name="text">
+    <string>Object</string>
    </property>
   </action>
  </widget>

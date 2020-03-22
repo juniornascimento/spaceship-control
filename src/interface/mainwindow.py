@@ -104,6 +104,9 @@ class MainWindow(QMainWindow):
         self.__ui.actionOpenImage.triggered.connect(
             self.__openImageAction)
 
+        self.__ui.actionOpenObject.triggered.connect(
+            self.__openObjectAction)
+
         self.__ui.actionImportPackage.triggered.connect(
             self.__importPackageAction)
 
@@ -547,3 +550,12 @@ class MainWindow(QMainWindow):
 
         if image is not None:
             FileInfo().openImageFile('/'.join(image))
+
+    @staticmethod
+    def __openObjectAction():
+
+        object_model = MainWindow.__getOptionDialog(
+            'Choose object model', FileInfo().listObjectsModelTree().children)
+
+        if object_model is not None:
+            FileInfo().openObjectModelFile('/'.join(object_model))

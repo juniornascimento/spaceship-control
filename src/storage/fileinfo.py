@@ -71,6 +71,9 @@ class FileInfo:
         return self.__listTree(self.__path.joinpath('images'),
                                Node('images'), remove_suffix=False)
 
+    def listObjectsModelTree(self):
+        return self.__listTree(self.__path.joinpath('objects'), Node('objects'))
+
     def __listTree(self, base_path, current_node, blacklist=(),
                    remove_suffix=True):
 
@@ -296,8 +299,8 @@ class FileInfo:
 
     def openObjectModelFile(self, obj_model):
 
-        model_path, _ = self.__findSuffix(
-            obj_model, self.shipModelPath, ('.toml', '.json', '.yaml', '.yml'))
+        model_path, _ = self.__findSuffix(obj_model, self.objectModelPath,
+                                          ('.toml', '.json', '.yaml', '.yml'))
 
         if model_path is not None:
             self.__openFile(model_path)
