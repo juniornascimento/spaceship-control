@@ -92,6 +92,9 @@ class MainWindow(QMainWindow):
         self.__ui.actionImportImage.triggered.connect(
             self.__importImageAction)
 
+        self.__ui.actionImportObject.triggered.connect(
+            self.__importObjectAction)
+
         self.__ui.actionOpenScenario.triggered.connect(
             self.__openScenarioAction)
 
@@ -488,6 +491,19 @@ class MainWindow(QMainWindow):
             return
 
         FileInfo().addImages(fdialog.selectedFiles())
+
+    @staticmethod
+    def __importObjectAction():
+
+        fdialog = QFileDialog(None, 'Object Import Dialog', '',
+                              'TOML files(*.toml) ;; JSON files(*.json) ;;'
+                              'YAML files(*.yml *.yaml)')
+        fdialog.setFileMode(QFileDialog.ExistingFiles)
+
+        if not fdialog.exec_():
+            return
+
+        FileInfo().addObjects(fdialog.selectedFiles())
 
     @staticmethod
     def __importPackageAction():

@@ -135,6 +135,7 @@
      <addaction name="actionImportShip"/>
      <addaction name="actionImportController"/>
      <addaction name="actionImportImage"/>
+     <addaction name="actionImportObject"/>
     </widget>
     <widget class="QMenu" name="menuOpenFile">
      <property name="title">
@@ -206,6 +207,11 @@
    </property>
   </action>
   <action name="actionOpenObject">
+   <property name="text">
+    <string>Object</string>
+   </property>
+  </action>
+  <action name="actionImportObject">
    <property name="text">
     <string>Object</string>
    </property>
