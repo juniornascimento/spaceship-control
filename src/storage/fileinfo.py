@@ -277,9 +277,11 @@ class FileInfo:
 
         return objectloader.loadObject(obj_content, space, prefixes=prefixes)
 
-    def loadController(self, controller_name, ship, json_info, lock):
+    def loadController(self, controller_name, ship, json_info,
+                       debug_queue, lock):
         return controllerloader.loadController(
-            self.controllerPath(controller_name), ship, json_info, lock)
+            self.controllerPath(controller_name), ship, json_info,
+            debug_queue, lock)
 
     def openScenarioFile(self, scenario):
 

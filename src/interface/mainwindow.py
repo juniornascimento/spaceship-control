@@ -4,6 +4,7 @@ import json
 from math import pi
 from threading import Lock
 from pathlib import Path
+from queue import SimpleQueue, Empty as EmptyQueueException
 
 from PyQt5 import uic
 from PyQt5.QtWidgets import (
@@ -126,6 +127,7 @@ class MainWindow(QMainWindow):
         self.__current_ship_widgets_index = 0
 
         self.__comm_engine = None
+        self.__debug_msg_queues = {}
 
     def __updateTitle(self):
 
@@ -237,8 +239,11 @@ class MainWindow(QMainWindow):
 
             ship_controller = '/'.join(ship_controller)
 
+        msg_queue = SimpleQueue()
         thread = fileinfo.loadController(ship_controller, ship, json_info,
-                                         self.__lock)
+                                         msg_queue, self.__lock)
+
+        self.__debug_msg_queues[ship.name] = msg_queue
 
         if config.image is None:
             ship_gitem = ObjectGraphicsItem(ship.body.shapes)
@@ -370,6 +375,8 @@ class MainWindow(QMainWindow):
                            self.__scenario_objectives]
         }
 
+        self.__debug_msg_queues.clear()
+
         ships = self.__loadScenarioShips(scenario_info.ships, arg_scenario_info)
         if ships is None:
             return
@@ -437,6 +444,13 @@ class MainWindow(QMainWindow):
 
         for node_value in self.__objectives_node_value:
             node_value.update()
+
+        for ship_name, queue in self.__debug_msg_queues.items():
+            try:
+                while not queue.empty():
+                    print(f'Debug {ship_name}: {queue.get_nowait()}', end='')
+            except EmptyQueueException:
+                pass
 
         self.__updateTitle()
 
