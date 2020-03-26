@@ -8,7 +8,8 @@ from queue import SimpleQueue, Empty as EmptyQueueException
 
 from PyQt5 import uic
 from PyQt5.QtWidgets import (
-    QMainWindow, QGraphicsScene, QFileDialog, QMessageBox, QGraphicsPixmapItem
+    QMainWindow, QGraphicsScene, QFileDialog, QMessageBox, QGraphicsPixmapItem,
+    QTextBrowser
 )
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import QTimer, Qt
@@ -128,6 +129,8 @@ class MainWindow(QMainWindow):
 
         self.__comm_engine = None
         self.__debug_msg_queues = {}
+
+        self.__debug_messages_text_browsers = {}
 
     def __updateTitle(self):
 
@@ -412,6 +415,13 @@ class MainWindow(QMainWindow):
         self.__current_scenario = scenario
         self.__ui.deviceInterfaceComboBox.setVisible(len(self.__ships) > 1)
 
+        self.__ui.debugMessagesTabWidget.clear()
+        self.__debug_messages_text_browsers.clear()
+        for ship, _, _, _ in ships:
+            tbrowser = QTextBrowser()
+            self.__debug_messages_text_browsers[ship.name] = tbrowser
+            self.__ui.debugMessagesTabWidget.addTab(tbrowser, ship.name)
+
     @staticmethod
     def __updateGraphicsItem(body, gitem):
 
@@ -446,9 +456,13 @@ class MainWindow(QMainWindow):
             node_value.update()
 
         for ship_name, queue in self.__debug_msg_queues.items():
+            tbrowser = self.__debug_messages_text_browsers.get(ship_name)
+            if tbrowser is None:
+                continue
+
             try:
                 while not queue.empty():
-                    print(f'Debug {ship_name}: {queue.get_nowait()}', end='')
+                    tbrowser.append(queue.get_nowait())
             except EmptyQueueException:
                 pass
 
