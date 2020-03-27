@@ -367,6 +367,8 @@ class MainWindow(QMainWindow):
 
         self.__ui.deviceInterfaceWidgets.setVisible(
             scenario_info.visible_user_interface)
+        self.__ui.debugMessagesTabWidget.setVisible(
+            scenario_info.visible_debug_window)
 
         self.__comm_engine = scenario_info.communication_engine
 

@@ -16,7 +16,7 @@ ShipInfo = namedtuple('ShipInfo', (
 
 ScenarioInfo = namedtuple('ScenarioInfo', (
     'name', 'ships', 'objectives', 'objects', 'visible_user_interface',
-    'communication_engine'
+    'communication_engine', 'visible_debug_window'
 ))
 
 def __createGoToObjective(objective_content) -> 'GoToObjective':
@@ -123,4 +123,6 @@ def loadScenario(scenario_info: 'Dict[str, Any]',
 
     return ScenarioInfo(name=s_name, ships=ships, objectives=objectives,
                         visible_user_interface=not(hidden_user_interface),
+                        visible_debug_window=scenario_content.get(
+                            'debug', False),
                         communication_engine=comm_engine, objects=objects)

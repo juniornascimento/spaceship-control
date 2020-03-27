@@ -2,6 +2,7 @@
 [Scenario]
 
 name = 'example2'
+debug = true
 
 [[Ship]]
 
