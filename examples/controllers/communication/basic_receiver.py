@@ -3,7 +3,13 @@
 import sys
 from math import isclose
 
-from lib.spctrl_base_controller import ship, send, debug
+from pathlib import Path
+
+sys.path.append(str(Path(__file__).parent.parent.joinpath('lib')))
+
+from spctrl_base_controller import ship, send, debug
+
+sys.__stderr__.flush()
 
 debug(ship.device)
 

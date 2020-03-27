@@ -2,13 +2,14 @@
 [Scenario]
 
 name = 'example1'
+debug = true
 
 [[Ship]]
 
 id = 'main-ship'
 name = 'sender'
-model = '.ship6'
-controller = '.ship6_control_example.py'
+model = '.basic_sender'
+controller = '.basic_sender.py'
 
 x = 0
 y = 0
@@ -18,8 +19,8 @@ angle = 45
 
 id = 'main-ship'
 name = 'receiver'
-model = '.ship7'
-controller = '.ship7_control_example.py'
+model = '.basic_receiver'
+controller = '.basic_receiver.py'
 
 x = 100
 y = 100

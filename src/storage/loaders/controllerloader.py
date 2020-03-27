@@ -19,7 +19,10 @@ def __controllerThreadDebugMessages(pstderr, debug_queue):
 
     try:
         while True:
-            debug_queue.put(pstderr.readline().decode()[:-1])
+            text = pstderr.readline().decode()
+            if not(text):
+                return
+            debug_queue.put(text[:-1])
 
     except BrokenPipeError:
         pass

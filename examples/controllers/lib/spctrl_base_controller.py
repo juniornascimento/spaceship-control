@@ -239,6 +239,7 @@ def send(message):
 
 def debug(*args, **kwargs):
     print(*args, **kwargs, file=sys.stderr)
+    sys.stderr.flush()
 
 ship = Ship()
 

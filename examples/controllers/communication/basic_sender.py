@@ -3,7 +3,11 @@
 import sys
 import random
 
-from lib.spctrl_base_controller import ship, send, debug
+from pathlib import Path
+
+sys.path.append(str(Path(__file__).parent.parent.joinpath('lib')))
+
+from spctrl_base_controller import ship, send, debug
 
 debug(ship.device)
 
