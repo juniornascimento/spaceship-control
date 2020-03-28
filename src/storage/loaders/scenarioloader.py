@@ -6,6 +6,7 @@ from ..configfileinheritance import resolvePrefix
 
 from ...objectives.objective import ObjectiveGroup
 from ...objectives.gotoobjective import GoToObjective
+from ...objectives.timedobjective import TimedObjectiveGroup
 
 from ...devices.communicationdevices import CommunicationEngine
 
@@ -37,10 +38,19 @@ def __createObjectiveGroup(objective_content) -> 'ObjectiveGroup':
     return ObjectiveGroup(loadObjectives(objective_content['Objective']),
                           **kwargs)
 
+def __createTimedObjectiveGroup(objective_content) -> 'TimedObjectiveGroup':
+
+    kwargs = {key: value for key, value in objective_content.items()
+              if key in ('name', 'description', 'time_limit')}
+
+    return TimedObjectiveGroup(loadObjectives(objective_content['Objective']),
+                               **kwargs)
+
 __OBJECTIVE_CREATE_FUNCTIONS = {
 
     'goto': __createGoToObjective,
-    'list': __createObjectiveGroup
+    'list': __createObjectiveGroup,
+    'timed-list'__createTimedObjectiveGroup
 }
 
 def __resolveShipModelPrefix(model, prefixes):
