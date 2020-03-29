@@ -414,6 +414,26 @@ class MainWindow(QMainWindow):
         else:
             self.__ui.treeView.hide()
 
+        for image_info in scenario_info.static_images:
+            pixmap = QPixmap(fileinfo.dataImagePath(image_info.name))
+            height = image_info.height
+            width = image_info.width
+
+            if height is None:
+                if width is not None:
+                    pixmap = pixmap.scaledToWidth(width)
+            elif width is None:
+                pixmap = pixmap.scaledToHeight(height)
+            else:
+                pixmap = pixmap.scaled(width, height)
+
+            image_item = QGraphicsPixmapItem(pixmap)
+
+            image_item.setX(image_info.x)
+            image_item.setY(image_info.y)
+
+            self.__ui.view.scene().addItem(image_item)
+
         self.__current_scenario = scenario
         self.__ui.deviceInterfaceComboBox.setVisible(len(self.__ships) > 1)
 

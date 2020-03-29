@@ -10,6 +10,9 @@ from ...objectives.timedobjective import TimedObjectiveGroup
 
 from ...devices.communicationdevices import CommunicationEngine
 
+StaticImageInfo = namedtuple('StaticImageInfo',
+                             ('name', 'width', 'height', 'x', 'y'))
+
 ObjectInfo = namedtuple('ObjectInfo', ('model', 'position', 'angle'))
 
 ShipInfo = namedtuple('ShipInfo', (
@@ -17,7 +20,7 @@ ShipInfo = namedtuple('ShipInfo', (
 
 ScenarioInfo = namedtuple('ScenarioInfo', (
     'name', 'ships', 'objectives', 'objects', 'visible_user_interface',
-    'communication_engine', 'visible_debug_window'
+    'communication_engine', 'visible_debug_window', 'static_images'
 ))
 
 def __createGoToObjective(objective_content) -> 'GoToObjective':
@@ -50,7 +53,7 @@ __OBJECTIVE_CREATE_FUNCTIONS = {
 
     'goto': __createGoToObjective,
     'list': __createObjectiveGroup,
-    'timed-list'__createTimedObjectiveGroup
+    'timed-list': __createTimedObjectiveGroup
 }
 
 def __resolveShipModelPrefix(model, prefixes):
@@ -102,6 +105,17 @@ def __readObjectInfo(obj_content, prefixes) -> 'ObjectInfo':
 
     return ObjectInfo(model=model, position=position, angle=angle)
 
+def __readImageInfo(image_content, prefixes) -> 'StaticImageInfo':
+
+    image_path = image_content['path']
+
+    image_path, _ = resolvePrefix(image_path, prefixes)
+    return StaticImageInfo(image_path,
+                           width=image_content.get('width'),
+                           height=image_content.get('height'),
+                           x=image_content.get('x', 0),
+                           y=image_content.get('y', 0))
+
 def loadCommunicationEngine(engine_info: 'Dict[str, Any]'):
 
     return CommunicationEngine(engine_info.get('max_noise', 10),
@@ -123,8 +137,11 @@ def loadScenario(scenario_info: 'Dict[str, Any]',
 
     objectives = tuple(loadObjectives(scenario_info.get('Objective', ())))
 
-    objects = tuple(__readObjectInfo(ship, prefixes)
-                    for ship in scenario_info.get('Object', ()))
+    objects = tuple(__readObjectInfo(obj, prefixes)
+                    for obj in scenario_info.get('Object', ()))
+
+    images = tuple(__readImageInfo(image, prefixes)
+                   for image in scenario_info.get('Image', ()))
 
     hidden_user_interface = scenario_content.get('hide_user_interface', False)
 
@@ -135,4 +152,5 @@ def loadScenario(scenario_info: 'Dict[str, Any]',
                         visible_user_interface=not(hidden_user_interface),
                         visible_debug_window=scenario_content.get(
                             'debug', False),
-                        communication_engine=comm_engine, objects=objects)
+                        communication_engine=comm_engine, objects=objects,
+                        static_images=images)

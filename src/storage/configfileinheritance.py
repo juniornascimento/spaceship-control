@@ -7,7 +7,7 @@ def resolvePrefix(name, prefixes):
         if char != '.':
             break
     else:
-        raise ValueError(f'Could\'nt resolve \'{name}\'')
+        raise ValueError(f'Could\'nt resolve path \'{name}\'')
 
     if dot_count == 0: # pylint: disable=undefined-loop-variable
         return name, prefixes
@@ -15,7 +15,7 @@ def resolvePrefix(name, prefixes):
     parent_returns = dot_count - 1 # pylint: disable=undefined-loop-variable
 
     if parent_returns > len(prefixes):
-        ValueError(f'Could\'nt resolve \'{name}\'')
+        ValueError(f'Could\'nt resolve path \'{name}\'')
 
     new_prefix = tuple(prefixes[: len(prefixes) - parent_returns])
 

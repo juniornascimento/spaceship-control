@@ -14,7 +14,6 @@ from ...devices.interfacedevice import (
     TextDisplayDevice, ButtonDevice, KeyboardReceiverDevice, ConsoleDevice
 )
 from ...devices.communicationdevices import (
-
     BasicReceiver, BasicSender, ConfigurableReceiver, ConfigurableSender
 )
 
