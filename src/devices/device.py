@@ -17,6 +17,18 @@ class Device(ABC):
 
     """
 
+    class Mirror:
+
+        def __init__(self, device: Device, attributes: 'Sequence[str]') -> None:
+            self._device = device
+            self.__valid_attrs = set(attributes)
+
+        def __getattr__(self, name) -> 'Any':
+            if name in self.__valid_attrs:
+                return getattr(self._device, name)
+
+            raise AttributeError(f'Access to \'{name}\' is forbidden')
+
     @abstractmethod
     def act(self) -> None:
         """Method used to perform the device actions.
@@ -49,6 +61,9 @@ class Device(ABC):
             A string that contain no control characters.
 
         """
+
+    def mirror(self) -> 'Device.Mirror':
+        return Device.Mirror(self, ())
 
 class DefaultDevice(Device): # pylint: disable=abstract-method
     """Device that use shell-like command to communicate.
