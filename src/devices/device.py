@@ -19,9 +19,9 @@ class Device(ABC):
 
     class Mirror:
 
-        def __init__(self, device: Device, attributes: 'Sequence[str]') -> None:
+        def __init__(self, device: 'Device', *args: 'str') -> None:
             self._device = device
-            self.__valid_attrs = set(attributes)
+            self.__valid_attrs = set(args)
 
         def __getattr__(self, name) -> 'Any':
             if name in self.__valid_attrs:
@@ -62,8 +62,9 @@ class Device(ABC):
 
         """
 
+    @property
     def mirror(self) -> 'Device.Mirror':
-        return Device.Mirror(self, ())
+        return Device.Mirror(self)
 
 class DefaultDevice(Device): # pylint: disable=abstract-method
     """Device that use shell-like command to communicate.
@@ -87,6 +88,13 @@ class DefaultDevice(Device): # pylint: disable=abstract-method
             constants that may used to help the controller to know more
             information about this device.
     """
+    class Mirror(Device.Mirror):
+
+        def __init__(self, device: 'Device', *args: str) -> None:
+
+            super().__init__(self, 'properties', 'getProperty',
+                             'deviceDescription', 'deviceType', 'getInfo',
+                             *args)
 
     def __init__(self, device_type: str = 'none',
                  device_desc: str = 'not specified',
@@ -266,7 +274,6 @@ class DefaultDevice(Device): # pylint: disable=abstract-method
 
         return result
 
-
     def getProperty(self, prop_name: str) -> 'Any':
         prop = self.__properties.get(prop_name)
         if prop is None:
@@ -291,6 +298,10 @@ class DefaultDevice(Device): # pylint: disable=abstract-method
     @property
     def properties(self) -> 'Iterable[Tuple[str, Any]]':
         return self.__properties.items()
+
+    @property
+    def mirror(self) -> 'DefaultDevice.Mirror':
+        return DefaultDevice.Mirror(self)
 
     def __listPropertiesStr(self) -> str:
         return ':'.join(key for key, _ in self.properties)
