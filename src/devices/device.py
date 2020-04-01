@@ -439,6 +439,10 @@ class DeviceGroup(DefaultDevice):
     def command(self, command: 'List[str]', *args) -> 'Any':
         return super().command(command, DeviceGroup.__COMMANDS, *args)
 
+    @property
+    def mirror(self) -> 'DeviceGroup.Mirror':
+        return DeviceGroup.Mirror(self)
+
     __COMMANDS = {
 
         'device-count': deviceCount
