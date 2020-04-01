@@ -91,7 +91,6 @@ class DefaultDevice(Device): # pylint: disable=abstract-method
     class Mirror(Device.Mirror):
 
         def __init__(self, device: 'Device', *args: str) -> None:
-
             super().__init__(self, 'properties', 'getProperty',
                              'deviceDescription', 'deviceType', 'getInfo',
                              *args)
@@ -341,6 +340,19 @@ class DeviceGroup(DefaultDevice):
             construtor.
     """
 
+    class Mirror(DefaultDevice.Mirror):
+
+        def __init__(self, device: Device, *args: str) -> None:
+            super().__init__(device, 'deviceCount', 'accessDevice', *args)
+
+        def __getattr__(self, name: str) -> 'Any':
+
+            device = self._device.accessDevice(name)
+            if device is None:
+                return super().__getattr__(name)
+
+            return device
+
     def __init__(self, device_type: str = 'device-group', **kwargs):
         super().__init__(device_type=device_type, **kwargs)
 
@@ -370,7 +382,7 @@ class DeviceGroup(DefaultDevice):
             if isinstance(device, DefaultDevice):
                 device.setInfo('device-name-in-group', name)
 
-    def deviceCount(self):
+    def deviceCount(self) -> int:
         """Method used to get the device count.
 
         This method will return the number of devices that are part of this
@@ -381,6 +393,16 @@ class DeviceGroup(DefaultDevice):
 
         """
         return len(self.__device_list)
+
+    def accessDevice(self, index) -> 'Optional[Device]':
+
+        if isinstance(index, int):
+            if 0 <= index < len(self.__device_list):
+                return self.__device_list[index]
+
+            return None
+
+        return self.__device_dict.get(index)
 
     def act(self) -> None:
         """Method `act` is overriden so it will call `act` for all subdevices.
