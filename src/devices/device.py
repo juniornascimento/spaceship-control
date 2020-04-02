@@ -343,7 +343,14 @@ class DeviceGroup(DefaultDevice):
     class Mirror(DefaultDevice.Mirror):
 
         def __init__(self, device: Device, *args: str) -> None:
-            super().__init__(device, 'deviceCount', 'accessDevice', *args)
+            super().__init__(device, 'deviceCount', *args)
+
+        def accessDevice(self, index):
+            device = self._device.accessDevice(index)
+            if device is None:
+                return None
+
+            return device.mirror
 
         def __getattr__(self, name: str) -> 'Any':
 
@@ -351,7 +358,7 @@ class DeviceGroup(DefaultDevice):
             if device is None:
                 return super().__getattr__(name)
 
-            return device
+            return device.mirror
 
     def __init__(self, device_type: str = 'device-group', **kwargs):
         super().__init__(device_type=device_type, **kwargs)
