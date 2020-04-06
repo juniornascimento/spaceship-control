@@ -20,7 +20,8 @@ from ...devices.communicationdevices import (
 from .shapeloader import loadShapes
 
 ShipImageInfo = namedtuple('ShipImageInfo', ('name', 'width', 'height'))
-ShipConfig = namedtuple('ShipConfig', ('image'))
+ShipConfig = namedtuple('ShipConfig', ('image',))
+ShipInfo = namedtuple('ShipInfo', ('device', 'config', 'widgets'))
 
 def __loadError(info: 'Dict[str, Any]') -> ErrorGenerator:
 
@@ -280,4 +281,5 @@ def loadShip(ship_info: str, name: str, space: 'pymunk.Space',
         widgets.extend(
             __addDevice(info, parts, 'InterfaceDevice'))
 
-    return ship, __loadConfig(ship_info, prefixes), widgets
+    return ShipInfo(device=ship, config=__loadConfig(ship_info, prefixes),
+                    widgets=widgets)

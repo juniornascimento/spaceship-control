@@ -218,15 +218,17 @@ class MainWindow(QMainWindow):
 
             ship_model = '/'.join(ship_model)
 
-        ship, config, widgets = fileinfo.loadShip(
+        loaded_ship = fileinfo.loadShip(
             ship_model, ship_info.name, self.__space,
             communication_engine=self.__comm_engine)
 
-        self.__widgets = widgets
+        ship = loaded_ship.device
+
+        self.__widgets = loaded_ship.widgets
         ship.body.position = ship_info.position
         ship.body.angle = ship_info.angle
 
-        for widget in widgets:
+        for widget in self.__widgets:
             widget.setParent(self.__ui.deviceInterfaceComponents)
 
         ship_controller = ship_info.controller
@@ -248,12 +250,14 @@ class MainWindow(QMainWindow):
 
         self.__debug_msg_queues[ship.name] = msg_queue
 
-        if config.image is None:
+        ship_image = loaded_ship.config.image
+
+        if ship_image is None:
             ship_gitem = ObjectGraphicsItem(ship.body.shapes)
         else:
-            pixmap = QPixmap(fileinfo.dataImagePath(config.image.name))
-            height = config.image.height
-            width = config.image.width
+            pixmap = QPixmap(fileinfo.dataImagePath(ship_image.name))
+            height = ship_image.height
+            width = ship_image.width
 
             if height is None:
                 if width is not None:
@@ -271,7 +275,7 @@ class MainWindow(QMainWindow):
 
         thread.start()
 
-        return ship, ship_gitem, widgets, thread
+        return ship, ship_gitem, self.__widgets, thread
 
     def __loadObject(self, obj_info, fileinfo):
 
