@@ -3,7 +3,7 @@
 
 variables_enabled = true
 
-[Config.Image]
+[[Image]]
 
 path = '.ship4.png'
 width = 200

@@ -250,11 +250,11 @@ class MainWindow(QMainWindow):
 
         self.__debug_msg_queues[ship.name] = msg_queue
 
-        ship_image = loaded_ship.config.image
-
-        if ship_image is None:
+        if not loaded_ship.images:
             ship_gitem = ObjectGraphicsItem(ship.body.shapes)
         else:
+            ship_image = loaded_ship.images[0]
+
             pixmap = QPixmap(fileinfo.dataImagePath(ship_image.name))
             height = ship_image.height
             width = ship_image.width

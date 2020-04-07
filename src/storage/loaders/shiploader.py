@@ -19,9 +19,9 @@ from ...devices.communicationdevices import (
 
 from .shapeloader import loadShapes
 
-ShipImageInfo = namedtuple('ShipImageInfo', ('name', 'width', 'height'))
-ShipConfig = namedtuple('ShipConfig', ('image',))
-ShipInfo = namedtuple('ShipInfo', ('device', 'config', 'widgets'))
+ShipImageInfo = namedtuple('ShipImageInfo', ('name', 'width', 'height',
+                                             'x', 'y'))
+ShipInfo = namedtuple('ShipInfo', ('device', 'images', 'widgets'))
 
 def __loadError(info: 'Dict[str, Any]') -> ErrorGenerator:
 
@@ -228,23 +228,22 @@ def __loadShipStructure(ship_info, name, space, body):
 
     return ship, parts
 
-def __loadConfig(ship_info, prefixes):
+def __loadImages(ship_info, prefixes):
 
-    config_content = ship_info.get('Config')
+    images_info = []
+    for image in ship_info.get('Image', ()):
 
-    image_info = None
-    if config_content is not None:
-        image_config = config_content.get('Image')
+        image_path = image['path']
+        image_path, _ = resolvePrefix(image_path, prefixes)
+        image_info = ShipImageInfo(image_path,
+                                   image.get('width'),
+                                   image.get('height'),
+                                   image.get('x', 0),
+                                   image.get('y', 0))
 
-        if image_config is not None:
-            image_path = image_config.get('path')
-            if image_path is not None:
-                image_path, _ = resolvePrefix(image_path, prefixes)
-                image_info = ShipImageInfo(image_path,
-                                           image_config.get('width'),
-                                           image_config.get('height'))
+        images_info.append(image_info)
 
-    return ShipConfig(image_info)
+    return images_info
 
 def loadShip(ship_info: str, name: str, space: 'pymunk.Space',
              prefixes: 'Sequence[str]' = (), communication_engine=None) \
@@ -281,5 +280,5 @@ def loadShip(ship_info: str, name: str, space: 'pymunk.Space',
         widgets.extend(
             __addDevice(info, parts, 'InterfaceDevice'))
 
-    return ShipInfo(device=ship, config=__loadConfig(ship_info, prefixes),
+    return ShipInfo(device=ship, images=__loadImages(ship_info, prefixes),
                     widgets=widgets)
