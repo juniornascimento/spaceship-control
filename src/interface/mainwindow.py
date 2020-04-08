@@ -250,9 +250,8 @@ class MainWindow(QMainWindow):
 
         self.__debug_msg_queues[ship.name] = msg_queue
 
-        if not loaded_ship.images:
-            ship_gitem = ObjectGraphicsItem(ship.body.shapes)
-        else:
+        if loaded_ship.images:
+
             ship_image = loaded_ship.images[0]
 
             pixmap = QPixmap(fileinfo.dataImagePath(ship_image.name))
@@ -268,6 +267,11 @@ class MainWindow(QMainWindow):
                 pixmap = pixmap.scaled(width, height)
 
             ship_gitem = QGraphicsPixmapItem(pixmap)
+            ship_gitem.setOffset(ship_image.x, ship_image.y)
+
+        else:
+            ship_gitem = ObjectGraphicsItem(ship.body.shapes)
+
         self.__ui.view.scene().addItem(ship_gitem)
 
         self.__ui.deviceInterfaceComboBox.addItem(
