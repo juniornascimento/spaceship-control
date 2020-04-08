@@ -9,7 +9,7 @@ from queue import SimpleQueue, Empty as EmptyQueueException
 from PyQt5 import uic
 from PyQt5.QtWidgets import (
     QMainWindow, QGraphicsScene, QFileDialog, QMessageBox, QGraphicsPixmapItem,
-    QTextBrowser
+    QTextBrowser, QGraphicsItemGroup
 )
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import QTimer, Qt
@@ -252,22 +252,26 @@ class MainWindow(QMainWindow):
 
         if loaded_ship.images:
 
-            ship_image = loaded_ship.images[0]
+            ship_gitem = QGraphicsItemGroup()
 
-            pixmap = QPixmap(fileinfo.dataImagePath(ship_image.name))
-            height = ship_image.height
-            width = ship_image.width
+            for ship_image in loaded_ship.images:
 
-            if height is None:
-                if width is not None:
-                    pixmap = pixmap.scaledToWidth(width)
-            elif width is None:
-                pixmap = pixmap.scaledToheight(height)
-            else:
-                pixmap = pixmap.scaled(width, height)
+                pixmap = QPixmap(fileinfo.dataImagePath(ship_image.name))
+                height = ship_image.height
+                width = ship_image.width
 
-            ship_gitem = QGraphicsPixmapItem(pixmap)
-            ship_gitem.setOffset(ship_image.x, ship_image.y)
+                if height is None:
+                    if width is not None:
+                        pixmap = pixmap.scaledToWidth(width)
+                elif width is None:
+                    pixmap = pixmap.scaledToheight(height)
+                else:
+                    pixmap = pixmap.scaled(width, height)
+
+                ship_gitem_part = QGraphicsPixmapItem(pixmap)
+                ship_gitem_part.setOffset(ship_image.x, ship_image.y)
+
+                ship_gitem.addToGroup(ship_gitem_part)
 
         else:
             ship_gitem = ObjectGraphicsItem(ship.body.shapes)
