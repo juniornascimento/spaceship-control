@@ -22,6 +22,7 @@ import anytree
 
 from .objectgraphicsitem import ObjectGraphicsItem
 from .choosefromtreedialog import ChooseFromTreeDialog
+from .conditiongraphicspixmapitem import ConditionGraphicsPixmapItem
 
 from ..storage.fileinfo import FileInfo
 
@@ -131,6 +132,7 @@ class MainWindow(QMainWindow):
         self.__debug_msg_queues = {}
 
         self.__debug_messages_text_browsers = {}
+        self.__condition_graphic_items = []
 
     def __updateTitle(self):
 
@@ -171,8 +173,9 @@ class MainWindow(QMainWindow):
             for _, gitem in self.__objects:
                 scene.removeItem(gitem)
 
-            self.__ships = []
-            self.__objects = []
+            self.__ships.clear()
+            self.__objects.clear()
+            self.__condition_graphic_items.clear()
 
         self.__current_scenario = None
         self.__current_ship_widgets_index = 0
@@ -268,7 +271,14 @@ class MainWindow(QMainWindow):
                 else:
                     pixmap = pixmap.scaled(width, height)
 
-                ship_gitem_part = QGraphicsPixmapItem(pixmap)
+                if ship_image.condition is None:
+                    ship_gitem_part = QGraphicsPixmapItem(pixmap)
+                else:
+                    ship_gitem_part = ConditionGraphicsPixmapItem(
+                        ship_image.condition, pixmap,
+                        names={'ship': ship.mirror})
+                    self.__condition_graphic_items.append(ship_gitem_part)
+
                 ship_gitem_part.setOffset(ship_image.x, ship_image.y)
 
                 ship_gitem.addToGroup(ship_gitem_part)
@@ -485,6 +495,9 @@ class MainWindow(QMainWindow):
             self.__objectives_complete = all(
                 objective.verify(self.__space, ships)
                 for objective in self.__scenario_objectives)
+
+            for dyn_gitem in self.__condition_graphic_items:
+                dyn_gitem.evaluate()
 
         for node_value in self.__objectives_node_value:
             node_value.update()

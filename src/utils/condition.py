@@ -9,7 +9,9 @@ class Condition:
 
     def evaluate(self, **kwargs: 'Any') -> 'Any':
 
+        self.__evaluator.names = kwargs
+
         try:
-            return bool(self.__evaluator.eval(self.__expr, names=kwargs))
+            return bool(self.__evaluator.eval(self.__expr))
         except Exception:
             return False
