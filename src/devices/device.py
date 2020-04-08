@@ -91,7 +91,7 @@ class DefaultDevice(Device): # pylint: disable=abstract-method
     class Mirror(Device.Mirror):
 
         def __init__(self, device: 'Device', *args: str) -> None:
-            super().__init__(self, 'properties', 'getProperty',
+            super().__init__(device, 'properties', 'getProperty',
                              'deviceDescription', 'deviceType', 'getInfo',
                              *args)
 
