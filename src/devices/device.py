@@ -345,8 +345,8 @@ class DeviceGroup(DefaultDevice):
         def __init__(self, device: Device, *args: str) -> None:
             super().__init__(device, 'deviceCount', *args)
 
-        def accessDevice(self, index):
-            device = self._device.accessDevice(index)
+        def accessDevice(self, index, *args):
+            device = self._device.accessDevice(index, *args)
             if device is None:
                 return None
 
@@ -401,15 +401,20 @@ class DeviceGroup(DefaultDevice):
         """
         return len(self.__device_list)
 
-    def accessDevice(self, index) -> 'Optional[Device]':
+    def accessDevice(self, index, *args) -> 'Optional[Device]':
 
         if isinstance(index, int):
             if 0 <= index < len(self.__device_list):
-                return self.__device_list[index]
+                device = self.__device_list[index]
+            else:
+                return None
+        else:
+            device = self.__device_dict.get(index)
 
-            return None
+        if args:
+            device = device.accessDevice(*args)
 
-        return self.__device_dict.get(index)
+        return device
 
     def act(self) -> None:
         """Method `act` is overriden so it will call `act` for all subdevices.

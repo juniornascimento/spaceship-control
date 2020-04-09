@@ -11,7 +11,7 @@ width = 20
 x = -18
 y = 40
 
-condition = 'ship.accessDevice(0).accessDevice(0).intensity > 0.1'
+condition = 'ship.accessDevice(0, 0).intensity > 0.1'
 
 [[Image]]
 
