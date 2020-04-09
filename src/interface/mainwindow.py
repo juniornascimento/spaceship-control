@@ -165,13 +165,12 @@ class MainWindow(QMainWindow):
             self.__space.remove(*self.__space.bodies, *self.__space.shapes)
 
             scene = self.__ui.view.scene()
-            for _, gitem, widgets, _ in self.__ships:
-                scene.removeItem(gitem)
+            for _, _, widgets, _ in self.__ships:
                 for widget in widgets:
                     widget.setParent(None)
 
-            for _, gitem in self.__objects:
-                scene.removeItem(gitem)
+            for item in scene.items():
+                scene.removeItem(item)
 
             self.__ships.clear()
             self.__objects.clear()
