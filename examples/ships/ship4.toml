@@ -8,8 +8,7 @@ variables_enabled = true
 path = '.engine_on.png'
 width = 20
 
-x = -18
-y = 40
+x = -58
 
 condition = 'ship.accessDevice(0, 0).intensity > 0.1'
 

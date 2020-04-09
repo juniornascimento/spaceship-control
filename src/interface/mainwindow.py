@@ -279,7 +279,9 @@ class MainWindow(QMainWindow):
                         names={'ship': ship.mirror})
                     self.__condition_graphic_items.append(ship_gitem_part)
 
-                ship_gitem_part.setOffset(ship_image.x, ship_image.y)
+                brect = ship_gitem_part.boundingRect()
+                ship_gitem_part.setOffset(ship_image.x - brect.width()/2,
+                                          ship_image.y - brect.height()/2)
 
                 ship_gitem.addToGroup(ship_gitem_part)
 
@@ -329,6 +331,9 @@ class MainWindow(QMainWindow):
                 pixmap = pixmap.scaled(width, height)
 
             object_gitem = QGraphicsPixmapItem(pixmap)
+
+            brect = object_gitem.boundingRect()
+            object_gitem.setOffset(-brect.width()/2, -brect.height()/2)
 
         self.__ui.view.scene().addItem(object_gitem)
 
@@ -451,8 +456,10 @@ class MainWindow(QMainWindow):
 
             image_item = QGraphicsPixmapItem(pixmap)
 
-            image_item.setX(image_info.x)
-            image_item.setY(image_info.y)
+            image_item.setPos(image_info.x, image_info.y)
+
+            brect = image_item.boundingRect()
+            image_item.setOffset(-brect.width()/2, -brect.height()/2)
 
             self.__ui.view.scene().addItem(image_item)
 
