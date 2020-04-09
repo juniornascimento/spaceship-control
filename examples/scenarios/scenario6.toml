@@ -6,3 +6,4 @@ parent = '.scenario1'
 
 id = 'main-ship'
 model = '.ship4'
+controller = '.ship4_control_example.py'

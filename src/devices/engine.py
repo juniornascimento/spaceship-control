@@ -6,6 +6,11 @@ from ..utils.interval import Interval, IntervalSet
 
 class Engine(Actuator):
 
+    class Mirror(Actuator.Mirror):
+
+        def __init__(self, device: 'Device', *args: str) -> None:
+            super().__init__(device, 'intensity', 'angle', *args)
+
     def __init__(self, part: 'StructuralPart',
                  start_intensity: 'Union[float, int]' = 0,
                  start_angle: 'Union[float, int]' = 0,
@@ -80,6 +85,10 @@ class Engine(Actuator):
             y = self.__pos_error(0)
 
         self.applyForce(thrust, x, y, angle)
+
+    @property
+    def mirror(self) -> 'Engine.Mirror':
+        return Engine.Mirror(self)
 
 class LinearEngine(Engine):
 
