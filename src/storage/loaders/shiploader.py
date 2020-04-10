@@ -18,9 +18,8 @@ from ...devices.communicationdevices import (
 )
 
 from .shapeloader import loadShapes
+from .imageloader import loadImages
 
-ShipImageInfo = namedtuple('ShipImageInfo', ('name', 'width', 'height',
-                                             'x', 'y', 'angle', 'condition'))
 ShipInfo = namedtuple('ShipInfo', ('device', 'images', 'widgets'))
 
 def __loadError(info: 'Dict[str, Any]') -> ErrorGenerator:
@@ -228,25 +227,6 @@ def __loadShipStructure(ship_info, name, space, body):
 
     return ship, parts
 
-def __loadImages(ship_info, prefixes):
-
-    images_info = []
-    for image in ship_info.get('Image', ()):
-
-        image_path = image['path']
-        image_path, _ = resolvePrefix(image_path, prefixes)
-        image_info = ShipImageInfo(image_path,
-                                   image.get('width'),
-                                   image.get('height'),
-                                   image.get('x', 0),
-                                   image.get('y', 0),
-                                   image.get('angle', 0),
-                                   image.get('condition'))
-
-        images_info.append(image_info)
-
-    return images_info
-
 def loadShip(ship_info: str, name: str, space: 'pymunk.Space',
              prefixes: 'Sequence[str]' = (), communication_engine=None) \
     -> 'Tuple[Structure, Sequence[QWidget]]':
@@ -282,5 +262,5 @@ def loadShip(ship_info: str, name: str, space: 'pymunk.Space',
         widgets.extend(
             __addDevice(info, parts, 'InterfaceDevice'))
 
-    return ShipInfo(device=ship, images=__loadImages(ship_info, prefixes),
-                    widgets=widgets)
+    return ShipInfo(device=ship, images=loadImages(
+        ship_info.get('Image'), prefixes=prefixes), widgets=widgets)
