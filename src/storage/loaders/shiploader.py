@@ -263,4 +263,4 @@ def loadShip(ship_info: str, name: str, space: 'pymunk.Space',
             __addDevice(info, parts, 'InterfaceDevice'))
 
     return ShipInfo(device=ship, images=loadImages(
-        ship_info.get('Image'), prefixes=prefixes), widgets=widgets)
+        ship_info.get('Image', ()), prefixes=prefixes), widgets=widgets)
