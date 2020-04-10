@@ -233,6 +233,8 @@ class MainWindow(QMainWindow):
             gitem_part.setOffset(image.x - brect.width()/2,
                                  image.y - brect.height()/2)
 
+            gitem_part.setZValue(image.z_value)
+
             gitem.addToGroup(gitem_part)
 
         return gitem

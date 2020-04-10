@@ -4,7 +4,7 @@ from collections import namedtuple
 from ..configfileinheritance import resolvePrefix
 
 ImageInfo = namedtuple('ImageInfo', ('name', 'width', 'height', 'x', 'y',
-                                     'angle', 'condition'))
+                                     'z_value', 'angle', 'condition'))
 
 def loadImages(images, prefixes=()):
 
@@ -18,6 +18,7 @@ def loadImages(images, prefixes=()):
                                image.get('height'),
                                image.get('x', 0),
                                image.get('y', 0),
+                               image.get('z_value', 0),
                                image.get('angle', 0),
                                image.get('condition'))
 
