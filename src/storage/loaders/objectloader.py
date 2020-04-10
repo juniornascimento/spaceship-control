@@ -6,9 +6,9 @@ from pymunk import Body
 from ..configfileinheritance import resolvePrefix
 
 from .shapeloader import loadShapes
+from .imageloader import loadImages
 
-ImageInfo = namedtuple('ImageInfo', ('name', 'width', 'height'))
-ObjectConfig = namedtuple('ObjectConfig', ('image',))
+ObjectInfo = namedtuple('ObjectInfo', ('body', 'images'))
 
 def loadObject(obj_info: str, space: 'pymunk.Space',
                prefixes: 'Sequence[str]' = ()) \
@@ -43,19 +43,5 @@ def loadObject(obj_info: str, space: 'pymunk.Space',
 
         space.add(body, shapes)
 
-    if config_content is None:
-        config = ObjectConfig(None)
-    else:
-        image_config = config_content.get('Image')
-
-        image_info = None
-        if image_config is not None:
-            image_path = image_config.get('path')
-            if image_path is not None:
-                image_path, _ = resolvePrefix(image_path, prefixes)
-                image_info = ImageInfo(image_path, image_config.get('width'),
-                                       image_config.get('height'))
-
-        config = ObjectConfig(image_info)
-
-    return body, config
+    return ObjectInfo(body, loadImages(obj_info.get('Image', ()),
+                                       prefixes=prefixes))

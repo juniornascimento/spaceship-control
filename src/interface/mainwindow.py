@@ -196,6 +196,47 @@ class MainWindow(QMainWindow):
         if scenario is not None:
             self.loadScenario('/'.join(scenario))
 
+    def __loadGraphicItem(self, shapes, images, condition_variables=None,
+                          default_color=Qt.blue):
+
+        if not images:
+            return ObjectGraphicsItem(shapes, color=default_color)
+
+        gitem = QGraphicsItemGroup()
+
+        for image in images:
+
+            pixmap = QPixmap(FileInfo().dataImagePath(image.name))
+            height = image.height
+            width = image.width
+
+            if height is None:
+                if width is not None:
+                    pixmap = pixmap.scaledToWidth(width)
+            elif width is None:
+                pixmap = pixmap.scaledToheight(height)
+            else:
+                pixmap = pixmap.scaled(width, height)
+
+            pixmap = pixmap.transformed(QTransform().rotate(
+                image.angle))
+
+            if image.condition is None:
+                gitem_part = QGraphicsPixmapItem(pixmap)
+            else:
+                gitem_part = ConditionGraphicsPixmapItem(
+                    image.condition, pixmap,
+                    names=condition_variables)
+                self.__condition_graphic_items.append(gitem_part)
+
+            brect = gitem_part.boundingRect()
+            gitem_part.setOffset(image.x - brect.width()/2,
+                                 image.y - brect.height()/2)
+
+            gitem.addToGroup(gitem_part)
+
+        return gitem
+
     def __loadShip(self, ship_info, arg_scenario_info, fileinfo):
 
         arg_scenario_info['starting-position'] = ship_info.position
@@ -252,43 +293,9 @@ class MainWindow(QMainWindow):
 
         self.__debug_msg_queues[ship.name] = msg_queue
 
-        if loaded_ship.images:
-
-            ship_gitem = QGraphicsItemGroup()
-
-            for ship_image in loaded_ship.images:
-
-                pixmap = QPixmap(fileinfo.dataImagePath(ship_image.name))
-                height = ship_image.height
-                width = ship_image.width
-
-                if height is None:
-                    if width is not None:
-                        pixmap = pixmap.scaledToWidth(width)
-                elif width is None:
-                    pixmap = pixmap.scaledToheight(height)
-                else:
-                    pixmap = pixmap.scaled(width, height)
-
-                pixmap = pixmap.transformed(QTransform().rotate(
-                    ship_image.angle))
-
-                if ship_image.condition is None:
-                    ship_gitem_part = QGraphicsPixmapItem(pixmap)
-                else:
-                    ship_gitem_part = ConditionGraphicsPixmapItem(
-                        ship_image.condition, pixmap,
-                        names={'ship': ship.mirror})
-                    self.__condition_graphic_items.append(ship_gitem_part)
-
-                brect = ship_gitem_part.boundingRect()
-                ship_gitem_part.setOffset(ship_image.x - brect.width()/2,
-                                          ship_image.y - brect.height()/2)
-
-                ship_gitem.addToGroup(ship_gitem_part)
-
-        else:
-            ship_gitem = ObjectGraphicsItem(ship.body.shapes)
+        ship_gitem = self.__loadGraphicItem(
+            ship.body.shapes, loaded_ship.images,
+            condition_variables={'ship': ship.mirror})
 
         self.__ui.view.scene().addItem(ship_gitem)
 
@@ -312,30 +319,15 @@ class MainWindow(QMainWindow):
 
             obj_model = '/'.join(obj_model)
 
-        body, config = fileinfo.loadObject(obj_model, self.__space)
+        object_info = fileinfo.loadObject(obj_model, self.__space)
+
+        body = object_info.body
 
         body.position = obj_info.position
         body.angle = obj_info.angle
 
-        if config.image is None:
-            object_gitem = ObjectGraphicsItem(body.shapes, color=Qt.gray)
-        else:
-            pixmap = QPixmap(fileinfo.dataImagePath(config.image.name))
-            height = config.image.height
-            width = config.image.width
-
-            if height is None:
-                if width is not None:
-                    pixmap = pixmap.scaledToWidth(width)
-            elif width is None:
-                pixmap = pixmap.scaledToheight(height)
-            else:
-                pixmap = pixmap.scaled(width, height)
-
-            object_gitem = QGraphicsPixmapItem(pixmap)
-
-            brect = object_gitem.boundingRect()
-            object_gitem.setOffset(-brect.width()/2, -brect.height()/2)
+        object_gitem = self.__loadGraphicItem(
+            body.shapes, object_info.images, default_color=Qt.gray)
 
         self.__ui.view.scene().addItem(object_gitem)
 
