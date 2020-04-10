@@ -20,7 +20,7 @@ from ...devices.communicationdevices import (
 from .shapeloader import loadShapes
 
 ShipImageInfo = namedtuple('ShipImageInfo', ('name', 'width', 'height',
-                                             'x', 'y', 'condition'))
+                                             'x', 'y', 'angle', 'condition'))
 ShipInfo = namedtuple('ShipInfo', ('device', 'images', 'widgets'))
 
 def __loadError(info: 'Dict[str, Any]') -> ErrorGenerator:
@@ -240,6 +240,7 @@ def __loadImages(ship_info, prefixes):
                                    image.get('height'),
                                    image.get('x', 0),
                                    image.get('y', 0),
+                                   image.get('angle', 0),
                                    image.get('condition'))
 
         images_info.append(image_info)

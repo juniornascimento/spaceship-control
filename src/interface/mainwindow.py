@@ -11,7 +11,7 @@ from PyQt5.QtWidgets import (
     QMainWindow, QGraphicsScene, QFileDialog, QMessageBox, QGraphicsPixmapItem,
     QTextBrowser, QGraphicsItemGroup
 )
-from PyQt5.QtGui import QPixmap
+from PyQt5.QtGui import QPixmap, QTransform
 from PyQt5.QtCore import QTimer, Qt
 
 import pymunk
@@ -269,6 +269,9 @@ class MainWindow(QMainWindow):
                     pixmap = pixmap.scaledToheight(height)
                 else:
                     pixmap = pixmap.scaled(width, height)
+
+                pixmap = pixmap.transformed(QTransform().rotate(
+                    ship_image.angle))
 
                 if ship_image.condition is None:
                     ship_gitem_part = QGraphicsPixmapItem(pixmap)

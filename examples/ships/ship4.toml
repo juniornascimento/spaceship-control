@@ -3,20 +3,37 @@
 
 variables_enabled = true
 
+[[Variable]]
+
+id = 'engine_image_width'
+value = 20
+
 [[Image]]
 
 path = '.engine_on.png'
-width = 20
+width = 'var# engine_image_width'
 
-x = -58
+x = -56
 
 condition = 'ship.accessDevice(0, 0).intensity > 0.1'
+
+[[Image]]
+
+path = '.engine_on.png'
+width = 'var# engine_image_width'
+
+x = 56
+angle = 180
+
+condition = 'ship.accessDevice(0, 0).intensity < -0.1'
 
 [[Image]]
 
 path = '.ship4.png'
 width = 100
 height = 100
+
+x = 1
 
 [[Variable]]
 
