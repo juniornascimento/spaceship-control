@@ -36,6 +36,9 @@ def __createShape(info: 'Dict[str, Any]') -> 'Shape':
 
     create_func = __SHAPE_CREATE_FUNCTIONS.get(type_)
 
+    if create_func is None:
+        raise Exception(f'Invalid shape type \'{type_}\'')
+
     return create_func(info)
 
 def loadShapes(info_list: 'Sequence[Dict[str, Any]]') -> 'Tuple[Shape, ...]':
