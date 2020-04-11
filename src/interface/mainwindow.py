@@ -210,13 +210,16 @@ class MainWindow(QMainWindow):
             height = image.height
             width = image.width
 
+            width_scale = 1
+            height_scale = 1
             if height is None:
                 if width is not None:
-                    pixmap = pixmap.scaledToWidth(width)
+                    width_scale = height_scale = width/pixmap.width()
             elif width is None:
-                pixmap = pixmap.scaledToheight(height)
+                width_scale = height_scale = height/pixmap.height()
             else:
-                pixmap = pixmap.scaled(width, height)
+                width_scale = width/pixmap.width()
+                height_scale = height/pixmap.height()
 
             pixmap = pixmap.transformed(QTransform().rotate(
                 image.angle))
@@ -229,9 +232,10 @@ class MainWindow(QMainWindow):
                     names=condition_variables)
                 self.__condition_graphic_items.append(gitem_part)
 
-            brect = gitem_part.boundingRect()
-            gitem_part.setOffset(image.x - brect.width()/2,
-                                 image.y - brect.height()/2)
+            gitem_part.setTransform(QTransform().scale(width_scale, height_scale))
+
+            gitem_part.setOffset(image.x/width_scale - pixmap.width()/2,
+                                 image.y/height_scale - pixmap.height()/2)
 
             gitem_part.setZValue(image.z_value)
 
