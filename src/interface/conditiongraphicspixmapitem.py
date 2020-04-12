@@ -1,7 +1,7 @@
 
 from PyQt5.QtWidgets import QGraphicsPixmapItem
 
-from ..utils.condition import Condition
+from ..utils.expression import Condition
 
 class ConditionGraphicsPixmapItem(QGraphicsPixmapItem):
 
@@ -12,6 +12,8 @@ class ConditionGraphicsPixmapItem(QGraphicsPixmapItem):
         self.__is_visible = True
         self.__condition_met = False
         self.__names = {} if names is None else names
+
+        self.evaluate()
 
     def show(self) -> None:
         self.setVisible(True)
