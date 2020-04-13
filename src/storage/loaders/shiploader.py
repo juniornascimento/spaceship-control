@@ -3,8 +3,6 @@ from collections import namedtuple
 
 from pymunk import Body
 
-from ..configfileinheritance import resolvePrefix
-
 from ...utils.errorgenerator import ErrorGenerator
 
 from ...devices.structure import Structure, StructuralPart

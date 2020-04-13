@@ -20,7 +20,7 @@ def __controllerThreadDebugMessages(pstderr, debug_queue):
     try:
         while True:
             text = pstderr.readline().decode()
-            if not(text):
+            if not text:
                 return
             debug_queue.put(text[:-1])
 

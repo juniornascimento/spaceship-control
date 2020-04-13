@@ -3,8 +3,6 @@ from collections import namedtuple
 
 from pymunk import Body
 
-from ..configfileinheritance import resolvePrefix
-
 from .shapeloader import loadShapes
 from .imageloader import loadImages
 
