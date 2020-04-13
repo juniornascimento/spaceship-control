@@ -45,5 +45,7 @@ def subVariables(content, enabled=None, variables=None):
             return variables[content[4:].strip()]
         if content.startswith('expr#'):
             return simple_eval(content[5:], names=variables)
+        if content.startswith('format#'):
+            return content[7:].format(**variables)
 
     return content
