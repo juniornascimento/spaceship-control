@@ -234,8 +234,22 @@ class MainWindow(QMainWindow):
 
             gitem_part.setTransform(QTransform().scale(width_scale, height_scale))
 
-            gitem_part.setOffset(image.x/width_scale - pixmap.width()/2,
-                                 image.y/height_scale - pixmap.height()/2)
+            x_offset = 0
+            if isinstance(image.x, str):
+                gitem_part.setXOffsetExpression(image.x,
+                                                multiplier=1/width_scale)
+            else:
+                x_offset = image.x/width_scale
+
+            y_offset = 0
+            if isinstance(image.y, str):
+                gitem_part.setYOffsetExpression(image.y,
+                                                multiplier=1/height_scale)
+            else:
+                y_offset = image.y/height_scale
+
+            gitem_part.setOffset(x_offset - pixmap.width()/2,
+                                 y_offset - pixmap.height()/2)
 
             gitem_part.setZValue(image.z_value)
 
