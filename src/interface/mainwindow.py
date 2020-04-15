@@ -211,6 +211,9 @@ class MainWindow(QMainWindow):
             height = image.height
             width = image.width
 
+            image_x_is_expr = isinstance(image.x, str)
+            image_y_is_expr = isinstance(image.y, str)
+
             width_scale = 1
             height_scale = 1
             if height is None:
@@ -225,25 +228,25 @@ class MainWindow(QMainWindow):
             pixmap = pixmap.transformed(QTransform().rotate(
                 image.angle))
 
-            if image.condition is None:
-                gitem_part = QGraphicsPixmapItem(pixmap)
-            else:
+            if image_x_is_expr or image_y_is_expr or image.condition:
                 gitem_part = ConditionGraphicsPixmapItem(
                     image.condition, pixmap,
                     names=condition_variables)
                 self.__condition_graphic_items.append(gitem_part)
+            else:
+                gitem_part = QGraphicsPixmapItem(pixmap)
 
             gitem_part.setTransform(QTransform().scale(width_scale, height_scale))
 
             x_offset = 0
-            if isinstance(image.x, str):
+            if image_x_is_expr:
                 gitem_part.setXOffsetExpression(image.x,
                                                 multiplier=1/width_scale)
             else:
                 x_offset = image.x/width_scale
 
             y_offset = 0
-            if isinstance(image.y, str):
+            if image_y_is_expr:
                 gitem_part.setYOffsetExpression(image.y,
                                                 multiplier=1/height_scale)
             else:
