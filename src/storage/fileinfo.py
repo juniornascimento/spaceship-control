@@ -207,7 +207,7 @@ class FileInfo:
 
         return content
 
-    def __getShipContent(self, ship_model):
+    def __getShipContent(self, ship_model, variables=None):
 
         content = self.__getContent(ship_model, self.shipModelPath,
                                     'Inexistent ship model named \'{name}\'')
@@ -225,7 +225,7 @@ class FileInfo:
         dictutils.mergeMatch(content, ('Shape',), ('Point', 'points'), 'Point',
                              absolute=True)
 
-        configfilevariables.subVariables(content)
+        configfilevariables.subVariables(content, variables=variables)
 
         return content
 
@@ -254,11 +254,12 @@ class FileInfo:
 
         return scenarioloader.loadScenario(scenario_content, prefixes=prefixes)
 
-    def loadShip(self, model, name, space, communication_engine=None):
+    def loadShip(self, model, name, space, communication_engine=None,
+                 variables=None):
 
         prefixes = model.split('/')[:-1]
 
-        ship_content = self.__getShipContent(model)
+        ship_content = self.__getShipContent(model, variables=variables)
 
         ship_content = configfileinheritance.mergeInheritedFiles(
             ship_content, self.__getShipContent, prefixes=prefixes)

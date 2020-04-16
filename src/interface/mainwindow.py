@@ -287,7 +287,8 @@ class MainWindow(QMainWindow):
 
         loaded_ship = fileinfo.loadShip(
             ship_model, ship_info.name, self.__space,
-            communication_engine=self.__comm_engine)
+            communication_engine=self.__comm_engine,
+            variables=ship_info.variables)
 
         ship = loaded_ship.device
 

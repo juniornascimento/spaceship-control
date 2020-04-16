@@ -16,7 +16,7 @@ StaticImageInfo = namedtuple('StaticImageInfo',
 ObjectInfo = namedtuple('ObjectInfo', ('model', 'position', 'angle'))
 
 ShipInfo = namedtuple('ShipInfo', (
-    'name', 'model', 'controller', 'position', 'angle'))
+    'name', 'model', 'controller', 'position', 'angle', 'variables'))
 
 ScenarioInfo = namedtuple('ScenarioInfo', (
     'name', 'ships', 'objectives', 'objects', 'visible_user_interface',
@@ -80,13 +80,22 @@ def __readShipInfo(ship_content, prefixes) -> 'ShipInfo':
     if controller is not None:
         controller, _ = resolvePrefix(controller, prefixes)
 
+    variables_content = ship_content.get('Variable')
+
+    if variables_content:
+        variables = {variable['id']: variable['value']
+                     for variable in variables_content}
+    else:
+        variables = None
+
     ship_info_kwargs = {
 
         'name': ship_content.get('name', '<<nameless>>'),
         'controller': controller,
         'model': model,
         'position': (ship_content.get('x', 0), ship_content.get('y', 0)),
-        'angle': pi*ship_content.get('angle', 0)/180
+        'angle': pi*ship_content.get('angle', 0)/180,
+        'variables': variables
     }
 
     return ShipInfo(**ship_info_kwargs)
