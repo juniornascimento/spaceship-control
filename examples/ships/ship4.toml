@@ -6,7 +6,8 @@ variables_enabled = true
 [[Variable]]
 
 id = 'engine_image_width'
-value = 20
+value = 10
+override = false
 
 [[Variable]]
 

@@ -17,12 +17,21 @@ def subVariables(content, enabled=None, variables=None):
             if config.get('variables_enabled', False) is False:
                 return content
 
+        variables_content = content.get('Variable', ())
+
         new_variables = {variable['id']: variable['value']
-                         for variable in content.get('Variable', ())}
+                         for variable in variables_content}
 
         if variables is None:
             variables = new_variables
         else:
+            for dont_override in (variable['id']
+                                  for variable in variables_content
+                                  if not variable.get('override', True)):
+
+                if dont_override in variables:
+                    del new_variables[dont_override]
+
             variables = variables.copy()
             variables.update(new_variables)
 
