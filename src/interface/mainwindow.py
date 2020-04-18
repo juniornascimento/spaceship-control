@@ -5,7 +5,12 @@ import time
 from math import pi
 from threading import Lock
 from pathlib import Path
-from queue import SimpleQueue, Empty as EmptyQueueException
+from queue import Empty as EmptyQueueException
+
+try:
+    from queue import SimpleQueue
+except ImportError:
+    from queue import Queue as SimpleQueue
 
 from PyQt5 import uic
 from PyQt5.QtWidgets import (
