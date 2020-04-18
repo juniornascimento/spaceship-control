@@ -213,6 +213,7 @@ class MainWindow(QMainWindow):
 
             image_x_is_expr = isinstance(image.x, str)
             image_y_is_expr = isinstance(image.y, str)
+            image_angle_is_expr = isinstance(image.angle, str)
 
             width_scale = 1
             height_scale = 1
@@ -225,10 +226,12 @@ class MainWindow(QMainWindow):
                 width_scale = width/pixmap.width()
                 height_scale = height/pixmap.height()
 
-            pixmap = pixmap.transformed(QTransform().rotate(
-                image.angle))
+            if not image_angle_is_expr:
+                pixmap = pixmap.transformed(QTransform().rotate(image.angle))
 
-            if image_x_is_expr or image_y_is_expr or image.condition:
+            if image_angle_is_expr or image_x_is_expr or image_y_is_expr or \
+                image.condition:
+
                 gitem_part = ConditionGraphicsPixmapItem(
                     image.condition, pixmap,
                     names=condition_variables)
@@ -236,7 +239,11 @@ class MainWindow(QMainWindow):
             else:
                 gitem_part = QGraphicsPixmapItem(pixmap)
 
-            gitem_part.setTransform(QTransform().scale(width_scale, height_scale))
+            gitem_part.setTransform(QTransform().scale(width_scale,
+                                                       height_scale))
+
+            if image_angle_is_expr:
+                gitem_part.setAngleOffsetExpression(image.angle)
 
             x_offset = 0
             if image_x_is_expr:

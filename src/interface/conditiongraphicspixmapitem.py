@@ -1,5 +1,8 @@
 
+from math import isclose
+
 from PyQt5.QtWidgets import QGraphicsPixmapItem
+from PyQt5.QtGui import QTransform
 
 from ..utils.expression import Condition, Expression
 
@@ -18,6 +21,10 @@ class ConditionGraphicsPixmapItem(QGraphicsPixmapItem):
         self.__y_offset_func_mul = 1
         self.__x_offset_calc = 0
         self.__y_offset_calc = 0
+        self.__angle_offset_func = None
+        self.__angle_offset_calc = 0
+
+        self.__pixmap = super().pixmap()
 
         self.evaluate()
 
@@ -33,6 +40,11 @@ class ConditionGraphicsPixmapItem(QGraphicsPixmapItem):
 
     def isVisible(self) -> bool:
         return self.__is_visible
+
+    def setPixmap(self, pixmap) -> None:
+        super().setPixmap(pixmap)
+
+        self.__pixmap = pixmap
 
     def setOffset(self, *args) -> None:
         super().setOffset(*args)
@@ -64,6 +76,15 @@ class ConditionGraphicsPixmapItem(QGraphicsPixmapItem):
             self.__y_offset_func = Expression(expression, default_value=0)
 
         self.__y_offset_func_mul = multiplier
+        self.evaluate()
+
+    def setAngleOffsetExpression(self, expression: 'Optional[str]') -> None:
+
+        if expression is None:
+            self.__angle_offset_func = None
+        else:
+            self.__angle_offset_func = Expression(expression, default_value=0)
+
         self.evaluate()
 
     def __updateOffset(self, new_calc_x, new_calc_y):
@@ -101,4 +122,17 @@ class ConditionGraphicsPixmapItem(QGraphicsPixmapItem):
 
         if offset_modif:
             self.__updateOffset(new_calc_x, new_calc_y)
+
+        if self.__angle_offset_func is not None:
+            new_angle = self.__angle_offset_func.evaluate(**self.__names,
+                                                          **kwargs)
+
+            print(new_angle)
+
+            if not isclose(self.__angle_offset_calc, new_angle,
+                           rel_tol=0, abs_tol=0.5):
+
+                self.__angle_offset_calc = new_angle
+                super().setPixmap(self.__pixmap.transformed(
+                    QTransform().rotate(new_angle)))
 
