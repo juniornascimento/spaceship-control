@@ -1,7 +1,7 @@
 
 import ast
 
-from simpleeval import SimpleEval
+from simpleeval import SimpleEval, FeatureNotAvailable
 
 class ExpressionEvaluator(SimpleEval):
 
@@ -20,6 +20,9 @@ class ExpressionEvaluator(SimpleEval):
 
         if parsed_expr is False:
             expr = self.parse(expr).body
+            self.expr = expr
+        else:
+            self.expr = '<<Parsed expression>>'
 
         expressions = expr.body
 
@@ -32,6 +35,9 @@ class ExpressionEvaluator(SimpleEval):
 
         value = self._eval(node.value)
         for target in node.targets:
+            if isinstance(target, ast.Attribute):
+                raise FeatureNotAvailable(
+                    'Setting an attribute is forbidden')
             self.names[target.id] = value
 
         return value
@@ -39,8 +45,13 @@ class ExpressionEvaluator(SimpleEval):
     def _eval_augassign(self, node):
 
         value = self._eval(node.value)
+        target = node.target
 
-        self.names[node.target.id] = self.operators[type(node.op)](
-            self._eval(node.target), value)
+        if isinstance(target, ast.Attribute):
+            raise FeatureNotAvailable(
+                'Setting an attribute is forbidden')
+
+        self.names[target.id] = self.operators[type(node.op)](
+            self._eval(target), value)
 
         return value
