@@ -16,13 +16,16 @@ class ExpressionEvaluator(SimpleEval):
     def parse(expr):
         return ast.parse(expr.strip())
 
-    def eval(self, expr, parsed_expr=False):
+    def eval(self, expr, parsed_expr=False, parsed_expr_original=None):
 
         if parsed_expr is False:
             expr = self.parse(expr).body
             self.expr = expr
         else:
-            self.expr = '<<Parsed expression>>'
+            if parsed_expr_original is None:
+                self.expr = '<<Parsed expression>>'
+            else:
+                self.expr = parsed_expr_original
 
         expressions = expr.body
 
