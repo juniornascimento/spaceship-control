@@ -9,6 +9,7 @@ class ExpressionEvaluator(SimpleEval):
         super().__init__(*args, **kwargs)
 
         self.nodes[ast.Assign] = self._eval_assign
+        self.nodes[ast.AugAssign] = self._eval_augassign
         self.nodes[ast.Expr] = lambda expr: self._eval(expr.value)
 
     @staticmethod
@@ -32,5 +33,14 @@ class ExpressionEvaluator(SimpleEval):
         value = self._eval(node.value)
         for target in node.targets:
             self.names[target.id] = value
+
+        return value
+
+    def _eval_augassign(self, node):
+
+        value = self._eval(node.value)
+
+        self.names[node.target.id] = self.operators[type(node.op)](
+            self._eval(node.target), value)
 
         return value
