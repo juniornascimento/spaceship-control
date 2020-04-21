@@ -1,0 +1,10 @@
+
+[Scenario]
+
+hide_user_interface = true
+
+[[Ship]]
+
+id = 'main-ship'
+model = '.translation'
+controller = '..ship1_control_example.py'

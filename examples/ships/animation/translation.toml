@@ -1,0 +1,46 @@
+
+[Inheritance]
+
+parent = '..ship1'
+
+[[Image]]
+
+path = '..green_ball.png'
+width = 20
+
+x = '(50*(timestamp % 5) - 125)*(1 if timestamp % 10 < 5 else -1)'
+z_value = 10
+
+[[Image]]
+
+path = '..green_ball.png'
+width = 20
+
+y = '(50*((timestamp + 1)% 5) - 125)*(1 if (timestamp + 1) % 10 < 5 else -1)'
+z_value = 10
+
+[[Image]]
+
+path = '..green_ball.png'
+width = 20
+
+x = '(50*((timestamp + 2) % 5) - 125)*(1 if (timestamp + 2) % 10 < 5 else -1)/1.414'
+y = '(50*((timestamp + 2) % 5) - 125)*(1 if (timestamp + 2) % 10 < 5 else -1)/1.414'
+z_value = 10
+
+[[Image]]
+
+path = '..green_ball.png'
+width = 20
+
+x = '(50*((timestamp + 3) % 5) - 125)*(-1 if (timestamp + 3) % 10 < 5 else 1)/1.414'
+y = '(50*((timestamp + 3) % 5) - 125)*(1 if (timestamp + 3) % 10 < 5 else -1)/1.414'
+z_value = 10
+
+[[Image]]
+
+path = '..ship4.png'
+width = 100
+height = 100
+
+x = 1
