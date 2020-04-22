@@ -18,9 +18,14 @@ ObjectInfo = namedtuple('ObjectInfo', ('model', 'position', 'angle'))
 ShipInfo = namedtuple('ShipInfo', (
     'name', 'model', 'controller', 'position', 'angle', 'variables'))
 
+PhysicsEngineInfo = namedtuple('PhysicsEngineInfo',
+                               ('damping', 'gravity', 'collision_slop',
+                                'collision_persistence', 'iterations'))
+
 ScenarioInfo = namedtuple('ScenarioInfo', (
     'name', 'ships', 'objectives', 'objects', 'visible_user_interface',
-    'communication_engine', 'visible_debug_window', 'static_images'
+    'communication_engine', 'visible_debug_window', 'static_images',
+    'physics_engine'
 ))
 
 def __createGoToObjective(objective_content) -> 'GoToObjective':
@@ -125,6 +130,20 @@ def __readImageInfo(image_content, prefixes) -> 'StaticImageInfo':
                            x=image_content.get('x', 0),
                            y=image_content.get('y', 0))
 
+def loadPhysicsEngine(engine_info: 'Dict[str, Any]'):
+
+    gravity_dict = engine_info.get('Gravity')
+    if gravity_dict is not None:
+        gravity = (gravity_dict.get('x', 0), gravity_dict.get('y', 0))
+    else:
+        gravity = (0, 0)
+
+    return PhysicsEngineInfo(engine_info.get('damping', 1),
+                             gravity,
+                             engine_info.get('collision_slop', 0.1),
+                             engine_info.get('collision_persistence', 3),
+                             engine_info.get('iterations', 10))
+
 def loadCommunicationEngine(engine_info: 'Dict[str, Any]'):
 
     return CommunicationEngine(engine_info.get('max_noise', 10),
@@ -162,4 +181,6 @@ def loadScenario(scenario_info: 'Dict[str, Any]',
                         visible_debug_window=scenario_content.get(
                             'debug', False),
                         communication_engine=comm_engine, objects=objects,
-                        static_images=images)
+                        static_images=images,
+                        physics_engine=loadPhysicsEngine(
+                            scenario_info.get('PhysicsEngine', {})))

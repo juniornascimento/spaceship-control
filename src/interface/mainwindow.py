@@ -423,6 +423,13 @@ class MainWindow(QMainWindow):
                 f'{type(err).__name__}: {err}'))
             return
 
+        space_info = scenario_info.physics_engine
+        self.__space.damping = space_info.damping
+        self.__space.gravity = space_info.gravity
+        self.__space.collision_slop = space_info.collision_slop
+        self.__space.collision_persistence = space_info.collision_persistence
+        self.__space.iterations = space_info.iterations
+
         self.__ui.deviceInterfaceWidgets.setVisible(
             scenario_info.visible_user_interface)
         self.__ui.debugMessagesTabWidget.setVisible(

@@ -1,4 +1,12 @@
 
+[PhysicsEngine]
+
+damping = 0.5
+
+    [PhysicsEngine.Gravity]
+
+    y = 10
+
 [Scenario]
 
 name = 'example2'
