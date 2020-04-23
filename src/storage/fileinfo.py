@@ -3,6 +3,8 @@ import os
 import shutil
 from pathlib import Path
 import subprocess
+from enum import Enum
+from collections import namedtuple
 
 import json
 import toml
@@ -21,6 +23,21 @@ from ..utils import dictutils
 class FileInfo:
 
     __instance = None
+
+    FileDataType = Enum('FileDataType', ('CONTROLLER', 'SHIPMODEL', 'SCENARIO',
+                                         'OBJECTMODEL', 'IMAGE', 'UIDESIGN'))
+
+    __DataTypeInfoType = namedtuple('DataTypeInfoType',
+                                    ('path', 'use_dist_path'))
+
+    __DATA_TYPE_INFO = {
+        FileDataType.CONTROLLER: __DataTypeInfoType('controllers', False),
+        FileDataType.SHIPMODEL: __DataTypeInfoType('ships', False),
+        FileDataType.SCENARIO: __DataTypeInfoType('scenarios', False),
+        FileDataType.OBJECTMODEL: __DataTypeInfoType('objects', False),
+        FileDataType.IMAGE: __DataTypeInfoType('images', False),
+        FileDataType.UIDESIGN: __DataTypeInfoType('forms', True)
+    }
 
     def __init__(self):
         self.__path = \
@@ -93,31 +110,22 @@ class FileInfo:
         return current_node
 
     def uiFilePath(self, *args, **kwargs):
-        return self.__getPath(self.__dist_data_path.joinpath('forms'), *args,
-                              **kwargs)
+        return self.getPath(self.FileDataType.UIDESIGN, *args, **kwargs)
 
     def shipModelPath(self, *args, **kwargs):
-        return self.__getPath(self.__path.joinpath('ships'), *args, **kwargs)
+        return self.getPath(self.FileDataType.SHIPMODEL, *args, **kwargs)
 
     def controllerPath(self, *args, **kwargs):
-        return self.__getPath(
-            self.__path.joinpath('controllers'), *args, **kwargs)
+        return self.getPath(self.FileDataType.CONTROLLER, *args, **kwargs)
 
     def imagePath(self, *args, **kwargs):
-        return self.__getPath(
-            self.__path.joinpath('images'), *args, **kwargs)
+        return self.getPath(self.FileDataType.IMAGE, *args, **kwargs)
 
     def scenarioPath(self, *args, **kwargs):
-        return self.__getPath(
-            self.__path.joinpath('scenarios'), *args, **kwargs)
+        return self.getPath(self.FileDataType.SCENARIO, *args, **kwargs)
 
     def objectModelPath(self, *args, **kwargs):
-        return self.__getPath(
-            self.__path.joinpath('objects'), *args, **kwargs)
-
-    def dataImagePath(self, *args, **kwargs):
-        return self.__getPath(
-            self.__path.joinpath('images'), *args, **kwargs)
+        return self.getPath(self.FileDataType.OBJECT, *args, **kwargs)
 
     def addScenarios(self, files):
         return self.__addFiles(self.__path.joinpath('scenarios'), files)
@@ -332,19 +340,38 @@ class FileInfo:
             new_file = shutil.copy(file, path_str)
             os.chmod(new_file, mode)
 
-    @staticmethod
-    def __getPath(basepath, name=None, to_string=True):
+    def getPath(self, filedatatype, name=None, to_string=True):
 
-        if name is None:
+        if filedatatype is None:
             if to_string:
-                return str(basepath)
-            return basepath
+                return str(self.__path)
+            return self.__path
 
-        file_path = basepath.joinpath(name)
+        filedatatype_info = self.__getFileDataTypeInfo(filedatatype)
 
-        if not(file_path.exists() and file_path.is_file()):
+        if filedatatype_info.use_dist_path:
+            basepath = self.__dist_data_path
+        else:
+            basepath = self.__path
+
+        filepath = basepath.joinpath(filedatatype_info.path)
+
+        if name is not None:
+            filepath = filepath.joinpath(name)
+
+        if not(filepath.exists() and filepath.is_file()):
             return None
 
         if to_string:
-            return str(file_path)
-        return file_path
+            return str(filepath)
+        return filepath
+
+    @staticmethod
+    def __getFileDataTypeInfo(filedatatype):
+
+        info = FileInfo.__DATA_TYPE_INFO.get(filedatatype)
+
+        if info is None:
+            raise ValueError(f'Invalid file data type')
+
+        return info

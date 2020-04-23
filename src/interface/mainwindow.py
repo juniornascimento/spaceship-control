@@ -212,7 +212,7 @@ class MainWindow(QMainWindow):
 
         for image in images:
 
-            pixmap = QPixmap(FileInfo().dataImagePath(image.name))
+            pixmap = QPixmap(FileInfo().imagePath(image.name))
             height = image.height
             width = image.width
 
@@ -480,7 +480,7 @@ class MainWindow(QMainWindow):
             self.__ui.treeView.hide()
 
         for image_info in scenario_info.static_images:
-            pixmap = QPixmap(fileinfo.dataImagePath(image_info.name))
+            pixmap = QPixmap(fileinfo.imagePath(image_info.name))
             height = image_info.height
             width = image_info.width
 
