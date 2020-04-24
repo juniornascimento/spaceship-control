@@ -10,6 +10,8 @@ import json
 import toml
 import yaml
 
+from PyQt5 import uic
+
 from anytree import Node
 
 from . import configfileinheritance, configfilevariables
@@ -109,24 +111,6 @@ class FileInfo:
 
         return current_node
 
-    def uiFilePath(self, *args, **kwargs):
-        return self.getPath(self.FileDataType.UIDESIGN, *args, **kwargs)
-
-    def shipModelPath(self, *args, **kwargs):
-        return self.getPath(self.FileDataType.SHIPMODEL, *args, **kwargs)
-
-    def controllerPath(self, *args, **kwargs):
-        return self.getPath(self.FileDataType.CONTROLLER, *args, **kwargs)
-
-    def imagePath(self, *args, **kwargs):
-        return self.getPath(self.FileDataType.IMAGE, *args, **kwargs)
-
-    def scenarioPath(self, *args, **kwargs):
-        return self.getPath(self.FileDataType.SCENARIO, *args, **kwargs)
-
-    def objectModelPath(self, *args, **kwargs):
-        return self.getPath(self.FileDataType.OBJECT, *args, **kwargs)
-
     def addScenarios(self, files):
         return self.__addFiles(self.__path.joinpath('scenarios'), files)
 
@@ -172,21 +156,19 @@ class FileInfo:
 
                         self.__addFiles(dest_path, (path,), mode=mode)
 
-    @staticmethod
-    def __findSuffix(basename, get_path, valid_suffixes):
+    def __findSuffix(self, basename, filedatatype, valid_suffixes):
 
         for valid_suffix in valid_suffixes:
-            filepath = get_path(basename + valid_suffix)
+            filepath = self.getPath(filedatatype, basename + valid_suffix)
             if filepath is not None:
                 return filepath, valid_suffix
 
         return None, None
 
-    @staticmethod
-    def __getContent(basename, get_path, inexistent_message):
+    def __getContent(self, basename, filedatatype, inexistent_message):
 
-        filepath, suffix = FileInfo.__findSuffix(
-            basename, get_path, ('.toml', '.json', '.yaml', '.yml'))
+        filepath, suffix = self.__findSuffix(
+            basename, filedatatype, ('.toml', '.json', '.yaml', '.yml'))
 
         if filepath is None:
             raise Exception(inexistent_message.format(name=basename))
@@ -203,7 +185,7 @@ class FileInfo:
 
     def __getScenarioContent(self, scenario_name):
 
-        content = self.__getContent(scenario_name, self.scenarioPath,
+        content = self.__getContent(scenario_name, self.FileDataType.SCENARIO,
                                     'Inexistent scenario named \'{name}\'')
 
         dictutils.mergeMatch(content, (), ('Ship', 'ships'), 'Ship',
@@ -217,7 +199,7 @@ class FileInfo:
 
     def __getShipContent(self, ship_model, variables=None):
 
-        content = self.__getContent(ship_model, self.shipModelPath,
+        content = self.__getContent(ship_model, self.FileDataType.SHIPMODEL,
                                     'Inexistent ship model named \'{name}\'')
 
         dictutils.mergeMatch(content, (), ('Shape', 'shapes'), 'Shape',
@@ -239,7 +221,7 @@ class FileInfo:
 
     def __getObjectContent(self, object_model):
 
-        content = self.__getContent(object_model, self.objectModelPath,
+        content = self.__getContent(object_model, self.FileDataType.OBJECTMODEL,
                                     'Inexistent object model named \'{name}\'')
 
         dictutils.mergeMatch(content, (), ('Shape', 'shapes'), 'Shape',
@@ -250,6 +232,10 @@ class FileInfo:
         configfilevariables.subVariables(content)
 
         return content
+
+    def loadUi(self, filename):
+        return uic.loadUiType(
+            self.getPath(self.FileDataType.UIDESIGN, filename))
 
     def loadScenario(self, scenario_name):
 
@@ -289,13 +275,14 @@ class FileInfo:
     def loadController(self, controller_name, ship, json_info,
                        debug_queue, lock):
         return controllerloader.loadController(
-            self.controllerPath(controller_name), ship, json_info,
-            debug_queue, lock)
+            self.getPath(self.FileDataType.CONTROLLER, controller_name),
+            ship, json_info, debug_queue, lock)
 
     def openScenarioFile(self, scenario):
 
         scenario_path, _ = self.__findSuffix(
-            scenario, self.scenarioPath, ('.toml', '.json', '.yaml', '.yml'))
+            scenario, self.FileDataType.SCENARIO,
+            ('.toml', '.json', '.yaml', '.yml'))
 
         if scenario_path is not None:
             self.__openFile(scenario_path)
@@ -303,29 +290,31 @@ class FileInfo:
     def openShipModelFile(self, ship_model):
 
         model_path, _ = self.__findSuffix(
-            ship_model, self.shipModelPath, ('.toml', '.json', '.yaml', '.yml'))
+            ship_model, self.FileDataType.SHIPMODEL,
+            ('.toml', '.json', '.yaml', '.yml'))
 
         if model_path is not None:
             self.__openFile(model_path)
 
     def openObjectModelFile(self, obj_model):
 
-        model_path, _ = self.__findSuffix(obj_model, self.objectModelPath,
-                                          ('.toml', '.json', '.yaml', '.yml'))
+        model_path, _ = self.__findSuffix(
+            obj_model, self.FileDataType.OBJECTMODEL,
+            ('.toml', '.json', '.yaml', '.yml'))
 
         if model_path is not None:
             self.__openFile(model_path)
 
     def openControllerFile(self, controller):
 
-        controller_path = self.controllerPath(controller)
+        controller_path = self.getPath(self.FileDataType.CONTROLLER, controller)
 
         if controller_path is not None:
             self.__openFile(controller_path)
 
     def openImageFile(self, image):
 
-        image_path = self.imagePath(image)
+        image_path = self.getPath(self.FileDataType.IMAGE, image)
 
         if image_path is not None:
             self.__openFile(image_path)

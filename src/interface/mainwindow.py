@@ -12,7 +12,6 @@ try:
 except ImportError:
     from queue import Queue as SimpleQueue
 
-from PyQt5 import uic
 from PyQt5.QtWidgets import (
     QMainWindow, QGraphicsScene, QFileDialog, QMessageBox, QGraphicsPixmapItem,
     QTextBrowser, QGraphicsItemGroup
@@ -40,8 +39,8 @@ from ..objectives.objective import createObjectiveTree
 sys.path.insert(0, str(Path(__file__).parent))
 
 # imported here so it is not imported in a different path
-from nodetreeview import NodeValue # pylint: disable=wrong-import-order
-UiMainWindow, _ = uic.loadUiType(FileInfo().uiFilePath('mainwindow.ui')) # pylint: disable=invalid-name
+from nodetreeview import NodeValue # pylint: disable=wrong-import-position
+UiMainWindow, _ = FileInfo().loadUi('mainwindow.ui') # pylint: disable=invalid-name
 sys.path.pop(0)
 
 class ObjectiveNodeValue(NodeValue):
@@ -212,7 +211,8 @@ class MainWindow(QMainWindow):
 
         for image in images:
 
-            pixmap = QPixmap(FileInfo().imagePath(image.name))
+            pixmap = QPixmap(FileInfo().getPath(FileInfo.FileDataType.IMAGE,
+                                                image.name))
             height = image.height
             width = image.width
 
