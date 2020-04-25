@@ -30,15 +30,18 @@ class FileInfo:
                                          'OBJECTMODEL', 'IMAGE', 'UIDESIGN'))
 
     __DataTypeInfoType = namedtuple('DataTypeInfoType',
-                                    ('path', 'use_dist_path'))
+                                    ('path', 'use_dist_path', 'suffix_list'))
 
     __DATA_TYPE_INFO = {
-        FileDataType.CONTROLLER: __DataTypeInfoType('controllers', False),
-        FileDataType.SHIPMODEL: __DataTypeInfoType('ships', False),
-        FileDataType.SCENARIO: __DataTypeInfoType('scenarios', False),
-        FileDataType.OBJECTMODEL: __DataTypeInfoType('objects', False),
-        FileDataType.IMAGE: __DataTypeInfoType('images', False),
-        FileDataType.UIDESIGN: __DataTypeInfoType('forms', True)
+        FileDataType.CONTROLLER: __DataTypeInfoType('controllers', False, None),
+        FileDataType.SHIPMODEL: __DataTypeInfoType(
+            'ships', False, ('.toml', '.json', '.yaml', '.yml')),
+        FileDataType.SCENARIO: __DataTypeInfoType(
+            'scenarios', False, ('.toml', '.json', '.yaml', '.yml')),
+        FileDataType.OBJECTMODEL: __DataTypeInfoType(
+            'objects', False, ('.toml', '.json', '.yaml', '.yml')),
+        FileDataType.IMAGE: __DataTypeInfoType('images', False, None),
+        FileDataType.UIDESIGN: __DataTypeInfoType('forms', True, ('.ui',))
     }
 
     def __init__(self):
@@ -278,46 +281,34 @@ class FileInfo:
             self.getPath(self.FileDataType.CONTROLLER, controller_name),
             ship, json_info, debug_queue, lock)
 
+    def openFile(self, filedatatype, filename):
+
+        filedatatype_info = self.__getFileDataTypeInfo(filedatatype)
+
+        valid_suffixes = filedatatype_info.suffix_list
+
+        if valid_suffixes is None:
+            path = self.getPath(filedatatype, filename)
+        else:
+            path, _ = self.__findSuffix(filename, filedatatype, valid_suffixes)
+
+        if path is not None:
+            self.__openFile(path)
+
     def openScenarioFile(self, scenario):
-
-        scenario_path, _ = self.__findSuffix(
-            scenario, self.FileDataType.SCENARIO,
-            ('.toml', '.json', '.yaml', '.yml'))
-
-        if scenario_path is not None:
-            self.__openFile(scenario_path)
+        self.openFile(self.FileDataType.SCENARIO, scenario)
 
     def openShipModelFile(self, ship_model):
-
-        model_path, _ = self.__findSuffix(
-            ship_model, self.FileDataType.SHIPMODEL,
-            ('.toml', '.json', '.yaml', '.yml'))
-
-        if model_path is not None:
-            self.__openFile(model_path)
+        self.openFile(self.FileDataType.SHIPMODEL, ship_model)
 
     def openObjectModelFile(self, obj_model):
-
-        model_path, _ = self.__findSuffix(
-            obj_model, self.FileDataType.OBJECTMODEL,
-            ('.toml', '.json', '.yaml', '.yml'))
-
-        if model_path is not None:
-            self.__openFile(model_path)
+        self.openFile(self.FileDataType.OBJECTMODEL, obj_model)
 
     def openControllerFile(self, controller):
-
-        controller_path = self.getPath(self.FileDataType.CONTROLLER, controller)
-
-        if controller_path is not None:
-            self.__openFile(controller_path)
+        self.openFile(self.FileDataType.CONTROLLER, controller)
 
     def openImageFile(self, image):
-
-        image_path = self.getPath(self.FileDataType.IMAGE, image)
-
-        if image_path is not None:
-            self.__openFile(image_path)
+        self.openFile(self.FileDataType.IMAGE, image)
 
     @staticmethod
     def __openFile(path):
