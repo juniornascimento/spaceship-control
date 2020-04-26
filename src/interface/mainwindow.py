@@ -201,6 +201,70 @@ class MainWindow(QMainWindow):
         if scenario is not None:
             self.loadScenario('/'.join(scenario))
 
+    @staticmethod
+    def __getSizeScale(cur_width, cur_height, after_width, after_height):
+
+        width_scale = height_scale = 1
+        if after_height is None:
+            if after_width is not None:
+                width_scale = height_scale = after_width/cur_width
+        elif after_width is None:
+            width_scale = height_scale = after_height/cur_height
+        else:
+            width_scale = after_width/cur_width
+            height_scale = after_height/cur_height
+
+        return width_scale, height_scale
+
+    def __loadGraphicItemImagePart(self, image, condition_variables):
+
+        pixmap = QPixmap(FileInfo().getPath(FileInfo.FileDataType.IMAGE,
+                                            image.name))
+
+        image_x_is_expr = isinstance(image.x, str)
+        image_y_is_expr = isinstance(image.y, str)
+        image_angle_is_expr = isinstance(image.angle, str)
+
+        width_scale, height_scale = self.__getSizeScale(
+            pixmap.width(), pixmap.height(), image.width, image.height)
+
+        if not image_angle_is_expr:
+            pixmap = pixmap.transformed(QTransform().rotate(image.angle))
+
+        if image_angle_is_expr or image_x_is_expr or image_y_is_expr or \
+            image.condition:
+
+            gitem_part = ConditionGraphicsPixmapItem(
+                image.condition, pixmap,
+                names=condition_variables)
+            self.__condition_graphic_items.append(gitem_part)
+        else:
+            gitem_part = QGraphicsPixmapItem(pixmap)
+
+        gitem_part.setTransform(QTransform().scale(width_scale, height_scale))
+
+        if image_angle_is_expr:
+            gitem_part.setAngleOffsetExpression(image.angle)
+
+        x_offset = 0
+        if image_x_is_expr:
+            gitem_part.setXOffsetExpression(image.x, multiplier=1/width_scale)
+        else:
+            x_offset = image.x/width_scale
+
+        y_offset = 0
+        if image_y_is_expr:
+            gitem_part.setYOffsetExpression(image.y, multiplier=1/height_scale)
+        else:
+            y_offset = image.y/height_scale
+
+        gitem_part.setOffset(x_offset - pixmap.width()/2,
+                             y_offset - pixmap.height()/2)
+
+        gitem_part.setZValue(image.z_value)
+
+        return gitem_part
+
     def __loadGraphicItem(self, shapes, images, condition_variables=None,
                           default_color=Qt.blue):
 
@@ -210,66 +274,8 @@ class MainWindow(QMainWindow):
         gitem = QGraphicsItemGroup()
 
         for image in images:
-
-            pixmap = QPixmap(FileInfo().getPath(FileInfo.FileDataType.IMAGE,
-                                                image.name))
-            height = image.height
-            width = image.width
-
-            image_x_is_expr = isinstance(image.x, str)
-            image_y_is_expr = isinstance(image.y, str)
-            image_angle_is_expr = isinstance(image.angle, str)
-
-            width_scale = 1
-            height_scale = 1
-            if height is None:
-                if width is not None:
-                    width_scale = height_scale = width/pixmap.width()
-            elif width is None:
-                width_scale = height_scale = height/pixmap.height()
-            else:
-                width_scale = width/pixmap.width()
-                height_scale = height/pixmap.height()
-
-            if not image_angle_is_expr:
-                pixmap = pixmap.transformed(QTransform().rotate(image.angle))
-
-            if image_angle_is_expr or image_x_is_expr or image_y_is_expr or \
-                image.condition:
-
-                gitem_part = ConditionGraphicsPixmapItem(
-                    image.condition, pixmap,
-                    names=condition_variables)
-                self.__condition_graphic_items.append(gitem_part)
-            else:
-                gitem_part = QGraphicsPixmapItem(pixmap)
-
-            gitem_part.setTransform(QTransform().scale(width_scale,
-                                                       height_scale))
-
-            if image_angle_is_expr:
-                gitem_part.setAngleOffsetExpression(image.angle)
-
-            x_offset = 0
-            if image_x_is_expr:
-                gitem_part.setXOffsetExpression(image.x,
-                                                multiplier=1/width_scale)
-            else:
-                x_offset = image.x/width_scale
-
-            y_offset = 0
-            if image_y_is_expr:
-                gitem_part.setYOffsetExpression(image.y,
-                                                multiplier=1/height_scale)
-            else:
-                y_offset = image.y/height_scale
-
-            gitem_part.setOffset(x_offset - pixmap.width()/2,
-                                 y_offset - pixmap.height()/2)
-
-            gitem_part.setZValue(image.z_value)
-
-            gitem.addToGroup(gitem_part)
+            gitem.addToGroup(self.__loadGraphicItemImagePart(
+                image, condition_variables))
 
         return gitem
 
