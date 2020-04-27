@@ -666,7 +666,8 @@ class MainWindow(QMainWindow):
             'Choose scenario', FileInfo().listScenariosTree().children)
 
         if scenario is not None:
-            FileInfo().openScenarioFile('/'.join(scenario))
+            FileInfo().openFile(FileInfo.FileDataType.SCENARIO,
+                                '/'.join(scenario))
 
     @staticmethod
     def __openShipAction():
@@ -675,7 +676,7 @@ class MainWindow(QMainWindow):
             'Choose ship model', FileInfo().listShipsModelTree().children)
 
         if ship is not None:
-            FileInfo().openShipModelFile('/'.join(ship))
+            FileInfo().openFile(FileInfo.FileDataType.SHIPMODEL, '/'.join(ship))
 
     @staticmethod
     def __openControllerAction():
@@ -684,7 +685,8 @@ class MainWindow(QMainWindow):
             'Choose controller', FileInfo().listControllersTree().children)
 
         if controller is not None:
-            FileInfo().openControllerFile('/'.join(controller))
+            FileInfo().openFile(FileInfo.FileDataType.CONTROLLER,
+                                '/'.join(controller))
 
     @staticmethod
     def __openImageAction():
@@ -693,7 +695,7 @@ class MainWindow(QMainWindow):
             'Choose image', FileInfo().listImagesTree().children)
 
         if image is not None:
-            FileInfo().openImageFile('/'.join(image))
+            FileInfo().openFile(FileInfo.FileDataType.IMAGE, '/'.join(image))
 
     @staticmethod
     def __openObjectAction():
@@ -702,4 +704,5 @@ class MainWindow(QMainWindow):
             'Choose object model', FileInfo().listObjectsModelTree().children)
 
         if object_model is not None:
-            FileInfo().openObjectModelFile('/'.join(object_model))
+            FileInfo().openFile(FileInfo.FileDataType.OBJECTMODEL,
+                                '/'.join(object_model))

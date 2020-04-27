@@ -295,21 +295,6 @@ class FileInfo:
         if path is not None:
             self.__openFile(path)
 
-    def openScenarioFile(self, scenario):
-        self.openFile(self.FileDataType.SCENARIO, scenario)
-
-    def openShipModelFile(self, ship_model):
-        self.openFile(self.FileDataType.SHIPMODEL, ship_model)
-
-    def openObjectModelFile(self, obj_model):
-        self.openFile(self.FileDataType.OBJECTMODEL, obj_model)
-
-    def openControllerFile(self, controller):
-        self.openFile(self.FileDataType.CONTROLLER, controller)
-
-    def openImageFile(self, image):
-        self.openFile(self.FileDataType.IMAGE, image)
-
     @staticmethod
     def __openFile(path):
         subprocess.call(['xdg-open', path])
