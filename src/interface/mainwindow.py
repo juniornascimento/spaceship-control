@@ -415,6 +415,31 @@ class MainWindow(QMainWindow):
 
         return objects
 
+    def __loadStaticImages(self, static_images):
+
+        for image_info in static_images:
+            pixmap = QPixmap(FileInfo().getPath(
+                FileInfo.FileDataType.IMAGE, image_info.name))
+            height = image_info.height
+            width = image_info.width
+
+            if height is None:
+                if width is not None:
+                    pixmap = pixmap.scaledToWidth(width)
+            elif width is None:
+                pixmap = pixmap.scaledToHeight(height)
+            else:
+                pixmap = pixmap.scaled(width, height)
+
+            image_item = QGraphicsPixmapItem(pixmap)
+
+            image_item.setPos(image_info.x, image_info.y)
+
+            brect = image_item.boundingRect()
+            image_item.setOffset(-brect.width()/2, -brect.height()/2)
+
+            self.__ui.view.scene().addItem(image_item)
+
     def loadScenario(self, scenario):
 
         self.clear()
@@ -485,27 +510,7 @@ class MainWindow(QMainWindow):
         else:
             self.__ui.treeView.hide()
 
-        for image_info in scenario_info.static_images:
-            pixmap = QPixmap(fileinfo.imagePath(image_info.name))
-            height = image_info.height
-            width = image_info.width
-
-            if height is None:
-                if width is not None:
-                    pixmap = pixmap.scaledToWidth(width)
-            elif width is None:
-                pixmap = pixmap.scaledToHeight(height)
-            else:
-                pixmap = pixmap.scaled(width, height)
-
-            image_item = QGraphicsPixmapItem(pixmap)
-
-            image_item.setPos(image_info.x, image_info.y)
-
-            brect = image_item.boundingRect()
-            image_item.setOffset(-brect.width()/2, -brect.height()/2)
-
-            self.__ui.view.scene().addItem(image_item)
+        self.__loadStaticImages(scenario_info.static_images)
 
         self.__current_scenario = scenario
         self.__ui.deviceInterfaceComboBox.setVisible(len(self.__ships) > 1)
