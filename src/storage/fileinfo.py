@@ -30,18 +30,22 @@ class FileInfo:
                                          'OBJECTMODEL', 'IMAGE', 'UIDESIGN'))
 
     __DataTypeInfoType = namedtuple('DataTypeInfoType',
-                                    ('path', 'use_dist_path', 'suffix_list'))
+                                    ('path', 'use_dist_path', 'suffix_list',
+                                     'list_remove_suffix', 'list_blacklist'))
 
     __DATA_TYPE_INFO = {
-        FileDataType.CONTROLLER: __DataTypeInfoType('controllers', False, None),
+        FileDataType.CONTROLLER: __DataTypeInfoType(
+            'controllers', False, None, False, ('__pycache__',)),
         FileDataType.SHIPMODEL: __DataTypeInfoType(
-            'ships', False, ('.toml', '.json', '.yaml', '.yml')),
+            'ships', False, ('.toml', '.json', '.yaml', '.yml'), True, ()),
         FileDataType.SCENARIO: __DataTypeInfoType(
-            'scenarios', False, ('.toml', '.json', '.yaml', '.yml')),
+            'scenarios', False, ('.toml', '.json', '.yaml', '.yml'), True, ()),
         FileDataType.OBJECTMODEL: __DataTypeInfoType(
-            'objects', False, ('.toml', '.json', '.yaml', '.yml')),
-        FileDataType.IMAGE: __DataTypeInfoType('images', False, None),
-        FileDataType.UIDESIGN: __DataTypeInfoType('forms', True, ('.ui',))
+            'objects', False, ('.toml', '.json', '.yaml', '.yml'), True, ()),
+        FileDataType.IMAGE: __DataTypeInfoType(
+            'images', False, None, False, ()),
+        FileDataType.UIDESIGN: __DataTypeInfoType(
+            'forms', True, ('.ui',), True, ())
     }
 
     def __init__(self):
@@ -78,23 +82,29 @@ class FileInfo:
         return FileInfo.__instance
 
     def listShipsModelTree(self):
-        return self.__listTree(self.__path.joinpath('ships'), Node('ships'))
+        return self.listFilesTree(self.FileDataType.SHIPMODEL)
 
     def listScenariosTree(self):
-        return self.__listTree(self.__path.joinpath('scenarios'),
-                               Node('scenarios'))
+        return self.listFilesTree(self.FileDataType.SCENARIO)
 
     def listControllersTree(self):
-        return self.__listTree(self.__path.joinpath('controllers'),
-                               Node('controllers'), blacklist=('__pycache__',),
-                               remove_suffix=False)
+        return self.listFilesTree(self.FileDataType.CONTROLLER)
 
     def listImagesTree(self):
-        return self.__listTree(self.__path.joinpath('images'),
-                               Node('images'), remove_suffix=False)
+        return self.listFilesTree(self.FileDataType.IMAGE)
 
     def listObjectsModelTree(self):
-        return self.__listTree(self.__path.joinpath('objects'), Node('objects'))
+        return self.listFilesTree(self.FileDataType.OBJECTMODEL)
+
+    def listFilesTree(self, filedatatype):
+
+        filedatatype_info = self.__getFileDataTypeInfo(filedatatype)
+
+        return self.__listTree(
+            self.getPath(filedatatype),
+            Node(filedatatype_info.path),
+            remove_suffix=filedatatype_info.list_remove_suffix,
+            blacklist=filedatatype_info.list_blacklist)
 
     def __listTree(self, base_path, current_node, blacklist=(),
                    remove_suffix=True):
@@ -321,8 +331,10 @@ class FileInfo:
 
         filepath = basepath.joinpath(filedatatype_info.path)
 
-        if name is not None:
-            filepath = filepath.joinpath(name)
+        if name is None:
+            return filepath
+
+        filepath = filepath.joinpath(name)
 
         if not(filepath.exists() and filepath.is_file()):
             return None
