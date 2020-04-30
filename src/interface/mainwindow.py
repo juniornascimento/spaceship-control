@@ -665,49 +665,35 @@ class MainWindow(QMainWindow):
         self.__current_ship_widgets_index = cur_index
 
     @staticmethod
+    def __openAction(text, filedatatype):
+
+        filepath = MainWindow.__getOptionDialog(
+            text, FileInfo().listFilesTree(filedatatype).children)
+
+        if filepath is not None:
+            FileInfo().openFile(filedatatype, '/'.join(filepath))
+
+    @staticmethod
     def __openScenarioAction():
-
-        scenario = MainWindow.__getOptionDialog(
-            'Choose scenario', FileInfo().listScenariosTree().children)
-
-        if scenario is not None:
-            FileInfo().openFile(FileInfo.FileDataType.SCENARIO,
-                                '/'.join(scenario))
+        MainWindow.__openAction('Choose scenario',
+                                FileInfo.FileDataType.SCENARIO)
 
     @staticmethod
     def __openShipAction():
-
-        ship = MainWindow.__getOptionDialog(
-            'Choose ship model', FileInfo().listShipsModelTree().children)
-
-        if ship is not None:
-            FileInfo().openFile(FileInfo.FileDataType.SHIPMODEL, '/'.join(ship))
+        MainWindow.__openAction('Choose ship model',
+                                FileInfo.FileDataType.SHIPMODEL)
 
     @staticmethod
     def __openControllerAction():
-
-        controller = MainWindow.__getOptionDialog(
-            'Choose controller', FileInfo().listControllersTree().children)
-
-        if controller is not None:
-            FileInfo().openFile(FileInfo.FileDataType.CONTROLLER,
-                                '/'.join(controller))
+        MainWindow.__openAction('Choose controller',
+                                FileInfo.FileDataType.CONTROLLER)
 
     @staticmethod
     def __openImageAction():
-
-        image = MainWindow.__getOptionDialog(
-            'Choose image', FileInfo().listImagesTree().children)
-
-        if image is not None:
-            FileInfo().openFile(FileInfo.FileDataType.IMAGE, '/'.join(image))
+        MainWindow.__openAction('Choose image',
+                                FileInfo.FileDataType.IMAGE)
 
     @staticmethod
     def __openObjectAction():
-
-        object_model = MainWindow.__getOptionDialog(
-            'Choose object model', FileInfo().listObjectsModelTree().children)
-
-        if object_model is not None:
-            FileInfo().openFile(FileInfo.FileDataType.OBJECTMODEL,
-                                '/'.join(object_model))
+        MainWindow.__openAction('Choose object model',
+                                FileInfo.FileDataType.OBJECTMODEL)
