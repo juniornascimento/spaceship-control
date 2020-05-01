@@ -196,7 +196,8 @@ class MainWindow(QMainWindow):
     def __loadScenarioAction(self):
 
         scenario = self.__getOptionDialog(
-            'Choose scenario', FileInfo().listScenariosTree().children)
+            'Choose scenario', FileInfo().listFilesTree(
+                FileInfo.FileDataType.SCENARIO).children)
 
         if scenario is not None:
             self.loadScenario('/'.join(scenario))
@@ -293,7 +294,8 @@ class MainWindow(QMainWindow):
                 ship_options = tuple(anytree.Node(model_option)
                                      for model_option in ship_model)
             else:
-                ship_options = fileinfo.listShipsModelTree().children
+                ship_options = fileinfo.listFilesTree(
+                    FileInfo.FileDataType.SHIPMODEL).children
 
             ship_model = self.__getOptionDialog('Choose ship model',
                                                 ship_options)
@@ -321,7 +323,8 @@ class MainWindow(QMainWindow):
 
         if ship_controller is None:
 
-            controller_options = fileinfo.listControllersTree().children
+            controller_options = fileinfo.listFilesTree(
+                FileInfo.FileDataType.CONTROLLER).children
             ship_controller = self.__getOptionDialog('Choose controller',
                                                      controller_options)
 
@@ -353,7 +356,8 @@ class MainWindow(QMainWindow):
 
         obj_model = obj_info.model
         if obj_model is None:
-            options = fileinfo.listObjectsModelTree().children
+            options = fileinfo.listFilesTree(
+                FileInfo.FileDataType.OBJECTMODEL).children
             obj_model = self.__getOptionDialog('Choose object model',
                                                options)
 

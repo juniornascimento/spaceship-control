@@ -81,21 +81,6 @@ class FileInfo:
 
         return FileInfo.__instance
 
-    def listShipsModelTree(self):
-        return self.listFilesTree(self.FileDataType.SHIPMODEL)
-
-    def listScenariosTree(self):
-        return self.listFilesTree(self.FileDataType.SCENARIO)
-
-    def listControllersTree(self):
-        return self.listFilesTree(self.FileDataType.CONTROLLER)
-
-    def listImagesTree(self):
-        return self.listFilesTree(self.FileDataType.IMAGE)
-
-    def listObjectsModelTree(self):
-        return self.listFilesTree(self.FileDataType.OBJECTMODEL)
-
     def listFilesTree(self, filedatatype):
 
         filedatatype_info = self.__getFileDataTypeInfo(filedatatype)
