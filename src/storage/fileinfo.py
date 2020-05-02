@@ -10,6 +10,8 @@ import json
 import toml
 import yaml
 
+from PyQt5 import uic
+
 from anytree import Node
 
 from . import configfileinheritance, configfilevariables
@@ -28,15 +30,31 @@ class FileInfo:
                                          'OBJECTMODEL', 'IMAGE', 'UIDESIGN'))
 
     __DataTypeInfoType = namedtuple('DataTypeInfoType',
-                                    ('path', 'use_dist_path'))
+                                    ('path', 'use_dist_path', 'suffix_list',
+                                     'list_remove_suffix', 'list_blacklist',
+                                     'package_glob_list', 'files_mode'))
+
+    __CONF_FILE_SUFFIX_LIST = ('.toml', '.json', '.yaml', '.yml')
+    __CONF_FILE_GLOB_LIST = tuple(
+        f'*{suffix}' for suffix in __CONF_FILE_SUFFIX_LIST)
 
     __DATA_TYPE_INFO = {
-        FileDataType.CONTROLLER: __DataTypeInfoType('controllers', False),
-        FileDataType.SHIPMODEL: __DataTypeInfoType('ships', False),
-        FileDataType.SCENARIO: __DataTypeInfoType('scenarios', False),
-        FileDataType.OBJECTMODEL: __DataTypeInfoType('objects', False),
-        FileDataType.IMAGE: __DataTypeInfoType('images', False),
-        FileDataType.UIDESIGN: __DataTypeInfoType('forms', True)
+        FileDataType.CONTROLLER: __DataTypeInfoType(
+            'controllers', False, None, False, ('__pycache__',), ('*',), 0o555),
+        FileDataType.SHIPMODEL: __DataTypeInfoType(
+            'ships', False, __CONF_FILE_SUFFIX_LIST, True, (),
+            __CONF_FILE_GLOB_LIST, 0o644),
+        FileDataType.SCENARIO: __DataTypeInfoType(
+            'scenarios', False, __CONF_FILE_SUFFIX_LIST, True, (),
+            __CONF_FILE_GLOB_LIST, 0o644),
+        FileDataType.OBJECTMODEL: __DataTypeInfoType(
+            'objects', False, __CONF_FILE_SUFFIX_LIST, True, (),
+            __CONF_FILE_GLOB_LIST, 0o644),
+        FileDataType.IMAGE: __DataTypeInfoType(
+            'images', False, None, False, (),
+            ('*.gif', '*.png'), 0o644),
+        FileDataType.UIDESIGN: __DataTypeInfoType(
+            'forms', True, ('.ui',), True, (), None, None)
     }
 
     def __init__(self):
@@ -72,24 +90,15 @@ class FileInfo:
 
         return FileInfo.__instance
 
-    def listShipsModelTree(self):
-        return self.__listTree(self.__path.joinpath('ships'), Node('ships'))
+    def listFilesTree(self, filedatatype):
 
-    def listScenariosTree(self):
-        return self.__listTree(self.__path.joinpath('scenarios'),
-                               Node('scenarios'))
+        filedatatype_info = self.__getFileDataTypeInfo(filedatatype)
 
-    def listControllersTree(self):
-        return self.__listTree(self.__path.joinpath('controllers'),
-                               Node('controllers'), blacklist=('__pycache__',),
-                               remove_suffix=False)
-
-    def listImagesTree(self):
-        return self.__listTree(self.__path.joinpath('images'),
-                               Node('images'), remove_suffix=False)
-
-    def listObjectsModelTree(self):
-        return self.__listTree(self.__path.joinpath('objects'), Node('objects'))
+        return self.__listTree(
+            self.getPath(filedatatype),
+            Node(filedatatype_info.path),
+            remove_suffix=filedatatype_info.list_remove_suffix,
+            blacklist=filedatatype_info.list_blacklist)
 
     def __listTree(self, base_path, current_node, blacklist=(),
                    remove_suffix=True):
@@ -109,39 +118,30 @@ class FileInfo:
 
         return current_node
 
-    def uiFilePath(self, *args, **kwargs):
-        return self.getPath(self.FileDataType.UIDESIGN, *args, **kwargs)
-
-    def shipModelPath(self, *args, **kwargs):
-        return self.getPath(self.FileDataType.SHIPMODEL, *args, **kwargs)
-
-    def controllerPath(self, *args, **kwargs):
-        return self.getPath(self.FileDataType.CONTROLLER, *args, **kwargs)
-
-    def imagePath(self, *args, **kwargs):
-        return self.getPath(self.FileDataType.IMAGE, *args, **kwargs)
-
-    def scenarioPath(self, *args, **kwargs):
-        return self.getPath(self.FileDataType.SCENARIO, *args, **kwargs)
-
-    def objectModelPath(self, *args, **kwargs):
-        return self.getPath(self.FileDataType.OBJECT, *args, **kwargs)
-
     def addScenarios(self, files):
-        return self.__addFiles(self.__path.joinpath('scenarios'), files)
+        return self.addFiles(self.FileDataType.SCENARIO, files)
 
     def addShips(self, files):
-        return self.__addFiles(self.__path.joinpath('ships'), files)
+        return self.addFiles(self.FileDataType.SHIPMODEL, files)
 
     def addControllers(self, files):
-        return self.__addFiles(self.__path.joinpath('controllers'), files,
-                               mode=0o555)
+        return self.addFiles(self.FileDataType.CONTROLLER, files)
 
     def addObjects(self, files):
-        return self.__addFiles(self.__path.joinpath('objects'), files)
+        return self.addFiles(self.FileDataType.OBJECTMODEL, files)
 
     def addImages(self, files):
-        return self.__addFiles(self.__path.joinpath('images'), files)
+        return self.addFiles(self.FileDataType.IMAGE, files)
+
+    def addFiles(self, filedatatype, files):
+
+        filedatatype_info = self.__getFileDataTypeInfo(filedatatype)
+
+        if filedatatype_info.files_mode is None:
+            raise ValueError('Can\'t add files to this FileDataType')
+
+        return self.__addFiles(self.getPath(filedatatype), files,
+                               mode=filedatatype_info.files_mode)
 
     def addPackage(self, package_pathname):
 
@@ -172,21 +172,19 @@ class FileInfo:
 
                         self.__addFiles(dest_path, (path,), mode=mode)
 
-    @staticmethod
-    def __findSuffix(basename, get_path, valid_suffixes):
+    def __findSuffix(self, basename, filedatatype, valid_suffixes):
 
         for valid_suffix in valid_suffixes:
-            filepath = get_path(basename + valid_suffix)
+            filepath = self.getPath(filedatatype, basename + valid_suffix)
             if filepath is not None:
                 return filepath, valid_suffix
 
         return None, None
 
-    @staticmethod
-    def __getContent(basename, get_path, inexistent_message):
+    def __getContent(self, basename, filedatatype, inexistent_message):
 
-        filepath, suffix = FileInfo.__findSuffix(
-            basename, get_path, ('.toml', '.json', '.yaml', '.yml'))
+        filepath, suffix = self.__findSuffix(
+            basename, filedatatype, ('.toml', '.json', '.yaml', '.yml'))
 
         if filepath is None:
             raise Exception(inexistent_message.format(name=basename))
@@ -203,7 +201,7 @@ class FileInfo:
 
     def __getScenarioContent(self, scenario_name):
 
-        content = self.__getContent(scenario_name, self.scenarioPath,
+        content = self.__getContent(scenario_name, self.FileDataType.SCENARIO,
                                     'Inexistent scenario named \'{name}\'')
 
         dictutils.mergeMatch(content, (), ('Ship', 'ships'), 'Ship',
@@ -217,7 +215,7 @@ class FileInfo:
 
     def __getShipContent(self, ship_model, variables=None):
 
-        content = self.__getContent(ship_model, self.shipModelPath,
+        content = self.__getContent(ship_model, self.FileDataType.SHIPMODEL,
                                     'Inexistent ship model named \'{name}\'')
 
         dictutils.mergeMatch(content, (), ('Shape', 'shapes'), 'Shape',
@@ -239,7 +237,7 @@ class FileInfo:
 
     def __getObjectContent(self, object_model):
 
-        content = self.__getContent(object_model, self.objectModelPath,
+        content = self.__getContent(object_model, self.FileDataType.OBJECTMODEL,
                                     'Inexistent object model named \'{name}\'')
 
         dictutils.mergeMatch(content, (), ('Shape', 'shapes'), 'Shape',
@@ -250,6 +248,10 @@ class FileInfo:
         configfilevariables.subVariables(content)
 
         return content
+
+    def loadUi(self, filename):
+        return uic.loadUiType(
+            self.getPath(self.FileDataType.UIDESIGN, filename))
 
     def loadScenario(self, scenario_name):
 
@@ -289,52 +291,29 @@ class FileInfo:
     def loadController(self, controller_name, ship, json_info,
                        debug_queue, lock):
         return controllerloader.loadController(
-            self.controllerPath(controller_name), ship, json_info,
-            debug_queue, lock)
+            self.getPath(self.FileDataType.CONTROLLER, controller_name),
+            ship, json_info, debug_queue, lock)
 
-    def openScenarioFile(self, scenario):
+    def openFile(self, filedatatype, filename):
 
-        scenario_path, _ = self.__findSuffix(
-            scenario, self.scenarioPath, ('.toml', '.json', '.yaml', '.yml'))
+        filedatatype_info = self.__getFileDataTypeInfo(filedatatype)
 
-        if scenario_path is not None:
-            self.__openFile(scenario_path)
+        valid_suffixes = filedatatype_info.suffix_list
 
-    def openShipModelFile(self, ship_model):
+        if valid_suffixes is None:
+            path = self.getPath(filedatatype, filename)
+        else:
+            path, _ = self.__findSuffix(filename, filedatatype, valid_suffixes)
 
-        model_path, _ = self.__findSuffix(
-            ship_model, self.shipModelPath, ('.toml', '.json', '.yaml', '.yml'))
-
-        if model_path is not None:
-            self.__openFile(model_path)
-
-    def openObjectModelFile(self, obj_model):
-
-        model_path, _ = self.__findSuffix(obj_model, self.objectModelPath,
-                                          ('.toml', '.json', '.yaml', '.yml'))
-
-        if model_path is not None:
-            self.__openFile(model_path)
-
-    def openControllerFile(self, controller):
-
-        controller_path = self.controllerPath(controller)
-
-        if controller_path is not None:
-            self.__openFile(controller_path)
-
-    def openImageFile(self, image):
-
-        image_path = self.imagePath(image)
-
-        if image_path is not None:
-            self.__openFile(image_path)
+        if path is not None:
+            self.__openFile(path)
 
     @staticmethod
     def __openFile(path):
         subprocess.call(['xdg-open', path])
 
-    def __addFiles(self, path, files, mode=0o644):
+    @staticmethod
+    def __addFiles(path, files, mode=0o644):
         path_str = str(path)
         for file in files:
             new_file = shutil.copy(file, path_str)
@@ -356,8 +335,10 @@ class FileInfo:
 
         filepath = basepath.joinpath(filedatatype_info.path)
 
-        if name is not None:
-            filepath = filepath.joinpath(name)
+        if name is None:
+            return filepath
+
+        filepath = filepath.joinpath(name)
 
         if not(filepath.exists() and filepath.is_file()):
             return None

@@ -12,7 +12,6 @@ try:
 except ImportError:
     from queue import Queue as SimpleQueue
 
-from PyQt5 import uic
 from PyQt5.QtWidgets import (
     QMainWindow, QGraphicsScene, QFileDialog, QMessageBox, QGraphicsPixmapItem,
     QTextBrowser, QGraphicsItemGroup
@@ -40,8 +39,8 @@ from ..objectives.objective import createObjectiveTree
 sys.path.insert(0, str(Path(__file__).parent))
 
 # imported here so it is not imported in a different path
-from nodetreeview import NodeValue # pylint: disable=wrong-import-order
-UiMainWindow, _ = uic.loadUiType(FileInfo().uiFilePath('mainwindow.ui')) # pylint: disable=invalid-name
+from nodetreeview import NodeValue # pylint: disable=wrong-import-position
+UiMainWindow, _ = FileInfo().loadUi('mainwindow.ui') # pylint: disable=invalid-name
 sys.path.pop(0)
 
 class ObjectiveNodeValue(NodeValue):
@@ -197,10 +196,75 @@ class MainWindow(QMainWindow):
     def __loadScenarioAction(self):
 
         scenario = self.__getOptionDialog(
-            'Choose scenario', FileInfo().listScenariosTree().children)
+            'Choose scenario', FileInfo().listFilesTree(
+                FileInfo.FileDataType.SCENARIO).children)
 
         if scenario is not None:
             self.loadScenario('/'.join(scenario))
+
+    @staticmethod
+    def __getSizeScale(cur_width, cur_height, after_width, after_height):
+
+        width_scale = height_scale = 1
+        if after_height is None:
+            if after_width is not None:
+                width_scale = height_scale = after_width/cur_width
+        elif after_width is None:
+            width_scale = height_scale = after_height/cur_height
+        else:
+            width_scale = after_width/cur_width
+            height_scale = after_height/cur_height
+
+        return width_scale, height_scale
+
+    def __loadGraphicItemImagePart(self, image, condition_variables):
+
+        pixmap = QPixmap(FileInfo().getPath(FileInfo.FileDataType.IMAGE,
+                                            image.name))
+
+        image_x_is_expr = isinstance(image.x, str)
+        image_y_is_expr = isinstance(image.y, str)
+        image_angle_is_expr = isinstance(image.angle, str)
+
+        width_scale, height_scale = self.__getSizeScale(
+            pixmap.width(), pixmap.height(), image.width, image.height)
+
+        if not image_angle_is_expr:
+            pixmap = pixmap.transformed(QTransform().rotate(image.angle))
+
+        if image_angle_is_expr or image_x_is_expr or image_y_is_expr or \
+            image.condition:
+
+            gitem_part = ConditionGraphicsPixmapItem(
+                image.condition, pixmap,
+                names=condition_variables)
+            self.__condition_graphic_items.append(gitem_part)
+        else:
+            gitem_part = QGraphicsPixmapItem(pixmap)
+
+        gitem_part.setTransform(QTransform().scale(width_scale, height_scale))
+
+        if image_angle_is_expr:
+            gitem_part.setAngleOffsetExpression(image.angle)
+
+        x_offset = 0
+        if image_x_is_expr:
+            gitem_part.setXOffsetExpression(image.x, multiplier=1/width_scale)
+        else:
+            x_offset = image.x/width_scale
+
+        y_offset = 0
+        if image_y_is_expr:
+            gitem_part.setYOffsetExpression(image.y, multiplier=1/height_scale)
+        else:
+            y_offset = image.y/height_scale
+
+        gitem_part.setOffset(x_offset - pixmap.width()/2,
+                             y_offset - pixmap.height()/2)
+
+        gitem_part.setZValue(image.z_value)
+
+        return gitem_part
 
     def __loadGraphicItem(self, shapes, images, condition_variables=None,
                           default_color=Qt.blue):
@@ -211,65 +275,8 @@ class MainWindow(QMainWindow):
         gitem = QGraphicsItemGroup()
 
         for image in images:
-
-            pixmap = QPixmap(FileInfo().imagePath(image.name))
-            height = image.height
-            width = image.width
-
-            image_x_is_expr = isinstance(image.x, str)
-            image_y_is_expr = isinstance(image.y, str)
-            image_angle_is_expr = isinstance(image.angle, str)
-
-            width_scale = 1
-            height_scale = 1
-            if height is None:
-                if width is not None:
-                    width_scale = height_scale = width/pixmap.width()
-            elif width is None:
-                width_scale = height_scale = height/pixmap.height()
-            else:
-                width_scale = width/pixmap.width()
-                height_scale = height/pixmap.height()
-
-            if not image_angle_is_expr:
-                pixmap = pixmap.transformed(QTransform().rotate(image.angle))
-
-            if image_angle_is_expr or image_x_is_expr or image_y_is_expr or \
-                image.condition:
-
-                gitem_part = ConditionGraphicsPixmapItem(
-                    image.condition, pixmap,
-                    names=condition_variables)
-                self.__condition_graphic_items.append(gitem_part)
-            else:
-                gitem_part = QGraphicsPixmapItem(pixmap)
-
-            gitem_part.setTransform(QTransform().scale(width_scale,
-                                                       height_scale))
-
-            if image_angle_is_expr:
-                gitem_part.setAngleOffsetExpression(image.angle)
-
-            x_offset = 0
-            if image_x_is_expr:
-                gitem_part.setXOffsetExpression(image.x,
-                                                multiplier=1/width_scale)
-            else:
-                x_offset = image.x/width_scale
-
-            y_offset = 0
-            if image_y_is_expr:
-                gitem_part.setYOffsetExpression(image.y,
-                                                multiplier=1/height_scale)
-            else:
-                y_offset = image.y/height_scale
-
-            gitem_part.setOffset(x_offset - pixmap.width()/2,
-                                 y_offset - pixmap.height()/2)
-
-            gitem_part.setZValue(image.z_value)
-
-            gitem.addToGroup(gitem_part)
+            gitem.addToGroup(self.__loadGraphicItemImagePart(
+                image, condition_variables))
 
         return gitem
 
@@ -287,7 +294,8 @@ class MainWindow(QMainWindow):
                 ship_options = tuple(anytree.Node(model_option)
                                      for model_option in ship_model)
             else:
-                ship_options = fileinfo.listShipsModelTree().children
+                ship_options = fileinfo.listFilesTree(
+                    FileInfo.FileDataType.SHIPMODEL).children
 
             ship_model = self.__getOptionDialog('Choose ship model',
                                                 ship_options)
@@ -315,7 +323,8 @@ class MainWindow(QMainWindow):
 
         if ship_controller is None:
 
-            controller_options = fileinfo.listControllersTree().children
+            controller_options = fileinfo.listFilesTree(
+                FileInfo.FileDataType.CONTROLLER).children
             ship_controller = self.__getOptionDialog('Choose controller',
                                                      controller_options)
 
@@ -347,7 +356,8 @@ class MainWindow(QMainWindow):
 
         obj_model = obj_info.model
         if obj_model is None:
-            options = fileinfo.listObjectsModelTree().children
+            options = fileinfo.listFilesTree(
+                FileInfo.FileDataType.OBJECTMODEL).children
             obj_model = self.__getOptionDialog('Choose object model',
                                                options)
 
@@ -408,6 +418,31 @@ class MainWindow(QMainWindow):
             objects[i] = obj
 
         return objects
+
+    def __loadStaticImages(self, static_images):
+
+        for image_info in static_images:
+            pixmap = QPixmap(FileInfo().getPath(
+                FileInfo.FileDataType.IMAGE, image_info.name))
+            height = image_info.height
+            width = image_info.width
+
+            if height is None:
+                if width is not None:
+                    pixmap = pixmap.scaledToWidth(width)
+            elif width is None:
+                pixmap = pixmap.scaledToHeight(height)
+            else:
+                pixmap = pixmap.scaled(width, height)
+
+            image_item = QGraphicsPixmapItem(pixmap)
+
+            image_item.setPos(image_info.x, image_info.y)
+
+            brect = image_item.boundingRect()
+            image_item.setOffset(-brect.width()/2, -brect.height()/2)
+
+            self.__ui.view.scene().addItem(image_item)
 
     def loadScenario(self, scenario):
 
@@ -479,27 +514,7 @@ class MainWindow(QMainWindow):
         else:
             self.__ui.treeView.hide()
 
-        for image_info in scenario_info.static_images:
-            pixmap = QPixmap(fileinfo.imagePath(image_info.name))
-            height = image_info.height
-            width = image_info.width
-
-            if height is None:
-                if width is not None:
-                    pixmap = pixmap.scaledToWidth(width)
-            elif width is None:
-                pixmap = pixmap.scaledToHeight(height)
-            else:
-                pixmap = pixmap.scaled(width, height)
-
-            image_item = QGraphicsPixmapItem(pixmap)
-
-            image_item.setPos(image_info.x, image_info.y)
-
-            brect = image_item.boundingRect()
-            image_item.setOffset(-brect.width()/2, -brect.height()/2)
-
-            self.__ui.view.scene().addItem(image_item)
+        self.__loadStaticImages(scenario_info.static_images)
 
         self.__current_scenario = scenario
         self.__ui.deviceInterfaceComboBox.setVisible(len(self.__ships) > 1)
@@ -654,46 +669,35 @@ class MainWindow(QMainWindow):
         self.__current_ship_widgets_index = cur_index
 
     @staticmethod
+    def __openAction(text, filedatatype):
+
+        filepath = MainWindow.__getOptionDialog(
+            text, FileInfo().listFilesTree(filedatatype).children)
+
+        if filepath is not None:
+            FileInfo().openFile(filedatatype, '/'.join(filepath))
+
+    @staticmethod
     def __openScenarioAction():
-
-        scenario = MainWindow.__getOptionDialog(
-            'Choose scenario', FileInfo().listScenariosTree().children)
-
-        if scenario is not None:
-            FileInfo().openScenarioFile('/'.join(scenario))
+        MainWindow.__openAction('Choose scenario',
+                                FileInfo.FileDataType.SCENARIO)
 
     @staticmethod
     def __openShipAction():
-
-        ship = MainWindow.__getOptionDialog(
-            'Choose ship model', FileInfo().listShipsModelTree().children)
-
-        if ship is not None:
-            FileInfo().openShipModelFile('/'.join(ship))
+        MainWindow.__openAction('Choose ship model',
+                                FileInfo.FileDataType.SHIPMODEL)
 
     @staticmethod
     def __openControllerAction():
-
-        controller = MainWindow.__getOptionDialog(
-            'Choose controller', FileInfo().listControllersTree().children)
-
-        if controller is not None:
-            FileInfo().openControllerFile('/'.join(controller))
+        MainWindow.__openAction('Choose controller',
+                                FileInfo.FileDataType.CONTROLLER)
 
     @staticmethod
     def __openImageAction():
-
-        image = MainWindow.__getOptionDialog(
-            'Choose image', FileInfo().listImagesTree().children)
-
-        if image is not None:
-            FileInfo().openImageFile('/'.join(image))
+        MainWindow.__openAction('Choose image',
+                                FileInfo.FileDataType.IMAGE)
 
     @staticmethod
     def __openObjectAction():
-
-        object_model = MainWindow.__getOptionDialog(
-            'Choose object model', FileInfo().listObjectsModelTree().children)
-
-        if object_model is not None:
-            FileInfo().openObjectModelFile('/'.join(object_model))
+        MainWindow.__openAction('Choose object model',
+                                FileInfo.FileDataType.OBJECTMODEL)
