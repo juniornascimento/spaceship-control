@@ -31,21 +31,30 @@ class FileInfo:
 
     __DataTypeInfoType = namedtuple('DataTypeInfoType',
                                     ('path', 'use_dist_path', 'suffix_list',
-                                     'list_remove_suffix', 'list_blacklist'))
+                                     'list_remove_suffix', 'list_blacklist',
+                                     'package_glob_list', 'files_mode'))
+
+    __CONF_FILE_SUFFIX_LIST = ('.toml', '.json', '.yaml', '.yml')
+    __CONF_FILE_GLOB_LIST = tuple(
+        f'*{suffix}' for suffix in __CONF_FILE_SUFFIX_LIST)
 
     __DATA_TYPE_INFO = {
         FileDataType.CONTROLLER: __DataTypeInfoType(
-            'controllers', False, None, False, ('__pycache__',)),
+            'controllers', False, None, False, ('__pycache__',), ('*',), 0o555),
         FileDataType.SHIPMODEL: __DataTypeInfoType(
-            'ships', False, ('.toml', '.json', '.yaml', '.yml'), True, ()),
+            'ships', False, __CONF_FILE_SUFFIX_LIST, True, (),
+            __CONF_FILE_GLOB_LIST, 0o644),
         FileDataType.SCENARIO: __DataTypeInfoType(
-            'scenarios', False, ('.toml', '.json', '.yaml', '.yml'), True, ()),
+            'scenarios', False, __CONF_FILE_SUFFIX_LIST, True, (),
+            __CONF_FILE_GLOB_LIST, 0o644),
         FileDataType.OBJECTMODEL: __DataTypeInfoType(
-            'objects', False, ('.toml', '.json', '.yaml', '.yml'), True, ()),
+            'objects', False, __CONF_FILE_SUFFIX_LIST, True, (),
+            __CONF_FILE_GLOB_LIST, 0o644),
         FileDataType.IMAGE: __DataTypeInfoType(
-            'images', False, None, False, ()),
+            'images', False, None, False, (),
+            ('*.gif', '*.png'), 0o644),
         FileDataType.UIDESIGN: __DataTypeInfoType(
-            'forms', True, ('.ui',), True, ())
+            'forms', True, ('.ui',), True, (), None, None)
     }
 
     def __init__(self):
@@ -110,20 +119,29 @@ class FileInfo:
         return current_node
 
     def addScenarios(self, files):
-        return self.__addFiles(self.__path.joinpath('scenarios'), files)
+        return self.addFiles(self.FileDataType.SCENARIO, files)
 
     def addShips(self, files):
-        return self.__addFiles(self.__path.joinpath('ships'), files)
+        return self.addFiles(self.FileDataType.SHIPMODEL, files)
 
     def addControllers(self, files):
-        return self.__addFiles(self.__path.joinpath('controllers'), files,
-                               mode=0o555)
+        return self.addFiles(self.FileDataType.CONTROLLER, files)
 
     def addObjects(self, files):
-        return self.__addFiles(self.__path.joinpath('objects'), files)
+        return self.addFiles(self.FileDataType.OBJECTMODEL, files)
 
     def addImages(self, files):
-        return self.__addFiles(self.__path.joinpath('images'), files)
+        return self.addFiles(self.FileDataType.IMAGE, files)
+
+    def addFiles(self, filedatatype, files):
+
+        filedatatype_info = self.__getFileDataTypeInfo(filedatatype)
+
+        if filedatatype_info.files_mode is None:
+            raise ValueError('Can\'t add files to this FileDataType')
+
+        return self.__addFiles(self.getPath(filedatatype), files,
+                               mode=filedatatype_info.files_mode)
 
     def addPackage(self, package_pathname):
 
@@ -294,7 +312,8 @@ class FileInfo:
     def __openFile(path):
         subprocess.call(['xdg-open', path])
 
-    def __addFiles(self, path, files, mode=0o644):
+    @staticmethod
+    def __addFiles(path, files, mode=0o644):
         path_str = str(path)
         for file in files:
             new_file = shutil.copy(file, path_str)
